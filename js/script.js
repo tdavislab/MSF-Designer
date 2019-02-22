@@ -4,7 +4,7 @@ var gridHeight = 60;
 
 let Anim = new anim()
 
-d3.select("#original")
+d3.select("#reset")
     .on("click",()=>{
         Anim.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]]
         Anim.cellBound = {"upper":[0.5,0], "lower":[0.5,1]};

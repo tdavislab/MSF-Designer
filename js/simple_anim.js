@@ -37,7 +37,8 @@ class anim{
         this.assginLocation(this.cp, this.cp_local)
 
 
-        this.elem = document.getElementById("animation")
+        // this.elem = document.getElementById("animation");
+        // this.elem = d3.select("#animation").node().getContext("2d");
 
         
 
@@ -45,22 +46,22 @@ class anim{
         //     console.log(event)
         // })
 
-        this.adbound = false;
-        d3.select("#adbound")
-            .on("click",()=>{
-                if(this.adbound === false){
-                    d3.select("#adbound")
-                        .attr("class","btn btn-primary")
-                        .attr("value","Finish Adjustment")
-                    this.adbound = true;
-                    this.adjustBound();
-                } else { 
-                    d3.select("#adbound")
-                        .attr("class","btn btn-secondary")
-                        .attr("value","Adjust Bound")
-                    this.adbound = false;
-                }
-            })
+        // this.adbound = false;
+        // d3.select("#adbound")
+        //     .on("click",()=>{
+        //         if(this.adbound === false){
+        //             d3.select("#adbound")
+        //                 .attr("class","btn btn-primary")
+        //                 .attr("value","Finish Adjustment")
+        //             this.adbound = true;
+        //             this.adjustBound();
+        //         } else { 
+        //             d3.select("#adbound")
+        //                 .attr("class","btn btn-secondary")
+        //                 .attr("value","Adjust Bound")
+        //             this.adbound = false;
+        //         }
+        //     })
         
         this.xMapReverse = d3.scaleLinear()
             .domain([0, this.canvasWidth])
@@ -74,7 +75,10 @@ class anim{
     }
 
     adjustBound(){
-        this.elem.addEventListener("click",event=>{
+        console.log("i am here")
+        // console.log(this.elem)
+        document.getElementById("animation").addEventListener("click",event=>{
+            console.log("I am here")
             if(this.adbound === true){
                 this.drawFlag = true;
                 let x = this.xMapReverse(event.x)/(gridWidth-1);
@@ -83,19 +87,6 @@ class anim{
                 if(y<=0.5){
                     this.cellBound.upper[0] = x;
                 } else { this.cellBound.lower[0] = x;}
-                // // this.assginLocation(this.cp, this.cp_local)
-                // console.log(this.grad)
-                // for(let i=0;i<this.grad.length;i++){
-                //     if(this.grad[i][2]>=0 && this.grad[i][2]<=0.5 && this.grad[i][3]>=0 && this.grad[i][3]<=0.5){
-                //         console.log("i am here")
-
-                //         // this.grad[i][2] = this.grad[i][3]*(0.5-this.cellBound.upper[0])/0.5+this.cellBound.upper[0]
-
-                //         this.grad[i][2] = this.grad[i][2]*(x+(0.5-x)*this.grad[i][3]/0.5)/0.5
-                //     } else {
-                //         // this.grad[i][2] = (1 - this.cellBound.upper[0])/0.5*(this.grad[i][2])-0.5+this.cellBound.upper[0];
-                    // }
-                // }
             }
                 
         })
@@ -103,16 +94,16 @@ class anim{
         
     }
 
-    amoveplus(){
-        console.log("i am here")
-        this.drawFlag = true;
-        this.elem.addEventListener("click",event=>{
-            console.log("event1", event)
-        })
-        this.elem.addEventListener("click",event=>{
-            console.log("event2", event)
-        })
-    }
+    // amoveplus(){
+    //     console.log("i am here")
+    //     this.drawFlag = true;
+    //     this.elem.addEventListener("click",event=>{
+    //         console.log("event1", event)
+    //     })
+    //     this.elem.addEventListener("click",event=>{
+    //         console.log("event2", event)
+    //     })
+    // }
 
     drawCellBound(bound){
         let g = d3.select("#animation").node().getContext("2d");
@@ -404,6 +395,28 @@ class anim{
         // if(type === "amovep"){
         //     this.amoveplus();
         // }
+        this.adbound = false;
+        d3.select("#adbound")
+            // .on("click", function() { d3.event.stopPropagation(); })
+            .on("click",()=>{
+                console.log("adbound",this.adbound)
+                console.log("drawflag",this.drawFlag)
+                if(this.adbound === false){
+                    d3.select("#adbound")
+                        .attr("class","btn btn-primary")
+                        .attr("value","Finish Adjustment")
+                    this.adbound = true;
+                    console.log("adbound now",this.adbound)
+                    
+                    this.adjustBound();
+                    console.log("drawflag now", this.drawFlag)
+                } else { 
+                    d3.select("#adbound")
+                        .attr("class","btn btn-secondary")
+                        .attr("value","Adjust Bound")
+                    this.adbound = false;
+                }
+            })
         
         // console.log(this.grad)
         
