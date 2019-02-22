@@ -8,6 +8,7 @@ class anim{
         // this.cp = [[0.25,0.75,1,1],[0.25,0.25,1,1],[0.25,0.5,1,-1],[0.75,0.75,1,1],[0.5,0.75,-1,1]]
         this.sigma = 0.1;
         
+        
 
         //// curve ////
         let N = 60; // 25^2 curves
@@ -36,8 +37,9 @@ class anim{
         this.assginLocation(this.cp, this.cp_local)
 
 
-
         this.elem = document.getElementById("animation")
+
+        
 
         // this.elem.addEventListener('click', function(event){
         //     console.log(event)
@@ -99,6 +101,17 @@ class anim{
         })
         
         
+    }
+
+    amoveplus(){
+        console.log("i am here")
+        this.drawFlag = true;
+        this.elem.addEventListener("click",event=>{
+            console.log("event1", event)
+        })
+        this.elem.addEventListener("click",event=>{
+            console.log("event2", event)
+        })
     }
 
     drawCellBound(bound){
@@ -388,6 +401,9 @@ class anim{
         this.cp_local = this.findLocations(this.cp,this.sigma);
         this.edges = this.findEdges(this.cp);
         this.grad = this.assginLocation(this.cp, this.cp_local)[0];
+        // if(type === "amovep"){
+        //     this.amoveplus();
+        // }
         
         // console.log(this.grad)
         
@@ -494,8 +510,8 @@ class anim{
                     dr = that.findV([Math.max(X[i],0),Math.max(Y[i],0)],that.grad);
                 }
                 else if (type === "bmove"){
-                    // dr = that.gradF(that.cp, X[i], Y[i],0.1);
-                    dr = that.findV([Math.max(X[i],0),Math.max(Y[i],0)],that.grad);
+                    dr = that.gradF(that.cp, X[i], Y[i],0.05);
+                    // dr = that.findV([Math.max(X[i],0),Math.max(Y[i],0)],that.grad);
                 }
                 else if (type === "cmove"){
                     dr = that.gradF(that.cp,X[i], Y[i],0.05);
