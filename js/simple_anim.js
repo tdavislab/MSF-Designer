@@ -13,18 +13,18 @@ class anim{
         // discretize the vfield coords
         this.xp = d3.range(N).map(
                 function (i) {
-                    return (gridWidth-1)*(i/N);
+                    return i/N;
                 });
         this.yp = d3.range(N).map(
                 function (i) {
-                    return (gridHeight-1)*(i/N);
+                    return i/N;
                 });
 
         this.xMap = d3.scaleLinear()
-            .domain([0, gridWidth-1])
+            .domain([0, 1])
             .range([0, this.canvasWidth]);
         this.yMap = d3.scaleLinear()
-            .domain([0, gridHeight-1])
+            .domain([0, 1])
             .range([0, this.canvasHeight]);
         this.cp_local = this.findLocations(this.cp,this.sigma);
         this.cellBound = {"upper":[0.5,0], "lower":[0.5,1]};
@@ -58,10 +58,10 @@ class anim{
         
         this.xMapReverse = d3.scaleLinear()
             .domain([0, this.canvasWidth])
-            .range([0, gridWidth-1]);
+            .range([0, 1]);
         this.yMapReverse = d3.scaleLinear()
             .domain([0, this.canvasHeight])
-            .range([0, gridHeight-1]);
+            .range([0, 1]);
 
         console.log(this.grad)
         
@@ -71,8 +71,8 @@ class anim{
         document.getElementById("animation").addEventListener("click",event=>{
             if(this.adbound === true){
                 this.drawFlag = true;
-                let x = this.xMapReverse(event.x)/(gridWidth-1);
-                let y = this.yMapReverse(event.y)/(gridHeight-1);
+                let x = this.xMapReverse(event.x);
+                let y = this.yMapReverse(event.y);
                 console.log("x,y",x,y)
                 if(y<=0.5){
                     this.cellBound.upper[0] = x;
@@ -87,23 +87,23 @@ class anim{
     drawCellBound(bound){
         let g = d3.select("#animation").node().getContext("2d");
         g.beginPath();
-        g.moveTo(this.xMap(0.5*(gridWidth-1)), this.yMap(0.5*(gridHeight-1))); 
-        g.lineTo(this.xMap(bound.upper[0]*(gridWidth-1)), this.yMap(bound.upper[1]*(gridHeight-1)));
+        g.moveTo(this.xMap(0.5), this.yMap(0.5)); 
+        g.lineTo(this.xMap(bound.upper[0]), this.yMap(bound.upper[1]));
         g.lineWidth = 1;
         g.strokeStyle = "white";
         g.stroke();
 
         g.beginPath();
-        g.moveTo(this.xMap(0.5*(gridWidth-1)), this.yMap(0.5*(gridHeight-1))); 
-        g.lineTo(this.xMap(bound.lower[0]*(gridWidth-1)), this.yMap(bound.lower[1]*(gridHeight-1)));
+        g.moveTo(this.xMap(0.5), this.yMap(0.5)); 
+        g.lineTo(this.xMap(bound.lower[0]), this.yMap(bound.lower[1]));
         g.lineWidth = 1;
         g.strokeStyle = "white";
         g.stroke();
     }
 
-    F(cp, x, y, sigma){
-        let xIdx = x/(gridWidth-1);
-        let yIdx = y/(gridHeight-1);
+    F(cp, xIdx, yIdx, sigma){
+        // let xIdx = x;
+        // let yIdx = y;
 
         let fx = 0;
         let fy = 0;
@@ -150,7 +150,7 @@ class anim{
             xLine[cp[i][0]].push({"original":cp[i], "local":cpLocal_i});
             yLine[cp[i][1]].push({"original":cp[i], "local":cpLocal_i});
         }
-        
+        console.log("line",xLine,yLine)
         // map vector values
         let grad_new = [];
         let xyVal = [];
@@ -258,18 +258,19 @@ class anim{
         // let newcircles = circles.enter().append("circle")
         // circles = newcircles.merge(circles);
         // circles
-        //     .attr("cx", (d)=>this.xMap(d[2]*(gridWidth-1)))
-        //     .attr("cy", (d)=>this.yMap(d[3]*(gridHeight-1)))
+        //     .attr("cx", (d)=>this.xMap(d[2]))
+        //     .attr("cy", (d)=>this.yMap(d[3]))
         //     .attr("r", 3)
 
         grad_new.sort(function(x,y){
             return d3.ascending(x[2],y[2]) || d3.ascending(x[3],y[3])
         })
+        return grad_new
     }
 
     findV(ptt, grad){
-        let xIdx = ptt[0]/(gridWidth-1);
-        let yIdx = ptt[1]/(gridHeight-1);
+        let xIdx = ptt[0];
+        let yIdx = ptt[1];
         
         let x1 = Math.floor(xIdx/0.025);
         let x2 = x1+1;
@@ -292,11 +293,10 @@ class anim{
         this.clearCanvas()
         this.cp_local = this.findLocations(this.cp,this.sigma);
         this.edges = this.findEdges(this.cp);
-        this.grad = this.assginLocation(this.cp, this.cp_local)[0];
+        this.grad = this.assginLocation(this.cp, this.cp_local);
             
-        // var dt = 0.5;
         let N = 60;
-        var dt = 0.05;
+        var dt = 0.001;
         var X0 = [], Y0 = []; // to store initial starting locations
         var X  = [], Y  = []; // to store current point for each curve
 
@@ -364,11 +364,10 @@ class anim{
             
             for (let i=0; i<M; i++) { // draw a single timestep for every curve
                 let dr = [0,0];
-                let X_new = X[i]/(gridWidth-1);
-                let Y_new = Y[i]/(gridHeight-1);
+                let X_new = X[i];
+                let Y_new = Y[i];
                 if(type === "original"){ 
-                    // dr = that.gradF(that.cp, X[i]/(gridWidth-1),Y[i]/(gridHeight-2),0.1);
-                    // that.calVec(X[i],Y[i])
+                    // dr = that.gradF(that.cp, X[i],Y[i],0.1);
                     // console.log(that.grad)
                     dr = that.findV([Math.max(X[i],0),Math.max(Y[i],0)],that.grad);
                     if(X_new>=0 && X_new<=0.5 && Y_new>=0 && Y_new <= 0.5){
@@ -387,13 +386,13 @@ class anim{
                     
                 }
                 else if(type === "original1"){ 
-                    dr = that.gradF(that.cp, X[i]/(gridWidth-1),Y[i]/(gridHeight-2),0.1);
+                    dr = that.gradF(that.cp, X[i],Y[i],0.1);
                     // that.calVec(X[i],Y[i])
                     // console.log(that.grad)
                     // dr = that.findV([Math.max(X[i],0),Math.max(Y[i],0)],that.grad);
                 }
                 else if (type === "amove"){
-                    // dr = that.gradF(that.cp, X[i]/(gridWidth-1), Y[i]/(gridHeight-2),0.1);
+                    // dr = that.gradF(that.cp, X[i], Y[i],0.1);
                     dr = that.findV([Math.max(X[i],0),Math.max(Y[i],0)],that.grad);
                 }
                 else if (type === "bmove"){
@@ -406,8 +405,8 @@ class anim{
 
                 g.setLineDash([1, 0])
                 g.beginPath();
-                g.moveTo(that.xMap(X_new*(gridWidth-1)), that.yMap(Y[i])); // the start point of the path
-                g.lineTo(that.xMap(X_new*(gridWidth-1)), that.yMap(Y[i]+=dr[1]*dt)); // the end point
+                g.moveTo(that.xMap(X_new), that.yMap(Y[i])); // the start point of the path
+                g.lineTo(that.xMap(X_new), that.yMap(Y[i]+=dr[1]*dt)); // the end point
                 X[i]+=dr[0]*dt
                 g.lineWidth = 0.7;
                 g.strokeStyle = "#FF8000";
@@ -426,8 +425,8 @@ class anim{
         
         for(let i=0;i<cp.length;i++){
             let type = cp[i].slice(2);
-            let arcX = this.xMap(cp[i][0]*(gridWidth-1));
-            let arcY = this.yMap(cp[i][1]*(gridHeight-1));
+            let arcX = this.xMap(cp[i][0]);
+            let arcY = this.yMap(cp[i][1]);
 
             if (type.join() === "1,1"){ // maximum
                 g.setLineDash([1, 0])
@@ -503,27 +502,27 @@ class anim{
         let g = d3.select("#animation").node().getContext("2d");
         g.beginPath();
         g.moveTo(this.xMap(0), this.yMap(0)); 
-        g.lineTo(this.xMap(0), this.yMap(gridWidth));
+        g.lineTo(this.xMap(0), this.yMap(1));
         g.lineWidth = 6;
         g.strokeStyle = "#1E90FF";
         g.stroke();
 
         g.beginPath();
         g.moveTo(this.xMap(0), this.yMap(gridHeight-1)); 
-        g.lineTo(this.xMap(gridWidth-1), this.yMap(gridHeight-1));
+        g.lineTo(this.xMap(1), this.yMap(gridHeight-1));
         g.strokeStyle = "#1E90FF";
         g.stroke();
 
         g.beginPath();
-        g.moveTo(this.xMap(gridWidth-1), this.yMap(0)); 
-        g.lineTo(this.xMap(gridWidth-1), this.yMap(gridHeight-1));
+        g.moveTo(this.xMap(1), this.yMap(0)); 
+        g.lineTo(this.xMap(1), this.yMap(gridHeight-1));
         g.strokeStyle = "#1E90FF";
         g.stroke();
 
         
         g.beginPath();
         g.moveTo(this.xMap(0), this.yMap(0)); 
-        g.lineTo(this.xMap(gridWidth), this.yMap(0));
+        g.lineTo(this.xMap(1), this.yMap(0));
         g.strokeStyle = "#328CC1";
         g.stroke();
 
@@ -546,8 +545,8 @@ class anim{
         //     }    
         // }
         for (let i=0;i<edges.length;i++){
-            let bp = [this.xMap(edges[i][0][0]*(gridWidth-1)),this.yMap(edges[i][0][1]*(gridHeight-1))]; // begin point
-            let ep = [this.xMap(edges[i][1][0]*(gridWidth-1)),this.yMap(edges[i][1][1]*(gridHeight-1))] // end point
+            let bp = [this.xMap(edges[i][0][0]),this.yMap(edges[i][0][1])]; // begin point
+            let ep = [this.xMap(edges[i][1][0]),this.yMap(edges[i][1][1])] // end point
             if(edges[i][2]==="max"){
                 g.setLineDash([5, 5]);
                 g.beginPath();
@@ -726,7 +725,7 @@ class anim{
             }
         }
         let cp_local_new = [];
-        cp_local.forEach(e=>cp_local_new.push([e[0]/(gridWidth-1), e[1]/(gridHeight-1), e[2],e[3]]))
+        cp_local.forEach(e=>cp_local_new.push([e[0], e[1], e[2],e[3]]))
         // console.log(this.xMap(cp_max[0][0]),this.yMap(cp_max[0][1]))
         return cp_local_new
     }
