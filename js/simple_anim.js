@@ -7,8 +7,6 @@ class anim{
         this.cp = [[0.25,0.5,1,1],[0.75,0.5,1,1],[0.5,0.5,-1,1]];
         // this.cp = [[0.25,0.75,1,1],[0.25,0.25,1,1],[0.25,0.5,1,-1],[0.75,0.75,1,1],[0.5,0.75,-1,1]]
         this.sigma = 0.1;
-        
-        
 
         //// curve ////
         let N = 60; // 25^2 curves
@@ -35,33 +33,28 @@ class anim{
         this.animation("original");
 
         this.assginLocation(this.cp, this.cp_local)
-
-
-        // this.elem = document.getElementById("animation");
-        // this.elem = d3.select("#animation").node().getContext("2d");
-
         
 
         // this.elem.addEventListener('click', function(event){
         //     console.log(event)
         // })
 
-        // this.adbound = false;
-        // d3.select("#adbound")
-        //     .on("click",()=>{
-        //         if(this.adbound === false){
-        //             d3.select("#adbound")
-        //                 .attr("class","btn btn-primary")
-        //                 .attr("value","Finish Adjustment")
-        //             this.adbound = true;
-        //             this.adjustBound();
-        //         } else { 
-        //             d3.select("#adbound")
-        //                 .attr("class","btn btn-secondary")
-        //                 .attr("value","Adjust Bound")
-        //             this.adbound = false;
-        //         }
-        //     })
+        this.adbound = false;
+        d3.select("#adbound")
+            .on("click",()=>{
+                if(this.adbound === false){
+                    d3.select("#adbound")
+                        .attr("class","btn btn-primary")
+                        .attr("value","Finish Adjustment")
+                    this.adbound = true;
+                    this.adjustBound();
+                } else { 
+                    d3.select("#adbound")
+                        .attr("class","btn btn-secondary")
+                        .attr("value","Adjust Bound")
+                    this.adbound = false;
+                }
+            })
         
         this.xMapReverse = d3.scaleLinear()
             .domain([0, this.canvasWidth])
@@ -75,10 +68,7 @@ class anim{
     }
 
     adjustBound(){
-        console.log("i am here")
-        // console.log(this.elem)
         document.getElementById("animation").addEventListener("click",event=>{
-            console.log("I am here")
             if(this.adbound === true){
                 this.drawFlag = true;
                 let x = this.xMapReverse(event.x)/(gridWidth-1);
@@ -93,17 +83,6 @@ class anim{
         
         
     }
-
-    // amoveplus(){
-    //     console.log("i am here")
-    //     this.drawFlag = true;
-    //     this.elem.addEventListener("click",event=>{
-    //         console.log("event1", event)
-    //     })
-    //     this.elem.addEventListener("click",event=>{
-    //         console.log("event2", event)
-    //     })
-    // }
 
     drawCellBound(bound){
         let g = d3.select("#animation").node().getContext("2d");
@@ -138,9 +117,6 @@ class anim{
     }
 
     gradF(cp, xIdx, yIdx, sigma){
-        // let xIdx = x/(gridWidth-1);
-        // let yIdx = y/(gridHeight-1);
-
         let dx = 0;
         let dy = 0;
 
@@ -155,18 +131,7 @@ class anim{
 
     }
 
-    // samplePoints(){
-    //     let gradSample = []
-    //     for(let i=0;i<this.xp.length;i++){
-    //         for(let j=0;j<this.yp.length;j++){
-    //             gradSample.push(this.gradF(this.cp, this.xp[i], this.yp[j], this.sigma))
-    //         }
-    //     }
-    //     return gradSample;
-    // }
     assginLocation(cp, cpLocal){
-        // console.log("cp",cp)
-        // console.log("cp local", cpLocal)
         let xLine = {1:[{"original":[1,1],"local":[1,1]}, {"original":[1,0],"local":[1,0]}], 0:[{"original":[0,0],"local":[0,0]}, {"original":[0,1],"local":[0,1]}]}; // data structure: {idx:[{pt1(local/original)}, {pt2}, {pt3}]}
         let yLine = {1:[{"original":[1,1],"local":[1,1]}, {"original":[0,1],"local":[0,1]}], 0:[{"original":[0,0],"local":[0,0]}, {"original":[1,0],"local":[1,0]}]};
 
@@ -186,46 +151,12 @@ class anim{
             yLine[cp[i][1]].push({"original":cp[i], "local":cpLocal_i});
         }
         
-        // for(let i=0;i<xLine[0.5].length;i++){
-        //     if(xLine[0.5][i].original[1]===0){
-        //         xLine[0.5][i].original[0] = this.cellBound.upper[0];
-        //         // xLine[0.5][i].local[0] = this.cellBound.upper[0];
-        //     }
-        //     if(xLine[0.5][i].original[1]===1){
-        //         xLine[0.5][i].original[0] = this.cellBound.lower[0];
-        //     }
-        // }
-        // for(let i=0;i<yLine[0].length;i++){
-        //     if(yLine[0][i].original[0] === 0.5){
-        //         yLine[0][i].original[0] = this.cellBound.upper[0];
-        //     }
-        // }
-        // for(let i=0;i<yLine[1].length;i++){
-        //     if(yLine[1][i].original[0] === 0.5){
-        //         yLine[1][i].original[0] = this.cellBound.lower[0];
-        //     }
-        // }
-        // console.log("xline", xLine)
-        // console.log("yline", yLine)
         // map vector values
         let grad_new = [];
         let xyVal = [];
         let xVal = Object.keys(xLine).map(Number).sort();
         let yVal = Object.keys(yLine).map(Number).sort();
-        // let xVal_local = [];
-        // let yVal_local = [];
-        // cpLocal.forEach(pt=>{
-        //     if(xVal_local.indexOf(pt[0])===-1){
-        //         xVal_local.push(pt[0]);
-        //     }
-        //     if(yVal_local.indexOf(pt[1])===-1){
-        //         yVal_local.push(pt[1]);
-        //     }
-        // })
-        // xVal_local.push(1);
-        // yVal_local.push(1)
-        // console.log("xval",xVal)
-        // console.log("yval",yVal)
+
         let xbp = {}; // begin point
         let xbp_local = {};
         yVal.forEach(y=>{ // horizontal line at y value = y
@@ -251,12 +182,7 @@ class anim{
             })
             xLocal.sort(function(x,y){
                 return d3.ascending(x[1],y[1])
-                // return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1])
             })
-            // console.log("xoriginal", xOriginal)
-            // console.log("xlocal",xLocal)
-            // let ybp = 0;
-            // let ybp_local = 0;
             for(let j=0;j<yVal.length;j++){
                 // console.log("i,j",i,j);
                 let yOriginal = [];
@@ -271,9 +197,6 @@ class anim{
                 yLocal.sort(function(x,y){
                     return d3.ascending(x[0],y[0])
                 })
-
-                // console.log("yoriginal",yOriginal)
-                // console.log("ylocal",yLocal)
                 let inter = xOriginal.filter(function(v){
                     let joint = [];
                     yOriginal.forEach(e=>{
@@ -301,8 +224,6 @@ class anim{
                     let yIdx_local = ybp_local[pt[0]];
                     let xStep_local = (pt_local[0] - xIdx_local)/(pt[0] - xIdx)*0.025
                     let yStep_local = (pt_local[1] - yIdx_local)/(pt[1] - yIdx)*0.05
-                    // console.log("xidx loc",xIdx_local)
-                    // console.log("yidx loc",yIdx_local)
                     // console.log("xidx, yidx", xIdx, yIdx)
                     // console.log("xidx loc, yidx loc", xIdx_local, yIdx_local)
                     for(let m=xIdx;m<pt[0];m+=0.025){
@@ -329,8 +250,6 @@ class anim{
                     ybp_local[pt[0]] = pt_local[1];
                 }
             }
-            // xbp = xVal[i];
-            // xbp_local = xVal_local[i];
         }
         
         // let ptt = d3.select("#test_points")
@@ -346,23 +265,6 @@ class anim{
         grad_new.sort(function(x,y){
             return d3.ascending(x[2],y[2]) || d3.ascending(x[3],y[3])
         })
-        // console.log(grad_new)
-
-        let xx = [];
-        let yy = [];
-        grad_new.forEach(item=>{
-            if(xx.indexOf(item[2])===-1){
-                xx.push(item[2]);
-            }
-            if(yy.indexOf(item[3])===-1){
-                yy.push(item[3]);
-            }
-        })
-        xx.sort();
-        yy.sort();
-        return [grad_new,xx,yy];
-
-
     }
 
     findV(ptt, grad){
@@ -387,39 +289,11 @@ class anim{
     }
 
     animation(type){
-        // console.log(type)
         this.clearCanvas()
         this.cp_local = this.findLocations(this.cp,this.sigma);
         this.edges = this.findEdges(this.cp);
         this.grad = this.assginLocation(this.cp, this.cp_local)[0];
-        // if(type === "amovep"){
-        //     this.amoveplus();
-        // }
-        this.adbound = false;
-        d3.select("#adbound")
-            // .on("click", function() { d3.event.stopPropagation(); })
-            .on("click",()=>{
-                console.log("adbound",this.adbound)
-                console.log("drawflag",this.drawFlag)
-                if(this.adbound === false){
-                    d3.select("#adbound")
-                        .attr("class","btn btn-primary")
-                        .attr("value","Finish Adjustment")
-                    this.adbound = true;
-                    console.log("adbound now",this.adbound)
-                    
-                    this.adjustBound();
-                    console.log("drawflag now", this.drawFlag)
-                } else { 
-                    d3.select("#adbound")
-                        .attr("class","btn btn-secondary")
-                        .attr("value","Adjust Bound")
-                    this.adbound = false;
-                }
-            })
-        
-        // console.log(this.grad)
-        
+            
         // var dt = 0.5;
         let N = 60;
         var dt = 0.05;
@@ -804,12 +678,6 @@ class anim{
 
     findLocations(cp,sigma){        
         let that = this;
-        // find x locations
-        let xcol = [];
-        let ycol = [];
-        let xyGrad = [];
-        // let xGrad = [];
-        // let yGrad = [];
         let xyLoc = [];
         let cp_local = [];
         // let xLoc = [];
@@ -860,67 +728,6 @@ class anim{
         let cp_local_new = [];
         cp_local.forEach(e=>cp_local_new.push([e[0]/(gridWidth-1), e[1]/(gridHeight-1), e[2],e[3]]))
         // console.log(this.xMap(cp_max[0][0]),this.yMap(cp_max[0][1]))
-
-
-
-        // for(let i=0;i<this.xp.length;i++){
-        //     for(let j=0;j<this.yp.length;j++){
-        //         xyGrad.push(that.gradF(cp,this.xp[i],this.yp[j],sigma));
-        //         xcol.push(this.xp[i]);
-        //         ycol.push(this.yp[j]);
-        //     }
-        // }
-        // console.log(xyGrad)
-        // for(let i=1;i<xyGrad.length;i++){
-        //     if(JSON.stringify(xyLoc).indexOf(JSON.stringify([this.xp[i-1],this.yp[i-1]]))===-1){
-
-        //         // x direction
-        //         if((xyGrad[i-1][0]*xyGrad[i][0]<= 0)&&(xyGrad[i-1][1]*xyGrad[i][1]<= 0)){
-        //             console.log(i)
-        //             console.log(xyGrad[i-1],xyGrad[i])
-        //             // if(Math.abs(xGrad[i-1])<= Math.abs(xGrad[i])){
-        //             //     xyLoc.push([this.xp[i-1],this.yp[i-1]]);
-        //             // } else {
-        //             //     xyLoc.push([this.xp[i],this.yp[i]]);
-        //             // }
-        //             xyLoc.push([xcol[i],ycol[i]])
-        //         }
-                
-                // else if(xyGrad[i-1][1]*xyGrad[i][1] <= 0){
-                //     if(Math.abs(xyGrad[i-1][1])<= Math.abs(xyGrad[i][1])){
-                //         xyLoc.push([xcol[i-1],ycol[i-1]]);
-                //     } else {
-                //         xyLoc.push([xcol[i],ycol[i]]);
-        //         //     }
-        //         // }
-        //     }
-        // }
-
-        // for(let i=1;i<yGrad.length;i++){
-        //     if(JSON.stringify(xyLoc).indexOf(JSON.stringify([xcol[i-1],ycol[i-1]]))===-1){
-        //         if(yGrad[i-1]*yGrad[i] <= 0){
-        //             // console.log(i)
-        //             // console.log(xyGrad[i-1],xyGrad[i])
-        //             if(Math.abs(yGrad[i-1])<= Math.abs(yGrad[i])){
-        //                 xyLoc.push([this.xp[i-1],this.yp[i-1]]);
-        //             } else {
-        //                 xyLoc.push([this.xp[i],this.yp[i]]);
-        //             }
-        //             // xyLoc.push([xcol[i],ycol[i]])
-        //         }
-
-        //     }
-        // }
-
-
-
-        // y direction
-         
-        // find y locations
-        // let yGrad = [];
-        // let yLoc = [];
-        // this.yp.forEach(y=>yGrad.push(that.gradF(cp,0.5,y,sigma)[0]))
-        
         return cp_local_new
     }
 
