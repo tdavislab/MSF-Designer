@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="js/simple_anim.js" async></script>
     <script src="js/script.js" async></script>
+    <link rel="stylesheet" href="style.css"/>
 </head>
 
 <body>
@@ -14,8 +15,18 @@
     <br>
     <table>
         <tr>
-            <td id="container" width="600px" style="border: 1px solid black; background-color: white" rowspan="2">
-                <canvas id="animation" width="1000" height="600"></canvas>
+            <td id="container" width="1050px" height = "650px" style="border: 1px solid black; background-color: white" rowspan="2">
+                
+                <!-- <div id='canvas-container' style="position: absolute; top:83px; left:2px; z-index:1">   -->
+                    
+                    <canvas id="animation" style="position: absolute; top:100px; left:10px; z-index:1" width="1000" height="600" ></canvas>
+                    <svg id="annotation" style="position: absolute; top:83px; left:2px; z-index:1" width="1000" height="600"></svg>
+                <!-- </div> -->
+                
+                <!-- <div></div> -->
+                
+               
+                <!-- <svg id="annotation" width="1000" height="600"></svg> -->
             </td>
             <td id="button-group" style="vertical-align: top; padding: 20px; border: 1px solid black">
                     <h4>Control Panel</h4>

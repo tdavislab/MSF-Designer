@@ -2,9 +2,13 @@ class anim{
     constructor() {
         this.canvasWidth = document.getElementById('animation').offsetWidth;
         this.canvasHeight = document.getElementById('animation').offsetHeight;
+        this.svg = d3.select("#annotation");
+        this.pointsGroup = this.svg.append("g")
+            .attr("id","pointgroup")
 
         this.drawFlag = true;
-        this.cp = [[0.25,0.5,1,1],[0.75,0.5,1,1],[0.5,0.5,-1,1]];
+        // this.cp = [[0.25,0.5,1,1],[0.75,0.5,1,1],[0.5,0.5,-1,1]];
+        this.cp = [[0.5,0.5,1,1]];
         // this.cp = [[0.25,0.75,1,1],[0.25,0.25,1,1],[0.25,0.5,1,-1],[0.75,0.75,1,1],[0.5,0.75,-1,1]]
         this.sigma = 0.1;
 
@@ -32,12 +36,8 @@ class anim{
         this.edges = this.findEdges(this.cp);
         this.animation("original");
 
-        this.assginLocation(this.cp, this.cp_local)
-        
-
-        // this.elem.addEventListener('click', function(event){
-        //     console.log(event)
-        // })
+        // this.assginLocation(this.cp, this.cp_local)
+       
 
         this.adbound = false;
         d3.select("#adbound")
@@ -62,9 +62,55 @@ class anim{
         this.yMapReverse = d3.scaleLinear()
             .domain([0, this.canvasHeight])
             .range([0, 1]);
+            
+        this.gradmax = this.maxMesh(this.sigma)
 
-        console.log(this.grad)
+        // console.log(this.grad)
         
+    }
+
+    drawAnnotation(){
+        let circles = this.pointsGroup.selectAll("circle").data(this.cp)
+        circles.exit().remove();
+        let newcircles = circles.enter().append("circle")
+        circles = newcircles.merge(circles);
+        circles
+            .attr("cx",(d)=>this.xMap(d[0]))
+            .attr("cy",(d)=>this.yMap(d[1]))
+            .attr("r",10)
+            .attr("fill","red")
+            .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            let that=this;
+
+            function dragstarted(d) {
+                d3.select(this).raise().classed("active", true);
+              }
+              
+              function dragged(d) {
+                // console.log(d3.event)
+                d3.select(this).attr("cx", d[0] = that.xMapReverse(d3.event.x)).attr("cy", d[1] = that.yMapReverse(d3.event.y));
+                that.cp[0][0] = that.xMapReverse(d3.event.x);
+                that.cp[0][1] = that.yMapReverse(d3.event.y);
+              }
+              
+              function dragended(d) {
+                d3.select(this).classed("active", false);
+                that.grad = that.assginLocation(that.cp, that.cp_local)
+                // console.log(that.grad)
+              }
+              
+                // console.log(that.cp_local)
+
+            // if (!mark.node()) {
+            //     mark = d3.select("#foreground").append("path").attr("class", "location-mark");
+            // }
+            // mark.datum({type: "Point", coordinates: coord}).attr("d", path);
+        
+
     }
 
     adjustBound(){
@@ -83,6 +129,7 @@ class anim{
         
         
     }
+
 
     drawCellBound(bound){
         let g = d3.select("#animation").node().getContext("2d");
@@ -131,7 +178,25 @@ class anim{
 
     }
 
+    maxMesh(sigma){
+        let gradmax = [];
+        for(let x=0;x<=1;x+=0.025){
+            for(let y=0;y<=1;y+=0.05){
+                let dx = (1/sigma) * (x-0.5) * Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma);
+                let dy = (1/sigma) * (y-0.5) * (Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma));
+                gradmax.push([x,y,dx,dy]);
+            }
+        }
+        gradmax.sort(function(x,y){
+            return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
+        })
+        console.log(gradmax)
+        return gradmax;
+
+    }
+
     assginLocation(cp, cpLocal){
+        console.log("cp",cp)
         let xLine = {1:[{"original":[1,1],"local":[1,1]}, {"original":[1,0],"local":[1,0]}], 0:[{"original":[0,0],"local":[0,0]}, {"original":[0,1],"local":[0,1]}]}; // data structure: {idx:[{pt1(local/original)}, {pt2}, {pt3}]}
         let yLine = {1:[{"original":[1,1],"local":[1,1]}, {"original":[0,1],"local":[0,1]}], 0:[{"original":[0,0],"local":[0,0]}, {"original":[1,0],"local":[1,0]}]};
 
@@ -150,7 +215,8 @@ class anim{
             xLine[cp[i][0]].push({"original":cp[i], "local":cpLocal_i});
             yLine[cp[i][1]].push({"original":cp[i], "local":cpLocal_i});
         }
-        console.log("line",xLine,yLine)
+        console.log("xline",xLine)
+        console.log("yline",yLine)
         // map vector values
         let grad_new = [];
         let xyVal = [];
@@ -251,20 +317,11 @@ class anim{
                 }
             }
         }
-        
-        // let ptt = d3.select("#test_points")
-        // let circles = ptt.selectAll("circle").data(grad_new);
-        // circles.exit().remove();
-        // let newcircles = circles.enter().append("circle")
-        // circles = newcircles.merge(circles);
-        // circles
-        //     .attr("cx", (d)=>this.xMap(d[2]))
-        //     .attr("cy", (d)=>this.yMap(d[3]))
-        //     .attr("r", 3)
 
         grad_new.sort(function(x,y){
             return d3.ascending(x[2],y[2]) || d3.ascending(x[3],y[3])
         })
+        // console.log("grad",grad_new)
         return grad_new
     }
 
@@ -282,8 +339,8 @@ class anim{
         let ex_v = [0,0]
         for(let i=0;i<3;i++){
             if(typeof triang[i]!="undefined"){
-                ex_v[0] += 1/3*triang[i][0]
-                ex_v[1] += 1/3*triang[i][1]
+                ex_v[0] += 1/3*triang[i][2]
+                ex_v[1] += 1/3*triang[i][3]
             }
         }
         return ex_v;
@@ -335,7 +392,7 @@ class anim{
         // let drawFlag = this.drawFlag
         setInterval(function () {if (that.drawFlag) {draw(type);}}, frameRate);
         d3.timer(function () {if (that.drawFlag) {draw(type);}}, frameRate);
-        d3.select("#animation")
+        d3.select("#annotation")
             .on("click", function() {that.drawFlag = (that.drawFlag) ? false : true;});
             
         g.globalCompositeOperation = "source-over";
@@ -347,19 +404,19 @@ class anim{
             g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba
             
             
-            if(type==="original1"){
-                // that.clearCanvas()
-                that.drawCellBound(that.cellBound);
-                that.addnodes(that.cp_local);
-                that.edges = that.findEdges(that.cp_local);
-                that.addedges(that.edges)
+            // if(type==="original1"){
+            //     // that.clearCanvas()
+            //     that.drawCellBound(that.cellBound);
+            //     that.addnodes(that.cp_local);
+            //     that.edges = that.findEdges(that.cp_local);
+            //     that.addedges(that.edges)
+            // } else {
+            //     that.drawCellBound(that.cellBound);
+            //     that.addnodes(that.cp);
+            //     that.addedges(that.edges)
+            // }
 
-
-            } else {
-                that.drawCellBound(that.cellBound);
-                that.addnodes(that.cp);
-                that.addedges(that.edges)
-            }
+            that.drawAnnotation();
 
             
             for (let i=0; i<M; i++) { // draw a single timestep for every curve
@@ -368,20 +425,22 @@ class anim{
                 let Y_new = Y[i];
                 if(type === "original"){ 
                     // dr = that.gradF(that.cp, X[i],Y[i],0.1);
+                    
                     // console.log(that.grad)
-                    dr = that.findV([Math.max(X[i],0),Math.max(Y[i],0)],that.grad);
-                    if(X_new>=0 && X_new<=0.5 && Y_new>=0 && Y_new <= 0.5){
-                        X_new = X_new*(that.cellBound.upper[0]+(0.5-that.cellBound.upper[0])*Y_new/0.5)/0.5
-                    }
-                    else if(X_new>0.5 && X_new<=1 && Y_new>=0 && Y_new <= 0.5){
-                        X_new = 1-(1-X_new)*((1-2*Y_new)*(0.5-that.cellBound.upper[0])+0.5)/0.5
-                    }
-                    else if(X_new>=0 && X_new<=0.5 && Y_new>0.5 && Y_new <= 1){
-                        X_new = X_new*(0.5-(2*Y_new-1)*(0.5-that.cellBound.lower[0]))/0.5
-                    }
-                    else if(X_new>0.5 && X_new<=1 && Y_new>0.5 && Y_new <= 1){
-                        X_new = 1-(1-X_new)*((2*Y_new-1)*(0.5-that.cellBound.lower[0])+0.5)/0.5
-                    }
+                    dr = that.findV([X[i]+(0.5-that.cp[0][0]),Y[i]+(0.5-that.cp[0][1])],that.gradmax);
+
+                    // if(X_new>=0 && X_new<=0.5 && Y_new>=0 && Y_new <= 0.5){
+                    //     X_new = X_new*(that.cellBound.upper[0]+(0.5-that.cellBound.upper[0])*Y_new/0.5)/0.5
+                    // }
+                    // else if(X_new>0.5 && X_new<=1 && Y_new>=0 && Y_new <= 0.5){
+                    //     X_new = 1-(1-X_new)*((1-2*Y_new)*(0.5-that.cellBound.upper[0])+0.5)/0.5
+                    // }
+                    // else if(X_new>=0 && X_new<=0.5 && Y_new>0.5 && Y_new <= 1){
+                    //     X_new = X_new*(0.5-(2*Y_new-1)*(0.5-that.cellBound.lower[0]))/0.5
+                    // }
+                    // else if(X_new>0.5 && X_new<=1 && Y_new>0.5 && Y_new <= 1){
+                    //     X_new = 1-(1-X_new)*((2*Y_new-1)*(0.5-that.cellBound.lower[0])+0.5)/0.5
+                    // }
 
                     
                 }
@@ -406,7 +465,7 @@ class anim{
                 g.setLineDash([1, 0])
                 g.beginPath();
                 g.moveTo(that.xMap(X_new), that.yMap(Y[i])); // the start point of the path
-                g.lineTo(that.xMap(X_new), that.yMap(Y[i]+=dr[1]*dt)); // the end point
+                g.lineTo(that.xMap(X_new+dr[0]*dt), that.yMap(Y[i]+=dr[1]*dt)); // the end point
                 X[i]+=dr[0]*dt
                 g.lineWidth = 0.7;
                 g.strokeStyle = "#FF8000";
@@ -508,14 +567,14 @@ class anim{
         g.stroke();
 
         g.beginPath();
-        g.moveTo(this.xMap(0), this.yMap(gridHeight-1)); 
-        g.lineTo(this.xMap(1), this.yMap(gridHeight-1));
+        g.moveTo(this.xMap(0), this.yMap(1)); 
+        g.lineTo(this.xMap(1), this.yMap(1));
         g.strokeStyle = "#1E90FF";
         g.stroke();
 
         g.beginPath();
         g.moveTo(this.xMap(1), this.yMap(0)); 
-        g.lineTo(this.xMap(1), this.yMap(gridHeight-1));
+        g.lineTo(this.xMap(1), this.yMap(1));
         g.strokeStyle = "#1E90FF";
         g.stroke();
 
@@ -585,7 +644,7 @@ class anim{
         //             }
         //         }
                 // if(cp_new.min.length === 0){
-                //     let pts = [[cp_new.saddle[i][0],0],[cp_new.saddle[i][0],gridHeight]];
+                //     let pts = [[cp_new.saddle[i][0],0],[cp_new.saddle[i][0],1]];
                 //     for(let j=0;j<pts.length;j++){
                 //         let bp = [this.xMap(cp_new.saddle[i][0]),this.yMap(cp_new.saddle[i][1])]; // begin point
                 //         let ep = [this.xMap(pts[j][0]),this.yMap(pts[j][1])] // end point
@@ -651,7 +710,7 @@ class anim{
                 }
                 // draw line between saddle and min
                 if(cp_new.min.length === 0){
-                    let pts = [[cp_new.saddle[i][0],0],[cp_new.saddle[i][0],gridHeight]];
+                    let pts = [[cp_new.saddle[i][0],0],[cp_new.saddle[i][0],1]];
                     for(let j=0;j<pts.length;j++){
                         edges.push([cp_new.saddle[i],pts[j],"min"]);
                     }
@@ -731,7 +790,7 @@ class anim{
     }
 
     clearCanvas(){  
-        $('#animation').remove();
-        $('#container').append('<canvas id="animation" width="1000" height="600"></canvas>');
+        // $('#animation').remove();
+        // $('#canvas-container').append('<canvas id="animation" width="1000" height="600"></canvas>');
     }  
 }
