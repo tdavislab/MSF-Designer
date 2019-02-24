@@ -9,7 +9,6 @@ class anim{
         this.drawFlag = true;
         // this.cp = [[0.25,0.5,1,1],[0.75,0.5,1,1],[0.5,0.5,-1,1]];
         this.cp = [[0.5,0.5,1,1]];
-        // this.cp = [[0.25,0.75,1,1],[0.25,0.25,1,1],[0.25,0.5,1,-1],[0.75,0.75,1,1],[0.5,0.75,-1,1]]
         this.sigma = 0.1;
 
         //// curve ////
@@ -30,13 +29,18 @@ class anim{
         this.yMap = d3.scaleLinear()
             .domain([0, 1])
             .range([0, this.canvasHeight]);
-        this.cp_local = this.findLocations(this.cp,this.sigma);
-        this.cellBound = {"upper":[0.5,0], "lower":[0.5,1]};
+        this.xMapReverse = d3.scaleLinear()
+            .domain([0, this.canvasWidth])
+            .range([0, 1]);
+        this.yMapReverse = d3.scaleLinear()
+            .domain([0, this.canvasHeight])
+            .range([0, 1]);
+        
 
+
+        this.cellBound = {"upper":[0.5,0], "lower":[0.5,1]};
         this.edges = this.findEdges(this.cp);
         this.animation("original");
-
-        // this.assginLocation(this.cp, this.cp_local)
        
 
         this.adbound = false;
@@ -55,18 +59,62 @@ class anim{
                     this.adbound = false;
                 }
             })
-        
-        this.xMapReverse = d3.scaleLinear()
-            .domain([0, this.canvasWidth])
-            .range([0, 1]);
-        this.yMapReverse = d3.scaleLinear()
-            .domain([0, this.canvasHeight])
-            .range([0, 1]);
-            
-        this.gradmax = this.maxMesh(this.sigma)
+  
+        this.gradmax = this.constructMesh(this.sigma,[1,1])
+        this.gradsaddle1 = this.constructMesh(this.sigma, [-1,1])
+        this.gradsaddle2 = this.constructMesh(this.sigma, [1,-1])
+        this.gradmin = this.constructMesh(this.sigma,[-1,-1])
 
-        // console.log(this.grad)
+        this.apType = "";
+        this.amType = "";
         
+    }
+
+    amovePlus(){
+        d3.select("#annotation")
+            .on("click", ()=>{
+                let x = Anim.xMapReverse(d3.event.x-10);
+                let y = Anim.yMapReverse(d3.event.y-100);
+                if(this.apType === "max"){
+                    this.cp.push([x,y,1,1]);
+                    this.apType = "saddle";
+                    d3.select("#amoveplus")
+                        .attr("value","Add a saddle point")
+                }
+                else if(this.apType === "saddle"){
+                    this.cp.push([x,y,-1,1]);
+                    this.drawFlag=true;
+                    d3.select("#annotation")
+                        .on("click", ()=>{this.drawFlag = (this.drawFlag) ? false : true;});
+                    d3.select("#amoveplus")
+                        .attr("value","A+ move")
+                    this.apType="";
+                }
+                this.drawAnnotation();
+            })
+    }
+    amoveMinus(){
+        d3.select("#annotation")
+            .on("click", ()=>{
+                let x = Anim.xMapReverse(d3.event.x-10);
+                let y = Anim.yMapReverse(d3.event.y-100);
+                if(this.amType === "min"){
+                    this.cp.push([x,y,-1,-1]);
+                    this.amType = "saddle";
+                    d3.select("#amoveminus")
+                        .attr("value","Add a saddle point")
+                }
+                else if(this.amType === "saddle"){
+                    this.cp.push([x,y,-1,1]);
+                    this.drawFlag=true;
+                    d3.select("#annotation")
+                        .on("click", ()=>{this.drawFlag = (this.drawFlag) ? false : true;});
+                    d3.select("#amoveminus")
+                        .attr("value","A- move")
+                    this.amType="";
+                }
+                this.drawAnnotation();
+            })
     }
 
     drawAnnotation(){
@@ -78,7 +126,15 @@ class anim{
             .attr("cx",(d)=>this.xMap(d[0]))
             .attr("cy",(d)=>this.yMap(d[1]))
             .attr("r",10)
-            .attr("fill","red")
+            .attr("fill",(d)=>{
+                if(d[2]===1&&d[3]===1){
+                    return "red"
+                } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
+                    return "green"
+                } else if (d[2]===-1&&d[3]===-1){
+                    return "blue"
+                }
+            })
             .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", dragged)
@@ -90,27 +146,15 @@ class anim{
                 d3.select(this).raise().classed("active", true);
               }
               
-              function dragged(d) {
-                // console.log(d3.event)
+              function dragged(d,i) {
                 d3.select(this).attr("cx", d[0] = that.xMapReverse(d3.event.x)).attr("cy", d[1] = that.yMapReverse(d3.event.y));
-                that.cp[0][0] = that.xMapReverse(d3.event.x);
-                that.cp[0][1] = that.yMapReverse(d3.event.y);
+                that.cp[i][0] = that.xMapReverse(d3.event.x);
+                that.cp[i][1] = that.yMapReverse(d3.event.y);
               }
               
               function dragended(d) {
                 d3.select(this).classed("active", false);
-                that.grad = that.assginLocation(that.cp, that.cp_local)
-                // console.log(that.grad)
               }
-              
-                // console.log(that.cp_local)
-
-            // if (!mark.node()) {
-            //     mark = d3.select("#foreground").append("path").attr("class", "location-mark");
-            // }
-            // mark.datum({type: "Point", coordinates: coord}).attr("d", path);
-        
-
     }
 
     adjustBound(){
@@ -124,10 +168,7 @@ class anim{
                     this.cellBound.upper[0] = x;
                 } else { this.cellBound.lower[0] = x;}
             }
-                
-        })
-        
-        
+        })   
     }
 
 
@@ -148,190 +189,29 @@ class anim{
         g.stroke();
     }
 
-    F(cp, xIdx, yIdx, sigma){
-        // let xIdx = x;
-        // let yIdx = y;
+    
 
-        let fx = 0;
-        let fy = 0;
-        for(let i=0;i<cp.length;i++){
-            let point = cp[i];
-            // e.g. point = [0.25, 0.25, 1, 1]
-            fx += (0.5)*point[2]*Math.exp(-(Math.pow(xIdx-point[0],2)+Math.pow(yIdx-point[1],2))/sigma)
-            fy += (0.5)*point[3]*Math.exp(-(Math.pow(xIdx-point[0],2)+Math.pow(yIdx-point[1],2))/sigma)
-        }
-        return [fx,fy]
-    }
-
-    gradF(cp, xIdx, yIdx, sigma){
-        let dx = 0;
-        let dy = 0;
-
-        for(let i=0;i<cp.length;i++){
-            let point = cp[i];
-            // e.g. point = [0.25, 0.25, 1, 1]
-            dx += point[2] * (1/sigma) * (xIdx-point[0])*Math.exp(-(Math.pow(xIdx-point[0],2)+Math.pow(yIdx-point[1],2))/sigma)
-            dy += point[3] * (1/sigma) * (yIdx-point[1]) * (Math.exp(-(Math.pow(xIdx-point[0],2)+Math.pow(yIdx-point[1],2))/sigma))
-        }
-
-        return [dx, dy]
-
-    }
-
-    maxMesh(sigma){
-        let gradmax = [];
+    constructMesh(sigma,idx){
+        let grad_new = [];
         for(let x=0;x<=1;x+=0.025){
             for(let y=0;y<=1;y+=0.05){
-                let dx = (1/sigma) * (x-0.5) * Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma);
-                let dy = (1/sigma) * (y-0.5) * (Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma));
-                gradmax.push([x,y,dx,dy]);
+                let dx = idx[0]*(1/sigma) * (x-0.5) * Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma);
+                let dy = idx[1]*(1/sigma) * (y-0.5) * (Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma));
+                grad_new.push([x,y,dx,dy]);
             }
         }
-        gradmax.sort(function(x,y){
+        grad_new.sort(function(x,y){
             return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
         })
-        console.log(gradmax)
-        return gradmax;
+        console.log(grad_new)
+        return grad_new;
 
     }
 
-    assginLocation(cp, cpLocal){
-        console.log("cp",cp)
-        let xLine = {1:[{"original":[1,1],"local":[1,1]}, {"original":[1,0],"local":[1,0]}], 0:[{"original":[0,0],"local":[0,0]}, {"original":[0,1],"local":[0,1]}]}; // data structure: {idx:[{pt1(local/original)}, {pt2}, {pt3}]}
-        let yLine = {1:[{"original":[1,1],"local":[1,1]}, {"original":[0,1],"local":[0,1]}], 0:[{"original":[0,0],"local":[0,0]}, {"original":[1,0],"local":[1,0]}]};
-
-        for(let i=0;i<cp.length;i++){
-            let cpLocal_i = this.findMinPt(cp[i],cpLocal);
-            if(xLine[cp[i][0]]===undefined){
-                xLine[cp[i][0]] = [{"original":[cp[i][0],1], "local":[cpLocal_i[0],1]}, {"original":[cp[i][0],0], "local":[cpLocal_i[0],0]}]; // add terminal point
-                yLine[1].push({"original":[cp[i][0],1], "local":[cpLocal_i[0],1]});
-                yLine[0].push({"original":[cp[i][0],0], "local":[cpLocal_i[0],0]})
-            }
-            if(yLine[cp[i][1]]===undefined){
-                yLine[cp[i][1]] = [{"original":[1,cp[i][1]], "local":[1,cpLocal_i[1]]},{"original":[0,cp[i][1]], "local":[0,cpLocal_i[1]]}];
-                xLine[1].push({"original":[1,cp[i][1]], "local":[1,cpLocal_i[1]]});
-                xLine[0].push({"original":[0,cp[i][1]], "local":[0,cpLocal_i[1]]})
-            }
-            xLine[cp[i][0]].push({"original":cp[i], "local":cpLocal_i});
-            yLine[cp[i][1]].push({"original":cp[i], "local":cpLocal_i});
-        }
-        console.log("xline",xLine)
-        console.log("yline",yLine)
-        // map vector values
-        let grad_new = [];
-        let xyVal = [];
-        let xVal = Object.keys(xLine).map(Number).sort();
-        let yVal = Object.keys(yLine).map(Number).sort();
-
-        let xbp = {}; // begin point
-        let xbp_local = {};
-        yVal.forEach(y=>{ // horizontal line at y value = y
-            xbp[y] = 0;
-            xbp_local[y] = 0;
-        })
-        let ybp = {};
-        let ybp_local = {};
-        xVal.forEach(x=>{ // vertical line at x value = x
-            ybp[x] = 0;
-            ybp_local[x] = 0;
-        })
-
-        for(let i=0;i<xVal.length;i++){
-            let xOriginal = [];
-            let xLocal = [];
-            xLine[xVal[i]].forEach(e=>{
-                xOriginal.push(e.original);
-                xLocal.push(e.local);
-            })
-            xOriginal.sort(function(x,y){
-                return d3.ascending(x[1],y[1])
-            })
-            xLocal.sort(function(x,y){
-                return d3.ascending(x[1],y[1])
-            })
-            for(let j=0;j<yVal.length;j++){
-                // console.log("i,j",i,j);
-                let yOriginal = [];
-                let yLocal = [];
-                yLine[yVal[j]].forEach(e=>{
-                    yOriginal.push(e.original);
-                    yLocal.push(e.local);
-                })
-                yOriginal.sort(function(x,y){
-                    return d3.ascending(x[0],y[0]);
-                })
-                yLocal.sort(function(x,y){
-                    return d3.ascending(x[0],y[0])
-                })
-                let inter = xOriginal.filter(function(v){
-                    let joint = [];
-                    yOriginal.forEach(e=>{
-                        joint.push(e.join());
-                    })
-                    return joint.indexOf(v.join()) > -1
-                });
-                if(inter.length>0){
-                    let pt = inter[0]; // e.g. pt = [0.25, 0.5, 1, 1];
-                    let pt_local = xLocal.filter(function(v){
-                        let joint = [];
-                        yLocal.forEach(e=>{
-                            joint.push(e.join());
-                        })
-                        return joint.indexOf(v.join()) > -1
-                    })[0];
-                    // console.log("intersection",pt, pt_local)
-                    // console.log("xbp",xbp)
-                    // console.log("xbp_local", xbp_local)
-                    // console.log("ybp",ybp)
-                    // console.log("ybp_local", ybp_local)
-                    let xIdx = xbp[pt[1]];
-                    let xIdx_local = xbp_local[pt[1]];
-                    let yIdx = ybp[pt[0]];
-                    let yIdx_local = ybp_local[pt[0]];
-                    let xStep_local = (pt_local[0] - xIdx_local)/(pt[0] - xIdx)*0.025
-                    let yStep_local = (pt_local[1] - yIdx_local)/(pt[1] - yIdx)*0.05
-                    // console.log("xidx, yidx", xIdx, yIdx)
-                    // console.log("xidx loc, yidx loc", xIdx_local, yIdx_local)
-                    for(let m=xIdx;m<pt[0];m+=0.025){
-                        for(let n=yIdx;n<pt[1];n+=0.05){
-                            m = Math.round(m*1000)/1000;
-                            n = Math.round(n*1000)/1000;
-                            if(xyVal.indexOf([m, n].join())===-1){
-                                let currentGrad = this.gradF(cp, xIdx_local, yIdx_local, this.sigma);
-                                // console.log("grad",xIdx_local, yIdx_local,currentGrad)
-                                currentGrad.push(m);
-                                currentGrad.push(n);
-                                grad_new.push(currentGrad);
-                                xyVal.push([m, n].join());
-                            }
-                            
-                            yIdx_local += yStep_local;
-                        }
-                        xIdx_local += xStep_local;
-                        yIdx_local = ybp_local[pt[0]];
-                    }
-                    xbp[pt[1]] = pt[0]
-                    xbp_local[pt[1]] = pt_local[0]
-                    ybp[pt[0]] = pt[1];
-                    ybp_local[pt[0]] = pt_local[1];
-                }
-            }
-        }
-
-        grad_new.sort(function(x,y){
-            return d3.ascending(x[2],y[2]) || d3.ascending(x[3],y[3])
-        })
-        // console.log("grad",grad_new)
-        return grad_new
-    }
-
-    findV(ptt, grad){
-        let xIdx = ptt[0];
-        let yIdx = ptt[1];
-        
-        let x1 = Math.floor(xIdx/0.025);
+    findV(x,y, grad){
+        let x1 = Math.floor(x/0.025);
         let x2 = x1+1;
-        let y1 = Math.floor(yIdx/0.05);
+        let y1 = Math.floor(y/0.05);
         let y2 = y1+1;
 
         let triang = [grad[x1*20+y1], grad[x2*20+y1], grad[x2*20+y2]];
@@ -348,9 +228,7 @@ class anim{
 
     animation(type){
         this.clearCanvas()
-        this.cp_local = this.findLocations(this.cp,this.sigma);
-        this.edges = this.findEdges(this.cp);
-        this.grad = this.assginLocation(this.cp, this.cp_local);
+        // this.edges = this.findEdges(this.cp);
             
         let N = 60;
         var dt = 0.001;
@@ -404,17 +282,10 @@ class anim{
             g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba
             
             
-            // if(type==="original1"){
-            //     // that.clearCanvas()
-            //     that.drawCellBound(that.cellBound);
-            //     that.addnodes(that.cp_local);
-            //     that.edges = that.findEdges(that.cp_local);
-            //     that.addedges(that.edges)
-            // } else {
-            //     that.drawCellBound(that.cellBound);
-            //     that.addnodes(that.cp);
-            //     that.addedges(that.edges)
-            // }
+          
+            // that.drawCellBound(that.cellBound);
+            // that.addnodes(that.cp);
+            // that.addedges(that.edges)
 
             that.drawAnnotation();
 
@@ -427,7 +298,20 @@ class anim{
                     // dr = that.gradF(that.cp, X[i],Y[i],0.1);
                     
                     // console.log(that.grad)
-                    dr = that.findV([X[i]+(0.5-that.cp[0][0]),Y[i]+(0.5-that.cp[0][1])],that.gradmax);
+                    let minCP = that.findMinPt([X[i],Y[i]],that.cp);
+                    if(minCP[2]===1&&minCP[3]===1){
+                        dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradmax)
+                    }
+                    else if(minCP[2]===-1&&minCP[3]===1){
+                        dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradsaddle1)
+                    }
+                    else if(minCP[2]===1&&minCP[3]===-1){
+                        dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradsaddle2)
+                    }
+                    else if(minCP[2]===-1&&minCP[3]===-1){
+                        dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradmin)
+                    }
+                    // + that.findV([X[i]+(0.5-that.cp[2][0]),Y[i]+(0.5-that.cp[2][1])],that.gradmax);
 
                     // if(X_new>=0 && X_new<=0.5 && Y_new>=0 && Y_new <= 0.5){
                     //     X_new = X_new*(that.cellBound.upper[0]+(0.5-that.cellBound.upper[0])*Y_new/0.5)/0.5
@@ -443,12 +327,6 @@ class anim{
                     // }
 
                     
-                }
-                else if(type === "original1"){ 
-                    dr = that.gradF(that.cp, X[i],Y[i],0.1);
-                    // that.calVec(X[i],Y[i])
-                    // console.log(that.grad)
-                    // dr = that.findV([Math.max(X[i],0),Math.max(Y[i],0)],that.grad);
                 }
                 else if (type === "amove"){
                     // dr = that.gradF(that.cp, X[i], Y[i],0.1);
@@ -539,16 +417,15 @@ class anim{
         }  
     }
 
-    calDist(loc1, loc2){
-        let dist = Math.sqrt(Math.pow(loc1[0]-loc2[0],2)+Math.pow(loc1[1]-loc2[1],2))
-        return dist
-    }
-
     findMinPt(pt0, pts){
-        let dist = this.calDist(pt0,pts[0]);
+        function calDist(loc1, loc2){
+            let dist = Math.sqrt(Math.pow(loc1[0]-loc2[0],2)+Math.pow(loc1[1]-loc2[1],2))
+            return dist
+        }
+        let dist = calDist(pt0,pts[0]);
         let minPt = pts[0];
         for(let i=1;i<pts.length;i++){
-            let disti = this.calDist(pt0,pts[i]);
+            let disti = calDist(pt0,pts[i]);
             if(disti < dist){
                 dist = disti;
                 minPt = pts[i]
@@ -732,61 +609,6 @@ class anim{
             }
         }
         return edges;
-    }
-
-    findLocations(cp,sigma){        
-        let that = this;
-        let xyLoc = [];
-        let cp_local = [];
-        // let xLoc = [];
-        // console.log(JSON.stringify(xyLoc).indexOf(JSON.stringify([-1,1])))
-        // this.xp.forEach(x=>xGrad.push(that.gradF(cp, x,0.5,sigma)[0]))
-        // this.yp.forEach(y=>yGrad.push(that.gradF(cp, 0.5,y,sigma)[0]))
-        for(let i=1;i<this.xp.length-1;i++){
-            for(let j=1;j<this.yp.length-1;j++){ // no boundary point will be considered (boundary is the minimum)
-                let point = [this.xp[i],this.yp[j]]
-                let point_10 =  [this.xp[i-1],this.yp[j]]
-                let point0_1 = [this.xp[i],this.yp[j-1]]
-                let point10 = [this.xp[i+1],this.yp[j]]
-                let point01 = [this.xp[i],this.yp[j+1]]
-                let g0 = this.gradF(cp, point[0], point[1], sigma)
-                let g_10 = this.gradF(cp, point_10[0], point_10[1], sigma)
-                let g0_1 = this.gradF(cp, point0_1[0], point0_1[1], sigma)
-                let g10 = this.gradF(cp, point10[0], point10[1], sigma)
-                let g01 = this.gradF(cp, point01[0], point01[1], sigma)
-                if((Math.abs(g0[0])-Math.abs(g_10[0])<=0)&&(Math.abs(g0[1])-Math.abs(g0_1[1])<=0)&&(Math.abs(g0[0])-Math.abs(g10[0])<=0)&&(Math.abs(g0[1])-Math.abs(g01[1])<=0)){ // a critical point is where the gradiant is local minimum
-                    let f0 = this.F(cp, point[0], point[1], sigma)
-                    let f_10 = this.F(cp, point_10[0], point_10[1], sigma)
-                    let f0_1 = this.F(cp, point0_1[0], point0_1[1], sigma)
-                    let f10 = this.F(cp, point10[0], point10[1], sigma)
-                    let f01 = this.F(cp, point01[0], point01[1], sigma)
-                    // console.log(f0,f_10,f0_1,f10,f01)
-                    
-                    if((f0[0]>=f_10[0])&&(f0[1]>=f0_1[1])&&(f0[0]>=f10[0])&&(f0[1]>=f01[1])){
-                        
-                        cp_local.push([this.xp[i],this.yp[j],1,1])
-                    }
-                    else if((f0[0]<=f_10[0])&&(f0[1]<=f0_1[1])&&(f0[0]<=f10[0])&&(f0[1]<=f01[1])){
-                        cp_local.push([this.xp[i],this.yp[j],-1,-1])
-                    }
-                    else if((f0[0]<=f_10[0])&&(f0[1]>=f0_1[1])&&(f0[0]<=f10[0])&&(f0[1]>=f01[1])){
-                        cp_local.push([this.xp[i],this.yp[j],-1,1])
-                    }
-                    else if((f0[0]>=f_10[0])&&(f0[1]<=f0_1[1])&&(f0[0]>=f10[0])&&(f0[1]<=f01[1])){
-                        cp_local.push([this.xp[i],this.yp[j],1,-1])
-                    }
-                    
-                    // console.log(point, point_10, point0_1, point10, point01)
-                    // console.log(g0,g_10,g0_1,g10,g01)
-                    // cp_max.push(point)
-                }
-
-            }
-        }
-        let cp_local_new = [];
-        cp_local.forEach(e=>cp_local_new.push([e[0], e[1], e[2],e[3]]))
-        // console.log(this.xMap(cp_max[0][0]),this.yMap(cp_max[0][1]))
-        return cp_local_new
     }
 
     clearCanvas(){  
