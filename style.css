@@ -9,12 +9,28 @@
 .minedge{
     stroke: white;
     stroke-width: 2;
-
+    fill: none;
 }
 
 .maxedge{
     stroke: white;
     stroke-width: 2;
     stroke-dasharray: 5,5; 
+    fill: none;
+}
 
+.connNode{
+    r: 6;
+    fill: grey;
+    stroke: yellow;
+    stroke-width: 2;
+}
+
+.frame{
+    stroke: #1E90FF;
+    stroke-width: 12;
+}
+
+.mouseover{
+    r: 10;
 }
