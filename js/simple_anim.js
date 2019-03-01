@@ -330,18 +330,15 @@ class anim{
         for(let i=0;i<this.edges.length;i++){
             let ed = this.edges[i];
             let xRange = Math.abs(ed[2][0]-ed[0][0]);
+            let yRange = Math.abs(ed[2][1]-ed[0][1]);
             if(xRange===0){
-            // if(i===3){
                 // now only deal with vertical lines
                 if(Math.min(ed[0][1],ed[2][1])<=y&&y<=Math.max(ed[0][1],ed[2][1])){ // only these points need to change
                     let edMap = this.edgeMapper["p"+i];
                     let ySeg = Math.abs(ed[2][1]-ed[0][1])/this.numSeg;
                     let pIdx = Math.floor((y-Math.min(ed[0][1],ed[2][1]))/ySeg);
-                    // console.log(pIdx)
                     let pt0 = edMap[pIdx];
                     let pt1 = edMap[Math.min(pIdx+1,edMap.length-1)];
-                    // console.log("pt0",pt0)
-                    // console.log("pt1",pt1)
                     let xOrigin = ed[0][0]; //the x value before change curve
                     let x_line_old = xOrigin;
                     // console.log("y",pt0.y_new, pt1.y_new)
@@ -355,8 +352,35 @@ class anim{
 
                     } else { 
                         x_new = 1-(1-x)/(1-x_line_old)*(1-x_line_new);
+                    } 
+                }
+            }
+            if(yRange===0){
+                // horizontal lines
+                if(Math.min(ed[0][0],ed[2][0])<=x&&x<=Math.max(ed[0][0],ed[2][0])){
+                    let edMap = this.edgeMapper["p"+i];
+                    let xSeg = Math.abs(ed[2][0]-ed[0][0])/this.numSeg;
+                    let pIdx = Math.floor((x-Math.min(ed[0][0],ed[2][0]))/xSeg);
+                    let pt0 = edMap[pIdx];
+                    let pt1 = edMap[Math.min(pIdx+1,edMap.length-1)];
+                    let yOrigin = ed[0][1]; //the y value before change curve
+                    let y_line_old = yOrigin;
+                    // console.log("y",pt0.y_new, pt1.y_new)
+                    let y_line_new = pt1.y_new;
+                    if(pt1.x_new!=pt0.x_new){
+                        y_line_new = (pt1.x_new-x)/(pt1.x_new-pt0.x_new)*pt0.y_new+(x-pt0.x_new)/(pt1.x_new-pt0.x_new)*pt1.y_new;
                     }
-                    
+                    if(y<=yOrigin){
+                        // points on left
+                        y_new = y * y_line_new / y_line_old;
+
+                    } else { 
+                        y_new = 1-(1-y)/(1-y_line_old)*(1-y_line_new);
+                    } 
+
+
+
+
                 }
 
             } 
