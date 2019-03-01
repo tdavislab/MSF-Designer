@@ -362,60 +362,6 @@ class anim{
             } 
         }
 
-        // for(let i=2;i<this.edges.length;i++){
-        //     let ed = this.edges[i];
-        //     let edMap = this.edgeMapper["p"+i];
-        //     let xSeg = Math.abs(ed[2][0]-ed[0][0])/this.numSeg;
-        //     let ySeg = Math.abs(ed[2][1]-ed[0][1])/this.numSeg;
-        //     // console.log(ySeg)
-            
-        //     if((Math.min(ed[0][0],ed[2][0])<=x&&x<=Math.max(ed[0][0],ed[2][0]))||(Math.min(ed[0][1],ed[2][1])<=y&&y<=Math.max(ed[0][1],ed[2][1]))){
-        //         let xIdx = 0;
-        //         let yIdx = 0;
-        //         if(xSeg!=0){
-        //             xIdx = Math.floor((x-Math.min(ed[0][0],ed[2][0]))/xSeg);
-        //         }
-        //         if(ySeg!=0){
-        //             // console.log("i am here")
-        //             yIdx = Math.floor((y-Math.min(ed[0][1],ed[2][1]))/ySeg);
-        //         }
-        //         // console.log(xIdx,yIdx)
-        //         let pIdx = Math.max(xIdx,yIdx)
-        //         // console.log(xSeg,ySeg)
-        //         let pt0 = edMap[pIdx];
-        //         let pt1 = edMap[Math.min(pIdx+1,this.numSeg-1)];
-        //         let xChange = 0;
-        //         let yChange = 0;
-        //         if (pt0.y-pt1.y != 0){
-        //             // console.log("xchange")
-        //             xChange = (Math.abs(pt0.y-y)/Math.abs(pt0.y-pt1.y))*(pt0.x_new-pt0.x)+(Math.abs(pt1.y-y)/Math.abs(pt0.y-pt1.y))*(pt1.x_new-pt1.x)
-        //         }
-        //         if (pt0.x-pt1.x != 0){
-        //             // console.log("ychange")
-        //             yChange = (Math.abs(pt0.x-x)/Math.abs(pt0.x-pt1.x))*(pt0.y_new-pt0.y)+(Math.abs(pt1.x-x)/Math.abs(pt0.x-pt1.x))*(pt1.y_new-pt1.y)
-        //         }
-        //         if(x<=0.5){
-        //             x_new += xChange;
-        //             y_new += yChange;
-
-        //         } else { 
-        //             x_new=0;
-        //             y_new = 0;
-        //         }
-            
-                
-        //         // d3.select("#currentPoint")
-        //         //     .attr("cx",this.xMap(x))
-        //         //     .attr("cy",this.yMap(y))
-        //         // d3.select("#currentNewPoint")
-        //         //     .attr("cx",this.xMap(x_new))
-        //         //     .attr("cy",this.yMap(y_new))
-
-
-
-        //     }
-        // }
-        
         
         return [x_new, y_new];
 
