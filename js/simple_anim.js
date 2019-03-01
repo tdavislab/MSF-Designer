@@ -11,20 +11,38 @@ class anim{
             .attr("id","pointgroup");
         this.frameGroup = this.svg.append("g")
             .attr("id","framegroup");
+        this.checkGroup= this.svg.append("g")
+            .attr("id", "checkgroup")
         this.connNodesGroup = this.svg.append("g")
             .attr("id","connNodesgroup");
+        this.currentPoint = this.svg.append("circle")
+            .attr("id","currentPoint")
+            .attr("r",10)
+            .attr("fill", "yellow")
+        this.currentNewPoint = this.svg.append("circle")
+            .attr("id","currentNewPoint")
+            .attr("r",10)
+            .attr("fill", "lightblue")
+        
         
 
         this.drawFlag = true;
-        this.cp = [[0.25,0.5,1,1],[0.75,0.5,1,1],[0.5,0.5,-1,1]];
+        this.step = 0.05;
+        this.numSeg = 10;
+        this.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]];
         // this.cp = [[0.5,0.5,1,1]];
         this.sigma = 0.1;
         this.edges = this.findEdges(this.cp);
         this.connNodes = this.findConnNodes(this.edges);
-        this.frames = [[0,0,0,1],[0,1,1,1],[0,0,1,0],[1,0,1,1,]];
+        this.edgeMapper = this.initializeEdgeMapper(this.edges);
+        this.frames = [[0,0,0,1],[0,1,1,1],[0,0,1,0],[1,0,1,1,]]; //used for drawing frames
+        
+
+        console.log(this.edges)
+        console.log(this.edgeMapper)
 
         //// curve ////
-        let N = 60; // 25^2 curves
+        let N = 45; // 25^2 curves
         // discretize the vfield coords
         this.xp = d3.range(N).map(
                 function (i) {
@@ -51,26 +69,8 @@ class anim{
 
 
         this.cellBound = {"upper":[0.5,0], "lower":[0.5,1]};
-        console.log(this.edges)
         this.animation("original");
        
-
-        // this.adbound = false;
-        // d3.select("#adbound")
-        //     .on("click",()=>{
-        //         if(this.adbound === false){
-        //             d3.select("#adbound")
-        //                 .attr("class","btn btn-primary")
-        //                 .attr("value","Finish Adjustment")
-        //             this.adbound = true;
-        //             this.adjustBound();
-        //         } else { 
-        //             d3.select("#adbound")
-        //                 .attr("class","btn btn-secondary")
-        //                 .attr("value","Adjust Bound")
-        //             this.adbound = false;
-        //         }
-        //     })
   
         this.gradmax = this.constructMesh(this.sigma,[1,1])
         this.gradsaddle1 = this.constructMesh(this.sigma, [-1,1])
@@ -79,6 +79,10 @@ class anim{
 
         this.apType = "";
         this.amType = "";
+
+        // this.mapEdges(0)
+
+        
         
     }
 
@@ -243,9 +247,71 @@ class anim{
                 d3.select(this).attr("cx", d[0][0] = that.xMapReverse(d3.event.x)).attr("cy", d[0][1] = that.yMapReverse(d3.event.y));
                 that.edges[d[1]][1] = [that.xMapReverse(d3.event.x), that.yMapReverse(d3.event.y)]
             } 
-            that.adjustBound(that.xMapReverse(d3.event.x), that.yMapReverse(d3.event.y)); 
+            let pathid = "p"+d[1];
+            console.log("pathid",pathid);
+            let totalLength = d3.select("#"+pathid).node().getTotalLength();
+            let stepLength = totalLength/that.numSeg;
+            console.log("steplength",stepLength)
+            let ed = that.edges[d[1]];
+            let newPoints = [];
+            for(let i=0;i<that.numSeg;i++){
+                let pt = d3.select("#"+pathid).node().getPointAtLength(i*stepLength)
+                if((ed[0][0]>ed[2][0])||(ed[0][1]>ed[2][1])){
+                    pt = d3.select("#"+pathid).node().getPointAtLength((that.numSeg-i)*stepLength)
+                }
+                newPoints.push([that.xMapReverse(pt.x), that.yMapReverse(pt.y)]);
+            }
+            that.mapEdges(pathid, newPoints);
+
+            // let checkCircles = that.checkGroup.selectAll("circle").data(newPoints)
+            // checkCircles.exit().remove();
+            // let newcheckCircles = checkCircles.enter().append("circle");
+            // checkCircles = newcheckCircles.merge(checkCircles);
+            // checkCircles
+            //     .attr("cx",(d)=>that.xMap(d[0]))
+            //     .attr("cy",(d)=>that.yMap(d[1]))
+            //     .attr("r",10)
+            //     .attr("fill","orange")
+
+            // d3.select("#checkcircle")
+            //     .attr("cx",tan.x)
+            //     .attr("cy",tan.y)
 
         }
+    }
+
+    initializeEdgeMapper(edges){
+        // console.log("i am here")
+        let edgeMapper = {};
+        for(let i=0;i<edges.length;i++){
+            edgeMapper["p"+i] = [];
+            let ed = edges[i].slice(0,3);
+            ed.sort(function(x,y){
+                return d3.ascending(x[0],y[0]) || d3.ascending(x[2],y[2]);
+            })
+            console.log("ed",ed)
+            let xRange = ed[2][0]-ed[0][0];
+            let yRange = ed[2][1]-ed[0][1];
+            for(let j=0;j<this.numSeg;j++){
+                edgeMapper["p"+i].push({"x":ed[0][0]+j*xRange/this.numSeg, "y":ed[0][1]+j*yRange/this.numSeg, "x_new":ed[0][0]+j*xRange/this.numSeg, "y_new":ed[0][1]+j*yRange/this.numSeg});
+            }
+            
+        }
+        return edgeMapper;
+    }
+
+    mapEdges(edgeid, newPoints){
+        for(let i=0;i<this.numSeg;i++){
+            // let pt = this.findMinPt([this.edgeMapper[edgeid][i].x, this.edgeMapper[edgeid][i].y], newPoints);
+            let pt = newPoints[i]
+            // console.log("i, pt",pt)
+            this.edgeMapper[edgeid][i].x_new = pt[0];
+            this.edgeMapper[edgeid][i].y_new = pt[1];
+        }
+        // this.edgeMapper[edgeid]
+        // console.log(newPoints)
+        
+
     }
 
     adjustBound(x,y){
@@ -255,46 +321,124 @@ class anim{
     }
 
     
+    adjustFlow(x,y){
+        // map the original point to a new location when the boundary geometry is changed
+        let x_new = x;
+        let y_new = y;
 
-    constructMesh(sigma,idx){
-        let grad_new = [];
-        for(let x=0;x<=1;x+=0.025){
-            for(let y=0;y<=1;y+=0.05){
-                let dx = idx[0]*(1/sigma) * (x-0.5) * Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma);
-                let dy = idx[1]*(1/sigma) * (y-0.5) * (Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma));
-                grad_new.push([x,y,dx,dy]);
-            }
+        // now only deal with vertical lines
+        for(let i=0;i<this.edges.length;i++){
+            let ed = this.edges[i];
+            let xRange = Math.abs(ed[2][0]-ed[0][0]);
+            if(xRange===0){
+            // if(i===3){
+                // now only deal with vertical lines
+                if(Math.min(ed[0][1],ed[2][1])<=y&&y<=Math.max(ed[0][1],ed[2][1])){ // only these points need to change
+                    let edMap = this.edgeMapper["p"+i];
+                    let ySeg = Math.abs(ed[2][1]-ed[0][1])/this.numSeg;
+                    let pIdx = Math.floor((y-Math.min(ed[0][1],ed[2][1]))/ySeg);
+                    // console.log(pIdx)
+                    let pt0 = edMap[pIdx];
+                    let pt1 = edMap[Math.min(pIdx+1,edMap.length-1)];
+                    // console.log("pt0",pt0)
+                    // console.log("pt1",pt1)
+                    let xOrigin = ed[0][0]; //the x value before change curve
+                    let x_line_old = xOrigin;
+                    // console.log("y",pt0.y_new, pt1.y_new)
+                    let x_line_new = pt1.x_new;
+                    if(pt1.y_new!=pt0.y_new){
+                        x_line_new = (pt1.y_new-y)/(pt1.y_new-pt0.y_new)*pt0.x_new+(y-pt0.y_new)/(pt1.y_new-pt0.y_new)*pt1.x_new;
+                    }
+                    if(x<=xOrigin){
+                        // points on left
+                        x_new = x * x_line_new / x_line_old;
+
+                    } else { 
+                        x_new = 1-(1-x)/(1-x_line_old)*(1-x_line_new);
+                    }
+                    
+                }
+
+            } 
         }
-        grad_new.sort(function(x,y){
-            return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
-        })
-        return grad_new;
+
+        // for(let i=2;i<this.edges.length;i++){
+        //     let ed = this.edges[i];
+        //     let edMap = this.edgeMapper["p"+i];
+        //     let xSeg = Math.abs(ed[2][0]-ed[0][0])/this.numSeg;
+        //     let ySeg = Math.abs(ed[2][1]-ed[0][1])/this.numSeg;
+        //     // console.log(ySeg)
+            
+        //     if((Math.min(ed[0][0],ed[2][0])<=x&&x<=Math.max(ed[0][0],ed[2][0]))||(Math.min(ed[0][1],ed[2][1])<=y&&y<=Math.max(ed[0][1],ed[2][1]))){
+        //         let xIdx = 0;
+        //         let yIdx = 0;
+        //         if(xSeg!=0){
+        //             xIdx = Math.floor((x-Math.min(ed[0][0],ed[2][0]))/xSeg);
+        //         }
+        //         if(ySeg!=0){
+        //             // console.log("i am here")
+        //             yIdx = Math.floor((y-Math.min(ed[0][1],ed[2][1]))/ySeg);
+        //         }
+        //         // console.log(xIdx,yIdx)
+        //         let pIdx = Math.max(xIdx,yIdx)
+        //         // console.log(xSeg,ySeg)
+        //         let pt0 = edMap[pIdx];
+        //         let pt1 = edMap[Math.min(pIdx+1,this.numSeg-1)];
+        //         let xChange = 0;
+        //         let yChange = 0;
+        //         if (pt0.y-pt1.y != 0){
+        //             // console.log("xchange")
+        //             xChange = (Math.abs(pt0.y-y)/Math.abs(pt0.y-pt1.y))*(pt0.x_new-pt0.x)+(Math.abs(pt1.y-y)/Math.abs(pt0.y-pt1.y))*(pt1.x_new-pt1.x)
+        //         }
+        //         if (pt0.x-pt1.x != 0){
+        //             // console.log("ychange")
+        //             yChange = (Math.abs(pt0.x-x)/Math.abs(pt0.x-pt1.x))*(pt0.y_new-pt0.y)+(Math.abs(pt1.x-x)/Math.abs(pt0.x-pt1.x))*(pt1.y_new-pt1.y)
+        //         }
+        //         if(x<=0.5){
+        //             x_new += xChange;
+        //             y_new += yChange;
+
+        //         } else { 
+        //             x_new=0;
+        //             y_new = 0;
+        //         }
+            
+                
+        //         // d3.select("#currentPoint")
+        //         //     .attr("cx",this.xMap(x))
+        //         //     .attr("cy",this.yMap(y))
+        //         // d3.select("#currentNewPoint")
+        //         //     .attr("cx",this.xMap(x_new))
+        //         //     .attr("cy",this.yMap(y_new))
+
+
+
+        //     }
+        // }
+        
+        
+        return [x_new, y_new];
 
     }
 
-    findV(x,y, grad){
-        let x1 = Math.floor(x/0.025);
-        let x2 = x1+1;
-        let y1 = Math.floor(y/0.05);
-        let y2 = y1+1;
-
-        let triang = [grad[x1*20+y1], grad[x2*20+y1], grad[x2*20+y2]];
-
-        let ex_v = [0,0]
-        for(let i=0;i<3;i++){
-            if(typeof triang[i]!="undefined"){
-                ex_v[0] += 1/3*triang[i][2]
-                ex_v[1] += 1/3*triang[i][3]
-            }
+    chooseGrad(x,y){
+        // determine the mesh type (max/min/saddle point mesh) for a given point
+        // **** Now for fixed value ****
+        if(x<0.375){
+            return [this.cp[0],this.gradmax];
+        } else if(x>0.625){
+            return [this.cp[2],this.gradmax];
+        } else if(x>=0.375 && x<=0.625){
+            return [this.cp[1],this.gradsaddle1];
         }
-        return ex_v;
     }
+    
 
     animation(type){
         this.clearCanvas()
         // this.edges = this.findEdges(this.cp);
             
-        let N = 60;
+        let N = 45;
         var dt = 0.001;
         var X0 = [], Y0 = []; // to store initial starting locations
         var X  = [], Y  = []; // to store current point for each curve
@@ -352,32 +496,39 @@ class anim{
 
             that.drawAnnotation();
 
+            // d3.select("#checkcircle")
+            //     .attr("cx",that.xMap(0.5))
+            //     .attr("cy",that.yMap(0.15))
+
             
             for (let i=0; i<M; i++) { // draw a single timestep for every curve
                 let dr = [0,0];
-                let X_new = X[i];
-                let Y_new = Y[i];
+                let X_new = that.adjustFlow(X[i],Y[i])[0];
+                let Y_new = that.adjustFlow(X[i],Y[i])[1];
                 if(type === "original"){ 
                     // dr = that.gradF(that.cp, X[i],Y[i],0.1);
                     
                     // console.log(that.grad)
-                    let minCP = that.findMinPt([X[i],Y[i]],that.cp);
-                    if(minCP[2]===1&&minCP[3]===1){
-                        dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradmax)
-                    }
-                    else if(minCP[2]===-1&&minCP[3]===1){
-                        dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradsaddle1)
-                    }
-                    else if(minCP[2]===1&&minCP[3]===-1){
-                        dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradsaddle2)
-                    }
-                    else if(minCP[2]===-1&&minCP[3]===-1){
-                        dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradmin)
-                    }
+                    // let result = that.chooseGrad(X[i],Y[i]);
+                    // console.log(result)
+                    dr = that.findV(X[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][0]),Y[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][1]),that.chooseGrad(X[i],Y[i])[1])
+                    // let minCP = that.findMinPt([X[i],Y[i]],that.cp);
+                    // if(minCP[2]===1&&minCP[3]===1){
+                    //     dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradmax)
+                    // }
+                    // else if(minCP[2]===-1&&minCP[3]===1){
+                    //     dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradsaddle1)
+                    // }
+                    // else if(minCP[2]===1&&minCP[3]===-1){
+                    //     dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradsaddle2)
+                    // }
+                    // else if(minCP[2]===-1&&minCP[3]===-1){
+                    //     dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradmin)
+                    // }
 
-                    if(X_new>=0 && X_new<=0.5 && Y_new>=0 && Y_new <= 0.5){
-                        X_new = X_new*(that.cellBound.upper[0]+(0.5-that.cellBound.upper[0])*Y_new/0.5)/0.5
-                    }
+                    // if(X_new>=0 && X_new<=0.5 && Y_new>=0 && Y_new <= 0.5){
+                    //     X_new = X_new*(that.cellBound.upper[0]+(0.5-that.cellBound.upper[0])*Y_new/0.5)/0.5
+                    // }
                     // else if(X_new>0.5 && X_new<=1 && Y_new>=0 && Y_new <= 0.5){
                     //     X_new = 1-(1-X_new)*((1-2*Y_new)*(0.5-that.cellBound.upper[0])+0.5)/0.5
                     // }
@@ -390,23 +541,13 @@ class anim{
 
                     
                 }
-                else if (type === "amove"){
-                    // dr = that.gradF(that.cp, X[i], Y[i],0.1);
-                    dr = that.findV([Math.max(X[i],0),Math.max(Y[i],0)],that.grad);
-                }
-                else if (type === "bmove"){
-                    dr = that.gradF(that.cp, X[i], Y[i],0.05);
-                    // dr = that.findV([Math.max(X[i],0),Math.max(Y[i],0)],that.grad);
-                }
-                else if (type === "cmove"){
-                    dr = that.gradF(that.cp,X[i], Y[i],0.05);
-                }
 
                 g.setLineDash([1, 0])
                 g.beginPath();
-                g.moveTo(that.xMap(X_new), that.yMap(Y[i])); // the start point of the path
-                g.lineTo(that.xMap(X_new+dr[0]*dt), that.yMap(Y[i]+=dr[1]*dt)); // the end point
-                X[i]+=dr[0]*dt
+                g.moveTo(that.xMap(X_new), that.yMap(Y_new)); // the start point of the path
+                g.lineTo(that.xMap(X_new+dr[0]*dt), that.yMap(Y_new+dr[1]*dt)); // the end point
+                X[i]+=dr[0]*dt;
+                Y[i]+=dr[1]*dt;
                 g.lineWidth = 0.7;
                 g.strokeStyle = "#FF8000";
                 g.stroke(); // final draw command
@@ -497,41 +638,24 @@ class anim{
     }
 
     addedges(){
-        // let edges = this.edgeGroup.selectAll("line").data(this.edges);
-        // edges.exit().remove();
-        // let newedges = edges.enter().append("line");
-        // edges = newedges.merge(edges);
-        // edges
-        //     .attr("x1",(d)=>this.xMap(d[0][0]))
-        //     .attr("y1",(d)=>this.yMap(d[0][1]))
-        //     .attr("x2",(d)=>this.xMap(d[1][0]))
-        //     .attr("y2",(d)=>this.yMap(d[1][1]))
-        //     .attr("class",(d)=>d[2]+"edge") // minedge/maxedge
-        //     .attr("id",(d)=>d[0].join()+d[2]+d[1].join()) // saddle position + min/max + min/max position
-
         let curve0 = d3.line()
             .x(d=>this.xMap(d[0]))
             .y(d=>this.yMap(d[1]))
-            .curve(d3.curveCardinal);
-            // .curve(d3.curveCatmullRomOpen)
+            .curve(d3.curveCardinal.tension(0));
+            // .curve(d3.curveStep)
+        // console.log(curve0([[0.125,0.125],[0.25,0.25]]))
         let edges = this.edgeGroup.selectAll("path").data(this.edges);
         edges.exit().remove();
         let newedges = edges.enter().append("path");
         edges = newedges.merge(edges);
         edges
-            // .attr("d",(d)=>{
-            //     let p = "M "+this.xMap(d[0][0])+" "+this.yMap(d[0][1])
-            //     for(let i=1;i<d.length-1;i++){
-            //         p += " L "+this.xMap(d[i][0])+" "+this.yMap(d[i][1])
-            //     }
-            //     return p;
-            // })
             .attr("d",(d)=>{
                 let d_new = d.slice(0,3);
                 return curve0(d_new);
             })
             .attr("class",(d)=>d[3]+"edge") // minedge/maxedge
-            .attr("id",(d)=>d[0].join()+d[2]+d[1].join()) // saddle position + min/max + min/max position
+            // .attr("id",(d)=>"p"+d[0].join()+d[3]+d[2].join()) // saddle position + min/max + min/max position
+            .attr("id",(d,i)=>"p"+i)
             .style("fill", "none")
             .style("stroke", "white")
             .style("stroke-width",2)
@@ -540,8 +664,6 @@ class anim{
                     return "5,5";
                 } else {return "";}
             })
-            // .interpolate("cardinal")
-
     }
 
     findEdges(cp){
@@ -612,13 +734,45 @@ class anim{
                     // node: [position, corresponding index in edges]
                 } 
             }
-            // let px = (edges[i][0][0] + edges[i][1][0])/2 // in the middle of two end points
-            // let py = (edges[i][0][1] + edges[i][1][1])/2
             connNodes.push([edges[i][1],i]);
         }
         console.log(connNodes)
         return connNodes;
+    }
 
+    constructMesh(sigma,idx){
+        let grad_new = [];
+        for(let x=0;x<=1;x+=this.step){
+            for(let y=0;y<=1;y+=this.step){
+                let dx = idx[0]*(1/sigma) * (x-0.5) * Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma);
+                let dy = idx[1]*(1/sigma) * (y-0.5) * (Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma));
+                grad_new.push([x,y,dx,dy]);
+            }
+        }
+        grad_new.sort(function(x,y){
+            return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
+        })
+        return grad_new;
+
+    }
+
+    findV(x,y, grad){
+        // Find the vector value for the original point
+        let x1Idx = Math.floor(x/this.step);
+        let x2Idx = x1Idx+1;
+        let y1Idx = Math.floor(y/this.step);
+        let y2Idx = y1Idx+1;
+
+        let triang = [grad[x1Idx/this.step+y1Idx], grad[x2Idx/this.step+y1Idx], grad[x2Idx/this.step+y2Idx]];
+
+        let ex_v = [0,0]
+        for(let i=0;i<3;i++){
+            if(typeof triang[i]!="undefined"){
+                ex_v[0] += 1/3*triang[i][2]
+                ex_v[1] += 1/3*triang[i][3]
+            }
+        }
+        return ex_v;
     }
 
     clearCanvas(){  
