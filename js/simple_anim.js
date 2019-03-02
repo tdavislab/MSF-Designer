@@ -29,8 +29,8 @@ class anim{
         this.drawFlag = true;
         this.step = 0.05;
         this.numSeg = 10;
-        // this.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]];
-        this.cp = [[0.5,0.5,1,1]];
+        this.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]];
+        // this.cp = [[0.5,0.5,1,1]];
         this.sigma = 0.1;
         this.edges = this.findEdges(this.cp);
         this.connNodes = this.findConnNodes(this.edges);
