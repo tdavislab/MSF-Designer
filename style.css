@@ -1,10 +1,6 @@
-/* html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, svg, canvas {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font: 1em mplus-2p-light-sub,Helvetica,arial,freesans,clean,sans-serif;
-    -webkit-font-smoothing: subpixel-antialiased;
-} */
+* {
+    font-family: 'Roboto', sans-serif;
+}
 
 .minedge{
     stroke: white;
@@ -20,17 +16,36 @@
 }
 
 .connNode{
-    r: 6;
+    r: 8;
     fill: grey;
     stroke: yellow;
-    stroke-width: 2;
+    stroke-width: 4;
 }
 
 .frame{
-    stroke: #1E90FF;
-    stroke-width: 12;
+    /* stroke: #1E90FF; */
+    stroke: rgb(44,123,246);
+    stroke-width: 20;
 }
 
 .mouseover{
     r: 10;
+}
+
+circle.max{
+    fill: rgb(234,85,41);
+    stroke: white;
+    stroke-width: 3;
+}
+
+circle.saddle{
+    fill: rgb(82,163,80);
+    stroke: white;
+    stroke-width: 3;
+}
+
+circle.min{
+    fill: rgb(44,123,246);
+    stroke: white;
+    stroke-width: 3;
 }

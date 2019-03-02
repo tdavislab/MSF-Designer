@@ -15,22 +15,22 @@ class anim{
             .attr("id", "checkgroup")
         this.connNodesGroup = this.svg.append("g")
             .attr("id","connNodesgroup");
-        this.currentPoint = this.svg.append("circle")
-            .attr("id","currentPoint")
-            .attr("r",10)
-            .attr("fill", "yellow")
-        this.currentNewPoint = this.svg.append("circle")
-            .attr("id","currentNewPoint")
-            .attr("r",10)
-            .attr("fill", "lightblue")
+        // this.currentPoint = this.svg.append("circle")
+        //     .attr("id","currentPoint")
+        //     .attr("r",10)
+        //     .attr("fill", "yellow")
+        // this.currentNewPoint = this.svg.append("circle")
+        //     .attr("id","currentNewPoint")
+        //     .attr("r",10)
+        //     .attr("fill", "lightblue")
         
         
 
         this.drawFlag = true;
         this.step = 0.05;
         this.numSeg = 10;
-        this.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]];
-        // this.cp = [[0.5,0.5,1,1]];
+        // this.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]];
+        this.cp = [[0.5,0.5,1,1]];
         this.sigma = 0.1;
         this.edges = this.findEdges(this.cp);
         this.connNodes = this.findConnNodes(this.edges);
@@ -89,8 +89,8 @@ class anim{
     amovePlus(){
         d3.select("#annotation")
             .on("click", ()=>{
-                let x = Anim.xMapReverse(d3.event.x-10);
-                let y = Anim.yMapReverse(d3.event.y-100);
+                let x = Anim.xMapReverse(d3.event.x-80);
+                let y = Anim.yMapReverse(d3.event.y-120+7.5);
                 if(this.apType === "max"){
                     this.cp.push([x,y,1,1]);
                     this.apType = "saddle";
@@ -107,15 +107,17 @@ class anim{
                     this.apType="";
                     this.edges = this.findEdges(this.cp);
                 }
+                // this.initializeEdgeMapper(this.edges);
                 this.drawAnnotation();
                 this.addedges();
+
             })
     }
     amoveMinus(){
         d3.select("#annotation")
             .on("click", ()=>{
-                let x = Anim.xMapReverse(d3.event.x-10);
-                let y = Anim.yMapReverse(d3.event.y-100);
+                let x = Anim.xMapReverse(d3.event.x-80);
+                let y = Anim.yMapReverse(d3.event.y-120+7.5);
                 if(this.amType === "min"){
                     this.cp.push([x,y,-1,-1]);
                     this.amType = "saddle";
@@ -144,14 +146,14 @@ class anim{
         circles
             .attr("cx",(d)=>this.xMap(d[0]))
             .attr("cy",(d)=>this.yMap(d[1]))
-            .attr("r",10)
-            .attr("fill",(d)=>{
+            .attr("r",15)
+            .attr("class",(d)=>{
                 if(d[2]===1&&d[3]===1){
-                    return "red"
+                    return "max"
                 } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
-                    return "green"
+                    return "saddle"
                 } else if (d[2]===-1&&d[3]===-1){
-                    return "blue"
+                    return "min"
                 }
             })
             .call(d3.drag()
@@ -167,15 +169,28 @@ class anim{
               
         function dragged(d,i) {
             for(let j=0;j<that.edges.length;j++){
+                let ed = that.edges[j];
                 if(that.edges[j][0].join()===that.cp[i].slice(0,2).join()) {
                     that.edges[j][0] = [that.xMapReverse(d3.event.x),that.yMapReverse(d3.event.y)];
                 } else if (that.edges[j][2].join()===that.cp[i].slice(0,2).join()) {
                     that.edges[j][2] = [that.xMapReverse(d3.event.x),that.yMapReverse(d3.event.y)];
                 }
+                
+                // let totalLength = d3.select("#p"+j).node().getTotalLength();
+                // let stepLength = totalLength/that.numSeg;
+                // let newPoints = [];
+                // for(let k=0;k<that.numSeg;k++){
+                //     let pt = d3.select("#p"+j).node().getPointAtLength(k*stepLength)
+                //     if((ed[0][0]>ed[2][0])||(ed[0][1]>ed[2][1])){
+                //         pt = d3.select("#p"+j).node().getPointAtLength((that.numSeg-k)*stepLength)
+                //     }
+                //     newPoints.push([that.xMapReverse(pt.x), that.yMapReverse(pt.y)]);
+                // }
+                // that.mapEdges("p"+j, newPoints);
             }
             d3.select(this).attr("cx", d[0] = that.xMapReverse(d3.event.x)).attr("cy", d[1] = that.yMapReverse(d3.event.y));
             that.cp[i][0] = that.xMapReverse(d3.event.x);
-            that.cp[i][1] = that.yMapReverse(d3.event.y);            
+            that.cp[i][1] = that.yMapReverse(d3.event.y);        
             that.connNodes = that.findConnNodes(that.edges);
         }
               
@@ -273,10 +288,6 @@ class anim{
             //     .attr("r",10)
             //     .attr("fill","orange")
 
-            // d3.select("#checkcircle")
-            //     .attr("cx",tan.x)
-            //     .attr("cy",tan.y)
-
         }
     }
 
@@ -289,7 +300,7 @@ class anim{
             ed.sort(function(x,y){
                 return d3.ascending(x[0],y[0]) || d3.ascending(x[2],y[2]);
             })
-            console.log("ed",ed)
+            // console.log("ed",ed)
             let xRange = ed[2][0]-ed[0][0];
             let yRange = ed[2][1]-ed[0][1];
             for(let j=0;j<this.numSeg;j++){
@@ -314,11 +325,11 @@ class anim{
 
     }
 
-    adjustBound(x,y){
-        if(y<=0.5){
-            this.cellBound.upper[0] = x;
-        } else { this.cellBound.lower[0] = x;}
-    }
+    // adjustBound(x,y){
+    //     if(y<=0.5){
+    //         this.cellBound.upper[0] = x;
+    //     } else { this.cellBound.lower[0] = x;}
+    // }
 
     
     adjustFlow(x,y){
@@ -393,14 +404,24 @@ class anim{
 
     chooseGrad(x,y){
         // determine the mesh type (max/min/saddle point mesh) for a given point
-        // **** Now for fixed value ****
-        if(x<0.375){
-            return [this.cp[0],this.gradmax];
-        } else if(x>0.625){
-            return [this.cp[2],this.gradmax];
-        } else if(x>=0.375 && x<=0.625){
-            return [this.cp[1],this.gradsaddle1];
+        let cpt = this.findMinPt([x,y],this.cp);
+        if(cpt[2]===1&&cpt[3]===1){
+            return [cpt,this.gradmax];
+        } else if (cpt[2]===-1&&cpt[3]===1){
+            return [cpt,this.gradsaddle1];
+        } else if (cpt[2]===1&&cpt[3]===-1){
+            return [cpt,this.gradsaddle2];
+        } else if (cpt[2]===-1&&cpt[3]===-1){
+            return [cpt,this.gradmax];
         }
+        // // **** Now for fixed value ****
+        // if(x<0.375){
+        //     return [this.cp[0],this.gradmax];
+        // } else if(x>0.625){
+        //     return [this.cp[2],this.gradmax];
+        // } else if(x>=0.375 && x<=0.625){
+        //     return [this.cp[1],this.gradsaddle1];
+        // }
     }
     
 
@@ -482,32 +503,6 @@ class anim{
                     // let result = that.chooseGrad(X[i],Y[i]);
                     // console.log(result)
                     dr = that.findV(X[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][0]),Y[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][1]),that.chooseGrad(X[i],Y[i])[1])
-                    // let minCP = that.findMinPt([X[i],Y[i]],that.cp);
-                    // if(minCP[2]===1&&minCP[3]===1){
-                    //     dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradmax)
-                    // }
-                    // else if(minCP[2]===-1&&minCP[3]===1){
-                    //     dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradsaddle1)
-                    // }
-                    // else if(minCP[2]===1&&minCP[3]===-1){
-                    //     dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradsaddle2)
-                    // }
-                    // else if(minCP[2]===-1&&minCP[3]===-1){
-                    //     dr = that.findV(X[i]+(0.5-minCP[0]),Y[i]+(0.5-minCP[1]),that.gradmin)
-                    // }
-
-                    // if(X_new>=0 && X_new<=0.5 && Y_new>=0 && Y_new <= 0.5){
-                    //     X_new = X_new*(that.cellBound.upper[0]+(0.5-that.cellBound.upper[0])*Y_new/0.5)/0.5
-                    // }
-                    // else if(X_new>0.5 && X_new<=1 && Y_new>=0 && Y_new <= 0.5){
-                    //     X_new = 1-(1-X_new)*((1-2*Y_new)*(0.5-that.cellBound.upper[0])+0.5)/0.5
-                    // }
-                    // else if(X_new>=0 && X_new<=0.5 && Y_new>0.5 && Y_new <= 1){
-                    //     X_new = X_new*(0.5-(2*Y_new-1)*(0.5-that.cellBound.lower[0]))/0.5
-                    // }
-                    // else if(X_new>0.5 && X_new<=1 && Y_new>0.5 && Y_new <= 1){
-                    //     X_new = 1-(1-X_new)*((2*Y_new-1)*(0.5-that.cellBound.lower[0])+0.5)/0.5
-                    // }
 
                     
                 }
@@ -520,6 +515,7 @@ class anim{
                 Y[i]+=dr[1]*dt;
                 g.lineWidth = 0.7;
                 g.strokeStyle = "#FF8000";
+                // g.strokeStyle = "white"
                 g.stroke(); // final draw command
                 if (age[i]++ > MaxAge) {
                     // increment age of each curve, restart if MaxAge is reached
@@ -530,65 +526,65 @@ class anim{
         }
     }
 
-    addnodes(cp){
-        let g = d3.select("#animation").node().getContext("2d");
+    // addnodes(cp){
+    //     let g = d3.select("#animation").node().getContext("2d");
         
-        for(let i=0;i<cp.length;i++){
-            let type = cp[i].slice(2);
-            let arcX = this.xMap(cp[i][0]);
-            let arcY = this.yMap(cp[i][1]);
+    //     for(let i=0;i<cp.length;i++){
+    //         let type = cp[i].slice(2);
+    //         let arcX = this.xMap(cp[i][0]);
+    //         let arcY = this.yMap(cp[i][1]);
 
-            if (type.join() === "1,1"){ // maximum
-                g.setLineDash([1, 0])
-                g.beginPath();
-                g.arc(arcX,arcY,15,0,2*Math.PI);
-                g.strokeStyle = "#E24E42";
-                g.lineWidth = 2;
-                g.stroke();
+    //         if (type.join() === "1,1"){ // maximum
+    //             g.setLineDash([1, 0])
+    //             g.beginPath();
+    //             g.arc(arcX,arcY,15,0,2*Math.PI);
+    //             g.strokeStyle = "#E24E42";
+    //             g.lineWidth = 2;
+    //             g.stroke();
     
-                g.beginPath();
-                g.arc(arcX,arcY,8,0,2*Math.PI);
-                g.fillStyle = "#E24E42"
-                g.fill();
-                g.lineWidth = 0.7;
-                g.strokeStyle = "#E24E42";
-                g.stroke();
-            }
+    //             g.beginPath();
+    //             g.arc(arcX,arcY,8,0,2*Math.PI);
+    //             g.fillStyle = "#E24E42"
+    //             g.fill();
+    //             g.lineWidth = 0.7;
+    //             g.strokeStyle = "#E24E42";
+    //             g.stroke();
+    //         }
 
-            if ((type.join() === "-1,1")||(type.join() === "1,-1")) { // saddle
-                g.setLineDash([1, 0])
-                g.beginPath();
-                g.arc(arcX,arcY,15,0,2*Math.PI);
-                g.strokeStyle = "#3CC47C";
-                g.stroke();
+    //         if ((type.join() === "-1,1")||(type.join() === "1,-1")) { // saddle
+    //             g.setLineDash([1, 0])
+    //             g.beginPath();
+    //             g.arc(arcX,arcY,15,0,2*Math.PI);
+    //             g.strokeStyle = "#3CC47C";
+    //             g.stroke();
     
-                g.beginPath();
-                g.moveTo(arcX,arcY-8); 
-                g.lineTo(arcX,arcY+8);
-                g.strokeStyle = "#3CC47C";
-                g.stroke();
+    //             g.beginPath();
+    //             g.moveTo(arcX,arcY-8); 
+    //             g.lineTo(arcX,arcY+8);
+    //             g.strokeStyle = "#3CC47C";
+    //             g.stroke();
     
-                g.beginPath();
-                g.moveTo(arcX-8,arcY); 
-                g.lineTo(arcX+8,arcY);
-                g.strokeStyle = "green";
-                g.stroke();
-            }
+    //             g.beginPath();
+    //             g.moveTo(arcX-8,arcY); 
+    //             g.lineTo(arcX+8,arcY);
+    //             g.strokeStyle = "green";
+    //             g.stroke();
+    //         }
 
-            if (type.join() === "-1,-1"){ // minimum
-                g.setLineDash([1, 0])
-                g.beginPath();
-                g.arc(arcX,arcY,8,0,2*Math.PI);
-                g.strokeStyle = "blue";
-                g.stroke();
+    //         if (type.join() === "-1,-1"){ // minimum
+    //             g.setLineDash([1, 0])
+    //             g.beginPath();
+    //             g.arc(arcX,arcY,8,0,2*Math.PI);
+    //             g.strokeStyle = "blue";
+    //             g.stroke();
     
-                g.beginPath();
-                g.arc(arcX,arcY,4,0,2*Math.PI);
-                g.strokeStyle = "blue";
-                g.stroke();
-            }
-        }  
-    }
+    //             g.beginPath();
+    //             g.arc(arcX,arcY,4,0,2*Math.PI);
+    //             g.strokeStyle = "blue";
+    //             g.stroke();
+    //         }
+    //     }  
+    // }
 
     findMinPt(pt0, pts){
         function calDist(loc1, loc2){
@@ -628,12 +624,13 @@ class anim{
             .attr("id",(d,i)=>"p"+i)
             .style("fill", "none")
             .style("stroke", "white")
-            .style("stroke-width",2)
+            .style("stroke-width",3)
             .style("stroke-dasharray",(d)=>{
                 if(d[3]==="max"){
                     return "5,5";
                 } else {return "";}
             })
+            .style("opacity",0.8)
     }
 
     findEdges(cp){
@@ -706,7 +703,7 @@ class anim{
             }
             connNodes.push([edges[i][1],i]);
         }
-        console.log(connNodes)
+        // console.log(connNodes)
         return connNodes;
     }
 
