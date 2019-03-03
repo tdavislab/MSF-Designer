@@ -34,7 +34,11 @@ class anim{
         this.sigma = 0.1;
         this.edges = this.findEdges(this.cp);
         this.connNodes = this.findConnNodes(this.edges);
-        this.edgeMapper = this.initializeEdgeMapper(this.edges);
+        // this.edgeMapper = this.initializeEdgeMapper(this.edges);
+        this.edgeMapper = {};
+        for(let i=0;i<this.edges.length;i++){
+            this.edgeMapper["p"+i] = this.initializeEdgeMapper(this.edges[i]);
+        }
         this.frames = [[0,0,0,1],[0,1,1,1],[0,0,1,0],[1,0,1,1,]]; //used for drawing frames
         
 
@@ -105,12 +109,27 @@ class anim{
                     d3.select("#amoveplus")
                         .attr("value","A+ move")
                     this.apType="";
-                    this.edges = this.findEdges(this.cp);
+                    let cp_new = []
+                    for(let i=0;i<this.cp.length;i++){
+                        let type = this.cp[i].slice(2);
+                        if(type.join()===[1,1].join()||type.join()===[-1,-1].join()){
+                            cp_new.push(this.cp[i]);
+                        }
+                    }
+                    cp_new.push([x,y,-1,1]);
+                    let edges_new = this.findEdges(cp_new); // in this way, the old edge information will not be overwritten
+                    for(let i=0;i<edges_new.length;i++){
+                        this.edges.push(edges_new[i]);
+                    }
                 }
-                // this.initializeEdgeMapper(this.edges);
+                for(let i=0;i<this.edges.length;i++){
+                    if(Object.keys(this.edgeMapper).indexOf("p"+i)===-1){
+                        this.edgeMapper["p"+i] = this.initializeEdgeMapper(this.edges[i]);
+                    }
+                }
+                this.connNodes = this.findConnNodes(this.edges);
                 this.drawAnnotation();
                 this.addedges();
-
             })
     }
     amoveMinus(){
@@ -132,8 +151,27 @@ class anim{
                     d3.select("#amoveminus")
                         .attr("value","A- move")
                     this.amType="";
+                    let cp_new = []
+                    for(let i=0;i<this.cp.length;i++){
+                        let type = this.cp[i].slice(2);
+                        if(type.join()===[1,1].join()||type.join()===[-1,-1].join()){
+                            cp_new.push(this.cp[i]);
+                        }
+                    }
+                    cp_new.push([x,y,-1,1]);
+                    let edges_new = this.findEdges(cp_new);
+                    for(let i=0;i<edges_new.length;i++){
+                        this.edges.push(edges_new[i]);
+                    }
                 }
+                for(let i=0;i<this.edges.length;i++){
+                    if(Object.keys(this.edgeMapper).indexOf("p"+i)===-1){
+                        this.edgeMapper["p"+i] = this.initializeEdgeMapper(this.edges[i]);
+                    }
+                }
+                this.connNodes = this.findConnNodes(this.edges);
                 this.drawAnnotation();
+                this.addedges();
             })
     }
 
@@ -245,7 +283,7 @@ class anim{
         // function mouseout(d){
         //     d3.select(this).classed("mouseover", false);
         // }
-        function draggedNode(d){
+        function draggedNode(d,i){
             // **** need boundary control ****
             if([0,1].indexOf(d[0][0])!=-1){
                 // node on vertical frame
@@ -261,6 +299,7 @@ class anim{
                 // node not on the frame
                 d3.select(this).attr("cx", d[0][0] = that.xMapReverse(d3.event.x)).attr("cy", d[0][1] = that.yMapReverse(d3.event.y));
                 that.edges[d[1]][1] = [that.xMapReverse(d3.event.x), that.yMapReverse(d3.event.y)]
+                that.connNodes[i][0] = [that.xMapReverse(d3.event.x), that.yMapReverse(d3.event.y)];
             } 
             let pathid = "p"+d[1];
             console.log("pathid",pathid);
@@ -291,24 +330,18 @@ class anim{
         }
     }
 
-    initializeEdgeMapper(edges){
-        // console.log("i am here")
-        let edgeMapper = {};
-        for(let i=0;i<edges.length;i++){
-            edgeMapper["p"+i] = [];
-            let ed = edges[i].slice(0,3);
-            ed.sort(function(x,y){
-                return d3.ascending(x[0],y[0]) || d3.ascending(x[2],y[2]);
-            })
-            // console.log("ed",ed)
-            let xRange = ed[2][0]-ed[0][0];
-            let yRange = ed[2][1]-ed[0][1];
-            for(let j=0;j<this.numSeg;j++){
-                edgeMapper["p"+i].push({"x":ed[0][0]+j*xRange/this.numSeg, "y":ed[0][1]+j*yRange/this.numSeg, "x_new":ed[0][0]+j*xRange/this.numSeg, "y_new":ed[0][1]+j*yRange/this.numSeg});
-            }
-            
+    initializeEdgeMapper(edge){
+        let em = [];
+        let ed = edge.slice(0,3);
+        ed.sort(function(x,y){
+            return d3.ascending(x[0],y[0]) || d3.ascending(x[2],y[2]);
+        })
+        let xRange = ed[2][0]-ed[0][0];
+        let yRange = ed[2][1]-ed[0][1];
+        for(let j=0;j<this.numSeg;j++){
+            em.push({"x":ed[0][0]+j*xRange/this.numSeg, "y":ed[0][1]+j*yRange/this.numSeg, "x_new":ed[0][0]+j*xRange/this.numSeg, "y_new":ed[0][1]+j*yRange/this.numSeg});
         }
-        return edgeMapper;
+        return em;
     }
 
     mapEdges(edgeid, newPoints){
