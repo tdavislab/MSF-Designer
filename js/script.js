@@ -40,9 +40,22 @@ d3.select("#bmoveplus")
         
     })
 
-d3.select("#cmoveplus")
+d3.select("#bmoveminus")
     .on("click",()=>{
-        Anim.cp = [[0.8,0.5,1,1],[0.7,0.5,-1,1],[0.5,0.5,1,1],[0.3,0.5,-1,1],[0.2,0.5,1,1]]
-        // Anim.cp = [[0.9,0.5,1,1],[0.7,0.5,-1,1], [0.5,0.5,1,1],[0.3,0.5,-1,1],[0.1,0.5,1,1]]
-        Anim.animation("cmove")
+        if(Anim.bmType===""){
+            Anim.drawFlag=false;
+            Anim.bmType = "min";
+            Anim.bmoveMinus();
+            d3.select("#bmoveminus")
+                .attr("value","Add a min point");
+            
+        }
+        
     })
+
+// d3.select("#cmoveplus")
+//     .on("click",()=>{
+//         Anim.cp = [[0.8,0.5,1,1],[0.7,0.5,-1,1],[0.5,0.5,1,1],[0.3,0.5,-1,1],[0.2,0.5,1,1]]
+//         // Anim.cp = [[0.9,0.5,1,1],[0.7,0.5,-1,1], [0.5,0.5,1,1],[0.3,0.5,-1,1],[0.1,0.5,1,1]]
+//         Anim.animation("cmove")
+//     })

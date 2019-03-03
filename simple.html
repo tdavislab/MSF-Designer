@@ -18,7 +18,7 @@
         <!-- <br> -->
         <table>
             <tr>
-                <td id="container" width="1050px" height = "1050px" style="border: 1px solid black; background-color: white" rowspan="2">
+                <td id="container" width="1050px" height = "1050px" style="border: 2px solid grey; background-color: white" rowspan="2">
                                             
                         <canvas id="animation" style="position: absolute; top:100px; left:80px; z-index:1" width="1000" height="1000" ></canvas>
                         <svg id="annotation" style="position: absolute; top:100px; left:80px; z-index:1" width="1000" height="1000"></svg>
@@ -29,28 +29,34 @@
                 
                     <!-- <svg id="annotation" width="1000" height="600"></svg> -->
                 </td>
-                <td id="button-group" style="vertical-align: top; padding: 20px; border: 1px solid black">
+                <td id="button-group" style="vertical-align: top; padding: 20px; border: 2px solid grey">
                         <h4>Control Panel</h4>
-                        <p><input type="button" id="reset" class="btn btn-primary"  value="Reset"></p>
+                        <br>
                         <p>                    
-                            <input type="button" id="amoveplus" class = "btn btn-primary" value="A+ move">
-                            <input type="button" id="amoveminus" class = "btn btn-primary" value="A- move">
+                            <input type="button" id="amoveplus" class = "btn btn-danger" value="A+ Move">
+                            <input type="button" id="amoveminus" class = "btn btn-danger" value="A- Move">
                         </p>
                         <p>
-                            <input type="button" id="bmoveplus" class = "btn btn-primary" value="B+ move">
-                            <input type="button" id="bmoveminus" class = "btn btn-secondary" value="B- move">
+                            <input type="button" id="bmoveplus" class = "btn btn-warning" value="B+ Move">
+                            <input type="button" id="bmoveminus" class = "btn btn-warning" value="B- Move">
                         </p>
                         <p>
-                            <input type="button" id="cmoveplus" class = "btn btn-secondary" value="C+ move">
-                            <input type="button" id="cmoveminus" class = "btn btn-secondary" value="C- move">
+                            <input type="button" id="cmoveplus" class = "btn btn-success disabled" value="C+ Move">
+                            <input type="button" id="cmoveminus" class = "btn btn-success disabled" value="C- Move">
                         </p>
                         <p>
-                            <input type="button" id="dmoveplus" class = "btn btn-secondary" value="D+ move">
-                            <input type="button" id="dmoveminus" class = "btn btn-secondary" value="D- move">
+                            <input type="button" id="dmoveplus" class = "btn btn-info disabled" value="D+ Move">
+                            <input type="button" id="dmoveminus" class = "btn btn-info disabled" value="D- Move">
                         </p>
-                        
-                        <!-- <input type="button" id="original1" value="Original1"> -->
-                        
+                        <p>
+                            <input type="button" id="dmoveplus" class = "btn btn-info disabled" value="D+ even Move">
+                            <input type="button" id="dmoveminus" class = "btn btn-info disabled" value="D- even Move">
+                        </p>
+                        <p>
+                            <input type="button" id="dmoveplus" class = "btn btn-info disabled" value="D+ odd Move">
+                            <input type="button" id="dmoveminus" class = "btn btn-info disabled" value="D- odd Move">
+                        </p>     
+                        <p><input type="button" id="reset" class="btn btn-primary btn-block"  value="Reset"></p>                   
                         
                 </td>
             </tr>

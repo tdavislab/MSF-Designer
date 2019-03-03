@@ -29,8 +29,8 @@ class anim{
         this.drawFlag = true;
         this.step = 0.05;
         this.numSeg = 10;
-        this.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]];
-        // this.cp = [[0.5,0.5,1,1]];
+        // this.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]];
+        this.cp = [[0.5,0.5,1,1]];
         this.sigma = 0.1;
         this.edges = this.findEdges(this.cp);
         this.connNodes = this.findConnNodes(this.edges);
@@ -85,6 +85,7 @@ class anim{
         this.apType = "";
         this.amType = "";
         this.bpType = "";
+        this.bmType = "";
         
         
     }
@@ -211,6 +212,66 @@ class anim{
                     d3.select("#bmoveplus")
                         .attr("value","B+ move")
                     this.bpType="";
+                    // let cp_new = []
+                    // for(let i=0;i<this.cp.length;i++){
+                    //     let type = this.cp[i].slice(2);
+                    //     if(type.join()===[1,1].join()||type.join()===[-1,-1].join()){
+                    //         cp_new.push(this.cp[i]);
+                    //     }
+                    // }
+                    // cp_new.push([x,y,-1,1]);
+                    // let edges_new = this.findEdges(cp_new);
+                    // for(let i=0;i<edges_new.length;i++){
+                    //     this.edges.push(edges_new[i]);
+                    // }
+                    this.edges = this.findEdges(this.cp);
+
+                }
+                for(let i=0;i<this.edges.length;i++){
+                    if(Object.keys(this.edgeMapper).indexOf("p"+i)===-1){
+                        this.edgeMapper["p"+i] = this.initializeEdgeMapper(this.edges[i]);
+                    }
+                }
+                this.connNodes = this.findConnNodes(this.edges);
+                this.grad = this.constructMesh(this.sigma);
+                this.drawAnnotation();
+                this.addedges();
+            })
+
+    }
+
+    bmoveMinus(){
+        d3.select("#annotation")
+            .on("click", ()=>{
+                let x = Anim.xMapReverse(d3.event.x-80);
+                let y = Anim.yMapReverse(d3.event.y-50+7.5);
+                console.log(this.bmType)
+                if(this.bmType === "min"){
+                    this.cp.push([x,y,1,1]);
+                    this.bmType = "saddle1";
+                    d3.select("#bmoveminus")
+                        .attr("value","Add a saddle point");
+                }
+                else if(this.bmType === "saddle1"){
+                    this.cp.push([x,y,-1,1]);  
+                    this.bmType="max";                  
+                    d3.select("#bmoveminus")
+                        .attr("value","Add a max point");
+                }
+                else if(this.bmType === "max"){
+                    this.cp.push([x,y,-1,-1]);  
+                    this.bmType="saddle2";                  
+                    d3.select("#bmoveminus")
+                        .attr("value","Add a saddle point");
+                }
+                else if(this.bmType === "saddle2"){
+                    this.cp.push([x,y,-1,1]);
+                    this.drawFlag=true;
+                    d3.select("#annotation")
+                        .on("click", ()=>{this.drawFlag = (this.drawFlag) ? false : true;});
+                    d3.select("#bmoveminus")
+                        .attr("value","B- move")
+                    this.bmType="";
                     // let cp_new = []
                     // for(let i=0;i<this.cp.length;i++){
                     //     let type = this.cp[i].slice(2);

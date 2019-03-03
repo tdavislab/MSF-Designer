@@ -2,7 +2,7 @@
     font-family: 'Roboto', sans-serif;
 }
 
-.minedge{
+/* .minedge{
     stroke: white;
     stroke-width: 2;
     fill: none;
@@ -13,7 +13,7 @@
     stroke-width: 2;
     stroke-dasharray: 5,5; 
     fill: none;
-}
+} */
 
 .connNode{
     r: 8;
@@ -52,3 +52,4 @@ circle.min{
     stroke: white;
     stroke-width: 3;
 }
+
