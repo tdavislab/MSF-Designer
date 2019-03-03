@@ -29,8 +29,8 @@ class anim{
         this.drawFlag = true;
         this.step = 0.05;
         this.numSeg = 10;
-        this.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]];
-        // this.cp = [[0.5,0.5,1,1]];
+        // this.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]];
+        this.cp = [[0.5,0.5,1,1]];
         this.sigma = 0.1;
         this.edges = this.findEdges(this.cp);
         this.connNodes = this.findConnNodes(this.edges);
@@ -459,7 +459,7 @@ class anim{
     
 
     animation(type){
-        this.clearCanvas()
+        // this.clearCanvas()
         // this.edges = this.findEdges(this.cp);
             
         let N = 45;
@@ -559,66 +559,6 @@ class anim{
         }
     }
 
-    // addnodes(cp){
-    //     let g = d3.select("#animation").node().getContext("2d");
-        
-    //     for(let i=0;i<cp.length;i++){
-    //         let type = cp[i].slice(2);
-    //         let arcX = this.xMap(cp[i][0]);
-    //         let arcY = this.yMap(cp[i][1]);
-
-    //         if (type.join() === "1,1"){ // maximum
-    //             g.setLineDash([1, 0])
-    //             g.beginPath();
-    //             g.arc(arcX,arcY,15,0,2*Math.PI);
-    //             g.strokeStyle = "#E24E42";
-    //             g.lineWidth = 2;
-    //             g.stroke();
-    
-    //             g.beginPath();
-    //             g.arc(arcX,arcY,8,0,2*Math.PI);
-    //             g.fillStyle = "#E24E42"
-    //             g.fill();
-    //             g.lineWidth = 0.7;
-    //             g.strokeStyle = "#E24E42";
-    //             g.stroke();
-    //         }
-
-    //         if ((type.join() === "-1,1")||(type.join() === "1,-1")) { // saddle
-    //             g.setLineDash([1, 0])
-    //             g.beginPath();
-    //             g.arc(arcX,arcY,15,0,2*Math.PI);
-    //             g.strokeStyle = "#3CC47C";
-    //             g.stroke();
-    
-    //             g.beginPath();
-    //             g.moveTo(arcX,arcY-8); 
-    //             g.lineTo(arcX,arcY+8);
-    //             g.strokeStyle = "#3CC47C";
-    //             g.stroke();
-    
-    //             g.beginPath();
-    //             g.moveTo(arcX-8,arcY); 
-    //             g.lineTo(arcX+8,arcY);
-    //             g.strokeStyle = "green";
-    //             g.stroke();
-    //         }
-
-    //         if (type.join() === "-1,-1"){ // minimum
-    //             g.setLineDash([1, 0])
-    //             g.beginPath();
-    //             g.arc(arcX,arcY,8,0,2*Math.PI);
-    //             g.strokeStyle = "blue";
-    //             g.stroke();
-    
-    //             g.beginPath();
-    //             g.arc(arcX,arcY,4,0,2*Math.PI);
-    //             g.strokeStyle = "blue";
-    //             g.stroke();
-    //         }
-    //     }  
-    // }
-
     findMinPt(pt0, pts){
         function calDist(loc1, loc2){
             let dist = Math.sqrt(Math.pow(loc1[0]-loc2[0],2)+Math.pow(loc1[1]-loc2[1],2))
@@ -641,8 +581,6 @@ class anim{
             .x(d=>this.xMap(d[0]))
             .y(d=>this.yMap(d[1]))
             .curve(d3.curveCardinal.tension(0));
-            // .curve(d3.curveStep)
-        // console.log(curve0([[0.125,0.125],[0.25,0.25]]))
         let edges = this.edgeGroup.selectAll("path").data(this.edges);
         edges.exit().remove();
         let newedges = edges.enter().append("path");
@@ -776,7 +714,10 @@ class anim{
     }
 
     clearCanvas(){  
-        // $('#animation').remove();
-        // $('#canvas-container').append('<canvas id="animation" width="1000" height="600"></canvas>');
+        this.drawFlag = false;
+        $('#animation').remove();
+        $('#annotation').remove();
+        $('#container').append('<canvas id="animation" style="position: absolute; top:100px; left:80px; z-index:1" width="1000" height="1000" ></canvas>');
+        $('#container').append('<svg id="annotation" style="position: absolute; top:100px; left:80px; z-index:1" width="1000" height="1000"></svg>');
     }  
 }
