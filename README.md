@@ -4,8 +4,8 @@ Just run
 
 ## Current Functions
 
-#### 1 Drag the critical points to change the position
+1 Drag the critical points to change the position.
 
-#### 2 Drag the yellow node to change the boundary geometry
+2 Drag the yellow node to change the boundary geometry.
 
-#### 3 Click A/B +/- buttons to add moves
+3 Click A/B +/- buttons to add moves.
