@@ -72,14 +72,15 @@ class anim{
         
 
 
-        this.cellBound = {"upper":[0.5,0], "lower":[0.5,1]};
         this.animation("original");
        
   
-        this.gradmax = this.constructMesh(this.sigma,[1,1])
-        this.gradsaddle1 = this.constructMesh(this.sigma, [-1,1])
-        this.gradsaddle2 = this.constructMesh(this.sigma, [1,-1])
-        this.gradmin = this.constructMesh(this.sigma,[-1,-1])
+        // this.gradmax = this.constructMesh(this.sigma,[1,1])
+        // this.gradsaddle1 = this.constructMesh(this.sigma, [-1,1])
+        // this.gradsaddle2 = this.constructMesh(this.sigma, [1,-1])
+        // this.gradmin = this.constructMesh(this.sigma,[-1,-1])
+        this.grad = this.constructMesh(this.sigma)
+        console.log(this.grad)
 
         this.apType = "";
         this.amType = "";
@@ -127,6 +128,7 @@ class anim{
                     }
                 }
                 this.connNodes = this.findConnNodes(this.edges);
+                this.grad = this.constructMesh(this.sigma);
                 this.drawAnnotation();
                 this.addedges();
             })
@@ -171,6 +173,7 @@ class anim{
                     }
                 }
                 this.connNodes = this.findConnNodes(this.edges);
+                this.grad = this.constructMesh(this.sigma);
                 this.drawAnnotation();
                 this.addedges();
             })
@@ -229,6 +232,7 @@ class anim{
                     }
                 }
                 this.connNodes = this.findConnNodes(this.edges);
+                this.grad = this.constructMesh(this.sigma);
                 this.drawAnnotation();
                 this.addedges();
             })
@@ -290,6 +294,7 @@ class anim{
             that.cp[i][0] = that.xMapReverse(d3.event.x);
             that.cp[i][1] = that.yMapReverse(d3.event.y);        
             that.connNodes = that.findConnNodes(that.edges);
+            that.grad = that.constructMesh(that.sigma);
         }
               
         function dragended(d) {
@@ -481,41 +486,27 @@ class anim{
                     } else { 
                         y_new = 1-(1-y)/(1-y_line_old)*(1-y_line_new);
                     } 
-
-
-
-
                 }
 
             } 
         }
-
-        
         return [x_new, y_new];
 
     }
 
-    chooseGrad(x,y){
-        // determine the mesh type (max/min/saddle point mesh) for a given point
-        let cpt = this.findMinPt([x,y],this.cp);
-        if(cpt[2]===1&&cpt[3]===1){
-            return [cpt,this.gradmax];
-        } else if (cpt[2]===-1&&cpt[3]===1){
-            return [cpt,this.gradsaddle1];
-        } else if (cpt[2]===1&&cpt[3]===-1){
-            return [cpt,this.gradsaddle2];
-        } else if (cpt[2]===-1&&cpt[3]===-1){
-            return [cpt,this.gradmax];
-        }
-        // // **** Now for fixed value ****
-        // if(x<0.375){
-        //     return [this.cp[0],this.gradmax];
-        // } else if(x>0.625){
-        //     return [this.cp[2],this.gradmax];
-        // } else if(x>=0.375 && x<=0.625){
-        //     return [this.cp[1],this.gradsaddle1];
-        // }
-    }
+    // chooseGrad(x,y){
+    //     // determine the mesh type (max/min/saddle point mesh) for a given point
+    //     let cpt = this.findMinPt([x,y],this.cp);
+    //     if(cpt[2]===1&&cpt[3]===1){
+    //         return [cpt,this.gradmax];
+    //     } else if (cpt[2]===-1&&cpt[3]===1){
+    //         return [cpt,this.gradsaddle1];
+    //     } else if (cpt[2]===1&&cpt[3]===-1){
+    //         return [cpt,this.gradsaddle2];
+    //     } else if (cpt[2]===-1&&cpt[3]===-1){
+    //         return [cpt,this.gradmax];
+    //     }
+    // }
     
 
     animation(type){
@@ -595,7 +586,8 @@ class anim{
                     // console.log(that.grad)
                     // let result = that.chooseGrad(X[i],Y[i]);
                     // console.log(result)
-                    dr = that.findV(X[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][0]),Y[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][1]),that.chooseGrad(X[i],Y[i])[1])
+                    // dr = that.findV(X[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][0]),Y[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][1]),that.chooseGrad(X[i],Y[i])[1])
+                    dr = that.findV(X[i],Y[i],that.grad)
 
                     
                 }
@@ -617,6 +609,10 @@ class anim{
                 }
             }
         }
+    }
+    calDist(loc1, loc2){
+        let dist = Math.sqrt(Math.pow(loc1[0]-loc2[0],2)+Math.pow(loc1[1]-loc2[1],2))
+        return dist
     }
 
     findMinPt(pt0, pts){
@@ -738,12 +734,16 @@ class anim{
         return connNodes;
     }
 
-    constructMesh(sigma,idx){
+    constructMesh(sigma){
         let grad_new = [];
         for(let x=0;x<=1;x+=this.step){
             for(let y=0;y<=1;y+=this.step){
-                let dx = idx[0]*(1/sigma) * (x-0.5) * Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma);
-                let dy = idx[1]*(1/sigma) * (y-0.5) * (Math.exp(-(Math.pow(x-0.5,2)+Math.pow(y-0.5,2))/sigma));
+                let cpt = this.findMinPt([x,y],this.cp);
+                let idx = cpt.slice(2);
+                let x_new = x + (0.5 - cpt[0]);
+                let y_new = y + (0.5 - cpt[1]);
+                let dx = idx[0]*(1/sigma) * (x_new-0.5) * Math.exp(-(Math.pow(x_new-0.5,2)+Math.pow(y_new-0.5,2))/sigma);
+                let dy = idx[1]*(1/sigma) * (y_new-0.5) * (Math.exp(-(Math.pow(x_new-0.5,2)+Math.pow(y_new-0.5,2))/sigma));
                 grad_new.push([x,y,dx,dy]);
             }
         }
@@ -770,6 +770,32 @@ class anim{
                 ex_v[1] += 1/3*triang[i][3]
             }
         }
+        // let triang1 = [this.gradmax[x1Idx/this.step+y1Idx], this.gradmax[x2Idx/this.step+y1Idx], this.gradmax[x2Idx/this.step+y2Idx]];
+        // let triang2 = [this.gradsaddle1[x1Idx/this.step+y1Idx], this.gradsaddle1[x2Idx/this.step+y1Idx], this.gradsaddle1[x2Idx/this.step+y2Idx]];
+        // let triang3 = [this.gradmin[x1Idx/this.step+y1Idx], this.gradmin[x2Idx/this.step+y1Idx], this.gradmin[x2Idx/this.step+y2Idx]];
+        // let totalDist = 0;
+        // for(let i=0;i<this.cp.length;i++){
+        //     totalDist += this.calDist([x,y],this.cp[i]);
+        // }
+        // let ex_v = [0,0]
+        // for(let i=0;i<this.cp.length;i++){
+        //     let type = this.cp[i].slice(2);
+        //     let triang = []
+        //     if(type.join()===[1,1].join()){
+        //         triang = triang1;
+        //     } else if(type.join()===[-1,1].join()){
+        //         triang = triang2;
+        //     } else if(type.join()===[-1,-1].join()){
+        //         triang = triang3;
+        //     }
+        //     for(let j=0;j<3;j++){
+        //         if(typeof triang[j]!="undefined"){
+        //             ex_v[0] += 1/3*triang[j][2]*this.calDist([x,y],this.cp[i])/totalDist;
+        //             ex_v[1] += 1/3*triang[j][3]*this.calDist([x,y],this.cp[i])/totalDist
+            //     }
+            // }
+            
+        // }
         return ex_v;
     }
 
