@@ -2,7 +2,6 @@ let Anim = new anim()
 
 d3.select("#reset")
     .on("click",()=>{
-        // Anim.drawFlag = false;
         Anim.clearCanvas()
         Anim = new anim()
         
@@ -30,8 +29,15 @@ d3.select("#amoveminus")
     })
 d3.select("#bmoveplus")
     .on("click",()=>{
-        Anim.cp = [[0.75,0.75,1,1],[0.25,0.75,1,1],[0.5,0.75,-1,1],[0.5,0.525,-1,-1],[0.3,0.5,1,-1],[0.7,0.5,1,-1],[0.5,0.25,1,1]]
-        Anim.animation("bmove")
+        if(Anim.bpType===""){
+            Anim.drawFlag=false;
+            Anim.bpType = "max";
+            Anim.bmovePlus();
+            d3.select("#bmoveplus")
+                .attr("value","Add a max point");
+            
+        }
+        
     })
 
 d3.select("#cmoveplus")
