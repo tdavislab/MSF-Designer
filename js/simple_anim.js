@@ -27,7 +27,8 @@ class anim{
         
 
         this.drawFlag = true;
-        this.step = 0.05;
+        this.step = 0.01;
+        // this.step = 0.05;
         this.numSeg = 10;
         this.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]];
         // this.cp = [[0.5,0.5,1,1]];
@@ -229,7 +230,7 @@ class anim{
                 newPoints.push([that.xMapReverse(pt.x), that.yMapReverse(pt.y)]);
             }
             that.mapEdges(pathid, newPoints);
-            // that.grad = that.constructMesh(that.sigma);
+            that.grad = that.constructMesh(that.sigma);
 
             // let checkCircles = that.checkGroup.selectAll("circle").data(newPoints)
             // checkCircles.exit().remove();
@@ -281,16 +282,44 @@ class anim{
         // now only deal with vertical lines
         for(let i=0;i<this.edges.length;i++){
             let ed = this.edges[i];
+            // let edMap = this.edgeMapper["p"+i];
             let xRange = Math.abs(ed[2][0]-ed[0][0]);
             let yRange = Math.abs(ed[2][1]-ed[0][1]);
             // if((Math.min(ed[0][1],ed[2][1])<=y&&y<=Math.max(ed[0][1],ed[2][1]))||(Math.min(ed[0][0],ed[2][0])<=x&&x<=Math.max(ed[0][0],ed[2][0])))
             // let edMap = this.edgeMapper["p"+i];
             // let xSeg = Math.abs(ed[2][0]-ed[0][0])/this.numSeg;
             // let ySeg = Math.abs(ed[2][1]-ed[0][1])/this.numSeg;
+            // let edMapPts = [];
+            // edMap.forEach(p=>edMapPts.push([p.x,p.y,p.x_new,p.y_new]))
+            // let pt0 = this.findMinPt([x,y],edMapPts);
+            // let edMapPts1 = [];
+            // for(let j=0;j<edMapPts.length;j++){
+            //     if(edMapPts[j].join()!=pt0.join()){
+            //         edMapPts1.push(edMapPts[j]);
+            //     }
+            // }
+            // let pt1 = this.findMinPt([x,y],edMapPts1);
+            // let x_line_old = pt0[0];
+            // let x_line_new = pt0[2];
+            // if(pt1[3]!=pt0[3]){
+            //     x_line_new = (pt1[3]-y)/(pt1[3]-pt0[3])*pt0[2]+(y-pt0[3])/(pt1[3]-pt0[3])*pt1[2];
+            // }
+            // if(x<=pt0[0]){
+            //     // points on left
+            //     x_new = x * x_line_new / x_line_old;
+            // } else { 
+            //     x_new = 1-(1-x)/(1-x_line_old)*(1-x_line_new);
+            // } 
+
+            // console.log(x_line_old,x_line_new)
+
+            // console.log(pt0)
+            let a = 1
 
 
 
-            if(xRange===0){
+            // if(xRange===0){
+            if(a===1){
                 // now only deal with vertical lines
                 if(Math.min(ed[0][1],ed[2][1])<=y&&y<=Math.max(ed[0][1],ed[2][1])){ // only these points need to change
                     let edMap = this.edgeMapper["p"+i];
@@ -315,6 +344,7 @@ class anim{
                 }
             }
             if(yRange===0){
+            // if(a===1){
                 // horizontal lines
                 if(Math.min(ed[0][0],ed[2][0])<=x&&x<=Math.max(ed[0][0],ed[2][0])){
                     let edMap = this.edgeMapper["p"+i];
@@ -410,40 +440,42 @@ class anim{
 
             
             for (let i=0; i<M; i++) { // draw a single timestep for every curve
-                let dr = [0,0];
-                let X_new = that.adjustFlow(X[i],Y[i])[0];
-                let Y_new = that.adjustFlow(X[i],Y[i])[1];
-                
-                 
-                    // dr = that.gradF(that.cp, X[i],Y[i],0.1);
-                    
-                    // console.log(that.grad)
-                    // let result = that.chooseGrad(X[i],Y[i]);
-                    // console.log(result)
-                    // dr = that.findV(X[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][0]),Y[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][1]),that.chooseGrad(X[i],Y[i])[1])
-                dr = that.findV(X[i],Y[i],that.grad)
-                // let pt_new = that.findV(X[i],Y[i],that.grad)[1]
-                // let X_new = pt_new[0];
-                // let Y_new = pt_new[1];
 
+                    let dr = [0,0];
+                    // let X_new = that.adjustFlow(X[i],Y[i])[0];
+                    // let Y_new = that.adjustFlow(X[i],Y[i])[1];
+                    // dr = that.findV(X[i],Y[i],that.grad);
                     
-                
+                    
+                        // dr = that.gradF(that.cp, X[i],Y[i],0.1);
+                        
+                        // console.log(that.grad)
+                        // let result = that.chooseGrad(X[i],Y[i]);
+                        // console.log(result)
+                        // dr = that.findV(X[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][0]),Y[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][1]),that.chooseGrad(X[i],Y[i])[1])
+                    dr = that.findV(X[i],Y[i],that.grad)[0]
+                    let pt_new = that.findV(X[i],Y[i],that.grad)[1]
+                    let X_new = pt_new[0];
+                    let Y_new = pt_new[1];
 
-                g.setLineDash([1, 0])
-                g.beginPath();
-                g.moveTo(that.xMap(X_new), that.yMap(Y_new)); // the start point of the path
-                g.lineTo(that.xMap(X_new+dr[0]*dt), that.yMap(Y_new+dr[1]*dt)); // the end point
-                X[i]+=dr[0]*dt;
-                Y[i]+=dr[1]*dt;
-                g.lineWidth = 0.7;
-                g.strokeStyle = "#FF8000";
-                // g.strokeStyle = "white"
-                g.stroke(); // final draw command
-                if (age[i]++ > MaxAge) {
-                    // increment age of each curve, restart if MaxAge is reached
-                    age[i] = randage();
-                    X[i] = X0[i], Y[i] = Y0[i];
-                }
+                        
+                    
+
+                    g.setLineDash([1, 0])
+                    g.beginPath();
+                    g.moveTo(that.xMap(X_new), that.yMap(Y_new)); // the start point of the path
+                    g.lineTo(that.xMap(X_new+dr[0]*dt), that.yMap(Y_new+dr[1]*dt)); // the end point
+                    X[i]+=dr[0]*dt;
+                    Y[i]+=dr[1]*dt;
+                    g.lineWidth = 0.7;
+                    g.strokeStyle = "#FF8000";
+                    // g.strokeStyle = "white"
+                    g.stroke(); // final draw command
+                    if (age[i]++ > MaxAge) {
+                        // increment age of each curve, restart if MaxAge is reached
+                        age[i] = randage();
+                        X[i] = X0[i], Y[i] = Y0[i];
+                    }
             }
         }
     }
@@ -578,11 +610,9 @@ class anim{
                 let y_new = y + (0.5 - cpt[1]);
                 let dx = idx[0]*(1/sigma) * (x_new-0.5) * Math.exp(-(Math.pow(x_new-0.5,2)+Math.pow(y_new-0.5,2))/sigma);
                 let dy = idx[1]*(1/sigma) * (y_new-0.5) * (Math.exp(-(Math.pow(x_new-0.5,2)+Math.pow(y_new-0.5,2))/sigma));
-                // let pt_new = this.adjustFlow(x,y);
-                // x = this.adjustFlow(x,y)[0];
-                // y = this.adjust
-                // grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1]]);
-                grad_new.push([x,y,dx,dy]);
+                let pt_new = this.adjustFlow(x,y);
+                grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1]]);
+                // grad_new.push([x,y,dx,dy]);
             }
         }
         grad_new.sort(function(x,y){
@@ -595,12 +625,17 @@ class anim{
 
     findV(x,y, grad){
         // Find the vector value for the point
-        let x1Idx = Math.floor(x/this.step);
-        let x2Idx = x1Idx+1;
-        let y1Idx = Math.floor(y/this.step);
-        let y2Idx = y1Idx+1;
+        // let x1Idx = Math.floor(x/this.step);
+        let x1Idx = Math.min(Math.max(Math.floor(x/this.step),0),1/this.step-1);
+        // let x2Idx = x1Idx+1;
+        let x2Idx = Math.min(x1Idx+1,1/this.step-1);
+        // let y1Idx = Math.floor(y/this.step);
+        let y1Idx = Math.min(Math.max(Math.floor(y/this.step),0),1/this.step-1);
+        // let y2Idx = y1Idx+1;
+        let y2Idx = Math.min(y1Idx+1,1/this.step-1);
 
         let triang = [grad[x1Idx/this.step+y1Idx], grad[x2Idx/this.step+y1Idx], grad[x2Idx/this.step+y2Idx]];
+        // console.log(x,y)
         // console.log(x1Idx,x2Idx,y1Idx,y2Idx)
         // console.log(triang)
 
@@ -612,10 +647,10 @@ class anim{
             }
         }
 
-        // let x_new = ((triang[1][0]-x)*triang[0][4]+(x-triang[0][0])*triang[1][4])/(triang[1][0]-triang[0][0]);
-        // let y_new = ((triang[2][1]-y)*triang[1][5]+(y-triang[1][1])*triang[2][5])/(triang[2][1]-triang[1][1]);
-        // let pt_new = [x_new,y_new]
-        // return [ex_v,pt_new];
+        let x_new = ((triang[1][0]-x)*triang[0][4]+(x-triang[0][0])*triang[1][4])/(triang[1][0]-triang[0][0]);
+        let y_new = ((triang[2][1]-y)*triang[1][5]+(y-triang[1][1])*triang[2][5])/(triang[2][1]-triang[1][1]);
+        let pt_new = [x_new,y_new]
+        return [ex_v,pt_new];
         return ex_v;
     }
 

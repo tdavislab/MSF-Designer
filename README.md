@@ -8,4 +8,4 @@ Just run
 
 2 Drag the yellow node to change the boundary geometry.
 
-3 Click A/B +/- buttons to add moves.
+3 Click buttons to add moves (D moves are still under construction).
