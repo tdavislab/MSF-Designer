@@ -36,20 +36,20 @@
 circle.max{
     /* fill: rgb(234,85,41); */
     fill: #E71818;
-    stroke: white;
+    stroke: black;
     stroke-width: 3;
 }
 
 circle.saddle{
     /* fill: rgb(82,163,80); */
     fill: #13B913;
-    stroke: white;
+    stroke: black;
     stroke-width: 3;
 }
 
 circle.min{
     fill: #2472DD;
-    stroke: white;
+    stroke: black;
     stroke-width: 3;
 }
 

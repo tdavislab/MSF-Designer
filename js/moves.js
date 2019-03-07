@@ -15,7 +15,7 @@ class moves{
         d3.select("#annotation")
             .on("click", ()=>{
                 let x = this.anim.xMapReverse(d3.event.x-80);
-                let y = this.anim.yMapReverse(d3.event.y-50+7.5);
+                let y = this.anim.yMapReverse(d3.event.y-30+7.5);
                 if(this.apType === "max"){
                     this.anim.cp.push([x,y,1,1]);
                     this.apType = "saddle";
@@ -60,7 +60,7 @@ class moves{
         d3.select("#annotation")
             .on("click", ()=>{
                 let x = this.anim.xMapReverse(d3.event.x-80);
-                let y = this.anim.yMapReverse(d3.event.y-50+7.5);
+                let y = this.anim.yMapReverse(d3.event.y-30+7.5);
                 if(this.amType === "min"){
                     this.anim.cp.push([x,y,-1,-1]);
                     this.amType = "saddle";
@@ -106,7 +106,7 @@ class moves{
         d3.select("#annotation")
             .on("click", ()=>{
                 let x = this.anim.xMapReverse(d3.event.x-80);
-                let y = this.anim.yMapReverse(d3.event.y-50+7.5);
+                let y = this.anim.yMapReverse(d3.event.y-30+7.5);
                 if(this.bpType === "max"){
                     this.anim.cp.push([x,y,1,1]);
                     this.bpType = "saddle1";
@@ -164,7 +164,7 @@ class moves{
         d3.select("#annotation")
             .on("click", ()=>{
                 let x = this.anim.xMapReverse(d3.event.x-80);
-                let y = this.anim.yMapReverse(d3.event.y-50+7.5);
+                let y = this.anim.yMapReverse(d3.event.y-30+7.5);
                 if(this.bmType === "min"){
                     this.anim.cp.push([x,y,-1,-1]);
                     this.bmType = "saddle1";
@@ -223,7 +223,7 @@ class moves{
         d3.select("#annotation")
             .on("click", ()=>{
                 let x = this.anim.xMapReverse(d3.event.x-80);
-                let y = this.anim.yMapReverse(d3.event.y-50+7.5);
+                let y = this.anim.yMapReverse(d3.event.y-30+7.5);
                 if(this.cpType === "max"){
                     this.anim.cp.push([x,y,1,1]);
                     this.cpType = "saddle";
@@ -268,7 +268,7 @@ class moves{
         d3.select("#annotation")
             .on("click", ()=>{
                 let x = this.anim.xMapReverse(d3.event.x-80);
-                let y = this.anim.yMapReverse(d3.event.y-50+7.5);
+                let y = this.anim.yMapReverse(d3.event.y-30+7.5);
                 if(this.cmType === "min"){
                     this.anim.cp.push([x,y,-1,-1]);
                     this.cmType = "saddle";

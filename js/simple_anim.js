@@ -399,9 +399,11 @@ class anim{
         }
 
         let g = d3.select("#animation").node().getContext("2d"); // initialize a "canvas" element
-        g.fillStyle = "rgba(0, 0, 0, 0.05)"; // for fading curves
+        // g.fillStyle = "rgba(0, 0, 0, 0.05)"; // for fading curves
+        // g.fillStyle = "white"
         g.lineWidth = 0.7;
-        g.strokeStyle = "#FF8000"; // html color code
+        // g.strokeStyle = "#FF8000"; // html color code
+        // g.strokeStyle = "";
 
         let that = this;
 
@@ -424,7 +426,8 @@ class anim{
         function draw() {
             let width = document.getElementById('animation').offsetWidth;
             let height = document.getElementById('animation').offsetHeight;
-            g.fillStyle = "rgba(0, 0, 0, 0.05)";
+            g.fillStyle = "rgba(255,255, 255, 0.05)";
+            // g.fillStyle = "black";
             g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba
             
             
@@ -468,8 +471,8 @@ class anim{
                     X[i]+=dr[0]*dt;
                     Y[i]+=dr[1]*dt;
                     g.lineWidth = 0.7;
-                    g.strokeStyle = "#FF8000";
-                    // g.strokeStyle = "white"
+                    // g.strokeStyle = "#FF8000";
+                    g.strokeStyle = "blue"
                     g.stroke(); // final draw command
                     if (age[i]++ > MaxAge) {
                         // increment age of each curve, restart if MaxAge is reached
@@ -516,7 +519,7 @@ class anim{
             // .attr("id",(d)=>"p"+d[0].join()+d[3]+d[2].join()) // saddle position + min/max + min/max position
             .attr("id",(d,i)=>"p"+i)
             .style("fill", "none")
-            .style("stroke", "white")
+            .style("stroke", "black")
             .style("stroke-width",3)
             .style("stroke-dasharray",(d)=>{
                 if(d[3]==="max"){
