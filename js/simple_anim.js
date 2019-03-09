@@ -92,27 +92,78 @@ class anim{
 
     drawAnnotation(){
         // draw critical points
-        let circles = this.pointsGroup.selectAll("circle").data(this.cp);
+        // let circles = this.pointsGroup.selectAll("circle").data(this.cp);
+        // circles.exit().remove();
+        // let newcircles = circles.enter().append("circle");
+        // circles = newcircles.merge(circles);
+        // circles
+        //     .attr("cx",(d)=>this.xMap(d[0]))
+        //     .attr("cy",(d)=>this.yMap(d[1]))
+        //     .attr("r",15)
+        //     .attr("class",(d)=>{
+        //         if(d[2]===1&&d[3]===1){
+        //             return "max"
+        //         } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
+        //             return "saddle"
+        //         } else if (d[2]===-1&&d[3]===-1){
+        //             return "min"
+        //         }
+        //     })
+        //     .call(d3.drag()
+        //             .on("start", dragstarted)
+        //             .on("drag", dragged)
+        //             .on("end", dragended));
+        
+        let circles = this.pointsGroup.selectAll("text").data(this.cp);
         circles.exit().remove();
-        let newcircles = circles.enter().append("circle");
+        let newcircles = circles.enter().append("text");
         circles = newcircles.merge(circles);
         circles
-            .attr("cx",(d)=>this.xMap(d[0]))
-            .attr("cy",(d)=>this.yMap(d[1]))
-            .attr("r",15)
-            .attr("class",(d)=>{
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'central')
+            .attr("class", (d)=>{
                 if(d[2]===1&&d[3]===1){
-                    return "max"
-                } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
-                    return "saddle"
-                } else if (d[2]===-1&&d[3]===-1){
-                    return "min"
+                    return "fas";
+                } else {
+                    return "far";
                 }
             })
+            .attr('font-size', '40px')
+            .attr("fill",(d)=>{
+                if(d[2]===1&&d[3]===1){
+                    return "#E71818"
+                } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
+                    return "#13B913"
+                } else if (d[2]===-1&&d[3]===-1){
+                    return "#2472DD"
+                }
+            })
+            .text((d)=>{
+                    if(d[2]===1&&d[3]===1){
+                        return "\uf140"
+                    } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
+                        return "\uf057"
+                    } else if (d[2]===-1&&d[3]===-1){
+                        return "\uf192"
+                    }
+                })
+            .attr("x",(d)=>this.xMap(d[0]))
+            .attr("y",(d)=>this.yMap(d[1]))
+            // .attr("class","criticalpoint")
+            // .attr("r",15)
+            // .attr("class",(d)=>{
+            //     if(d[2]===1&&d[3]===1){
+            //         return "max"
+            //     } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
+            //         return "saddle"
+            //     } else if (d[2]===-1&&d[3]===-1){
+            //         return "min"
+            //     }
+            // })
             .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", dragged)
-                    .on("end", dragended));
+                    .on("end", dragended)); 
 
         let that=this;
 
@@ -433,9 +484,10 @@ class anim{
             
           
             // that.addnodes(that.cp);
-            that.addedges()
+            
 
             that.drawAnnotation();
+            that.addedges()
 
             // d3.select("#checkcircle")
             //     .attr("cx",that.xMap(0.5))
