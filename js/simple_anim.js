@@ -47,7 +47,7 @@ class anim{
         console.log(this.edgeMapper)
 
         //// curve ////
-        let N = 45; // 25^2 curves
+        let N = 50; // 25^2 curves
         // discretize the vfield coords
         this.xp = d3.range(N).map(
                 function (i) {
@@ -70,72 +70,44 @@ class anim{
         this.yMapReverse = d3.scaleLinear()
             .domain([0, this.canvasHeight])
             .range([0, 1]);
-        
-
 
         this.animation();
        
-  
-        // this.gradmax = this.constructMesh(this.sigma,[1,1])
-        // this.gradsaddle1 = this.constructMesh(this.sigma, [-1,1])
-        // this.gradsaddle2 = this.constructMesh(this.sigma, [1,-1])
-        // this.gradmin = this.constructMesh(this.sigma,[-1,-1])
         this.grad = this.constructMesh(this.sigma)
         console.log(this.grad)
-
-        
-        
-        
     }
 
     
 
     drawAnnotation(){
         // draw critical points
-        // let circles = this.pointsGroup.selectAll("circle").data(this.cp);
-        // circles.exit().remove();
-        // let newcircles = circles.enter().append("circle");
-        // circles = newcircles.merge(circles);
-        // circles
-        //     .attr("cx",(d)=>this.xMap(d[0]))
-        //     .attr("cy",(d)=>this.yMap(d[1]))
-        //     .attr("r",15)
-        //     .attr("class",(d)=>{
-        //         if(d[2]===1&&d[3]===1){
-        //             return "max"
-        //         } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
-        //             return "saddle"
-        //         } else if (d[2]===-1&&d[3]===-1){
-        //             return "min"
-        //         }
-        //     })
-        //     .call(d3.drag()
-        //             .on("start", dragstarted)
-        //             .on("drag", dragged)
-        //             .on("end", dragended));
-        
-        let circles = this.pointsGroup.selectAll("text").data(this.cp);
+        let circles = this.pointsGroup.selectAll("circle").data(this.cp);
         circles.exit().remove();
-        let newcircles = circles.enter().append("text");
+        let newcircles = circles.enter().append("circle");
         circles = newcircles.merge(circles);
         circles
+            .attr("cx",(d)=>this.xMap(d[0]))
+            .attr("cy",(d)=>this.yMap(d[1]))
+            .attr("r",15)
+            .attr("fill","white")
+        
+        let circletext = this.pointsGroup.selectAll("text").data(this.cp);
+        circletext.exit().remove();
+        let newcircletext = circletext.enter().append("text");
+        circletext = newcircletext.merge(circletext);
+        circletext
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
-            .attr("class", (d)=>{
+            .attr('font-size', '35px')
+            .attr("x",(d)=>this.xMap(d[0]))
+            .attr("y",(d)=>this.yMap(d[1]))
+            .attr("class",(d)=>{
                 if(d[2]===1&&d[3]===1){
-                    return "fas";
-                } else {
-                    return "far";
-                }
-            })
-            .attr('font-size', '40px')
-            .attr("fill",(d)=>{
-                if(d[2]===1&&d[3]===1){
-                    return "#E71818"
+                    return "fas max"
                 } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
-                    return "#13B913"
+                    return "far saddle"
                 } else if (d[2]===-1&&d[3]===-1){
-                    return "#2472DD"
+                    return "far min"
                 }
             })
             .text((d)=>{
@@ -147,19 +119,6 @@ class anim{
                         return "\uf192"
                     }
                 })
-            .attr("x",(d)=>this.xMap(d[0]))
-            .attr("y",(d)=>this.yMap(d[1]))
-            // .attr("class","criticalpoint")
-            // .attr("r",15)
-            // .attr("class",(d)=>{
-            //     if(d[2]===1&&d[3]===1){
-            //         return "max"
-            //     } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
-            //         return "saddle"
-            //     } else if (d[2]===-1&&d[3]===-1){
-            //         return "min"
-            //     }
-            // })
             .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", dragged)
@@ -430,7 +389,7 @@ class anim{
         // this.clearCanvas()
         // this.edges = this.findEdges(this.cp);
             
-        let N = 45;
+        let N = 50;
         var dt = 0.001;
         var X0 = [], Y0 = []; // to store initial starting locations
         var X  = [], Y  = []; // to store current point for each curve
@@ -442,8 +401,6 @@ class anim{
                 X0.push(this.xp[j]), Y0.push(this.yp[i]);
             }
         }
-        // console.log("X",X)
-        // console.log("Y",Y)
         function randage() {
             // to randomize starting ages for each curve
             return Math.round(Math.random()*100);
@@ -452,7 +409,7 @@ class anim{
         let g = d3.select("#animation").node().getContext("2d"); // initialize a "canvas" element
         // g.fillStyle = "rgba(0, 0, 0, 0.05)"; // for fading curves
         // g.fillStyle = "white"
-        g.lineWidth = 0.7;
+        // g.lineWidth = 0.7;
         // g.strokeStyle = "#FF8000"; // html color code
         // g.strokeStyle = "";
 
@@ -479,12 +436,7 @@ class anim{
             let height = document.getElementById('animation').offsetHeight;
             g.fillStyle = "rgba(255,255, 255, 0.05)";
             // g.fillStyle = "black";
-            g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba
-            
-            
-          
-            // that.addnodes(that.cp);
-            
+            g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba            
 
             that.drawAnnotation();
             that.addedges()
@@ -522,9 +474,9 @@ class anim{
                     g.lineTo(that.xMap(X_new+dr[0]*dt), that.yMap(Y_new+dr[1]*dt)); // the end point
                     X[i]+=dr[0]*dt;
                     Y[i]+=dr[1]*dt;
-                    g.lineWidth = 0.7;
+                    g.lineWidth = 1;
                     // g.strokeStyle = "#FF8000";
-                    g.strokeStyle = "blue"
+                    g.strokeStyle = "rgb(141,106,184)"
                     g.stroke(); // final draw command
                     if (age[i]++ > MaxAge) {
                         // increment age of each curve, restart if MaxAge is reached
@@ -568,11 +520,10 @@ class anim{
                 return curve0(d_new);
             })
             .attr("class",(d)=>d[3]+"edge") // minedge/maxedge
-            // .attr("id",(d)=>"p"+d[0].join()+d[3]+d[2].join()) // saddle position + min/max + min/max position
             .attr("id",(d,i)=>"p"+i)
             .style("fill", "none")
             .style("stroke", "black")
-            .style("stroke-width",3)
+            .style("stroke-width",2)
             .style("stroke-dasharray",(d)=>{
                 if(d[3]==="max"){
                     return "5,5";
@@ -606,11 +557,7 @@ class anim{
                 let cp_new_max = cp_new.max.slice(0);
                 if(cp_new_max.length>2){
                     // find the closest max points
-                    let pt1 = this.findMinPt(cp_new.saddle[i],cp_new_max);
-                    let idx1 = cp_new_max.indexOf(pt1);
-                    cp_new_max.splice(idx1,1);
-                    let pt2 = this.findMinPt(cp_new.saddle[i],cp_new_max);
-                    pts = [pt1,pt2];
+                    pts = this.find2MinPt(cp_new.saddle[i],cp_new.max);
                 } else { pts = cp_new_max; }
                 for(let j=0;j<pts.length;j++){
                     let midpt = [(cp_new.saddle[i][0]+pts[j][0])/2, (cp_new.saddle[i][1]+pts[j][1])/2];
@@ -623,11 +570,12 @@ class anim{
             let pts = [];
             if(cp_new_min.length>2){
                 // find the closest min points
-                let pt1 = this.findMinPt(cp_new.saddle[i],cp_new_min);
-                let idx1 = cp_new_min.indexOf(pt1);
-                cp_new_min.splice(idx1,1);
-                let pt2 = this.findMinPt(cp_new.saddle[i],cp_new_min);
-                pts = [pt1,pt2];
+                // let pt1 = this.findMinPt(cp_new.saddle[i],cp_new_min);
+                // let idx1 = cp_new_min.indexOf(pt1);
+                // cp_new_min.splice(idx1,1);
+                // let pt2 = this.findMinPt(cp_new.saddle[i],cp_new_min);
+                pts = this.find2MinPt(cp_new.saddle[i],cp_new_min);
+                // pts = [pt1,pt2];
             } else { pts = cp_new_min;}
             for(let j=0;j<pts.length;j++){
                 let midpt = [(cp_new.saddle[i][0]+pts[j][0])/2, (cp_new.saddle[i][1]+pts[j][1])/2]
@@ -638,6 +586,7 @@ class anim{
     }
 
     findConnNodes(edges){
+        // find the location of control nodes on each edge
         let connNodes = [];
         // console.log(edges)
         for(let i=0;i<edges.length;i++){
@@ -655,17 +604,49 @@ class anim{
         return connNodes;
     }
 
+    find2MinPt(pt,pts){
+        let pt1 = this.findMinPt(pt,pts);
+        let idx1 = pts.indexOf(pt1);
+        let pts1 = pts.slice(0,idx1);
+        let pts2 = pts.slice(idx1+1);
+        let pts_new = pts1.concat(pts2);
+        let pt2 = this.findMinPt(pt,pts_new);
+        return [pt1,pt2];
+    }
+
     constructMesh(sigma){
+        console.log("constucting")
         let grad_new = [];
+        let cp_max = [];
+        for(let i=0;i<this.cp.length;i++){
+            if(this.cp[i][2]===1 && this.cp[i][3]===1){
+                cp_max.push(this.cp[i]);
+            }
+        }
+        console.log(cp_max)
         for(let x=0;x<=1;x+=this.step){
             for(let y=0;y<=1;y+=this.step){
                 let cpt = this.findMinPt([x,y],this.cp);
                 let idx = cpt.slice(2);
+                if(idx[0]===-1&&idx[1]===-1){
+                    console.log("min")
+                }
                 let x_new = x + (0.5 - cpt[0]);
                 let y_new = y + (0.5 - cpt[1]);
                 let dx = idx[0]*(1/sigma) * (x_new-0.5) * Math.exp(-(Math.pow(x_new-0.5,2)+Math.pow(y_new-0.5,2))/sigma);
                 let dy = idx[1]*(1/sigma) * (y_new-0.5) * (Math.exp(-(Math.pow(x_new-0.5,2)+Math.pow(y_new-0.5,2))/sigma));
-                let pt_new = this.adjustFlow(x,y);
+                if(idx[0]*idx[1]===-1){
+                    // flow rotation
+                    let pts = this.find2MinPt(cpt,cp_max);
+                    let theta = Math.atan2(pts[1][1]-pts[0][1],pts[1][0]-pts[0][0])*2;
+                    let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+                    let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+                    dx = dx_new;
+                    dy = dy_new;
+                    
+                }
+                // let pt_new = this.adjustFlow(x,y);
+                let pt_new = [x,y];
                 grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1]]);
                 // grad_new.push([x,y,dx,dy]);
             }
@@ -675,7 +656,6 @@ class anim{
         })
         // console.log(grad_new)
         return grad_new;
-
     }
 
     findV(x,y, grad){
@@ -706,7 +686,7 @@ class anim{
         let y_new = ((triang[2][1]-y)*triang[1][5]+(y-triang[1][1])*triang[2][5])/(triang[2][1]-triang[1][1]);
         let pt_new = [x_new,y_new]
         return [ex_v,pt_new];
-        return ex_v;
+        // return ex_v;
     }
 
     clearCanvas(){

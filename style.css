@@ -31,43 +31,31 @@
 
 .connNode{
     r: 8;
-    fill: grey;
-    stroke: yellow;
-    stroke-width: 4;
+    fill: rgb(274,194,68);
+    stroke: black;
+    stroke-width: 2;
 }
 
 .frame{
-    /* stroke: #1E90FF; */
-    /* stroke: rgb(44,123,246); */
-    stroke: #2472DD;
-    stroke-width: 20;
+    stroke: rgb(44,123,246);
+    stroke-width: 5;
 }
 
 .mouseover{
     r: 10;
 }
 
-circle.max{
-    /* fill: rgb(234,85,41); */
+text.max{
     fill: #E71818;
-    stroke: black;
-    stroke-width: 3;
 }
 
-circle.saddle{
-    /* fill: rgb(82,163,80); */
+text.saddle{
     fill: #13B913;
-    stroke: black;
-    stroke-width: 3;
+    /* stroke: black; */
+    /* stroke-width: 3; */
 }
 
-circle.min{
-    fill: #2472DD;
-    stroke: black;
-    stroke-width: 3;
+text.min{
+    fill: rgb(44,123,246);
 }
 
-/* svg text .criticalpoint{
-    font-family: "Font Awesome 5 Free";
-     text: "\f066";
-} */

@@ -43,14 +43,14 @@ class moves{
                     //     this.edges.push(edges_new[i]);
                     // }
                     this.anim.edges = this.anim.findEdges(this.anim.cp);
-                }
-                for(let i=0;i<this.anim.edges.length;i++){
-                    if(Object.keys(this.anim.edgeMapper).indexOf("p"+i)===-1){
-                        this.anim.edgeMapper["p"+i] = this.anim.initializeEdgeMapper(this.anim.edges[i]);
+                    for(let i=0;i<this.anim.edges.length;i++){
+                        if(Object.keys(this.anim.edgeMapper).indexOf("p"+i)===-1){
+                            this.anim.edgeMapper["p"+i] = this.anim.initializeEdgeMapper(this.anim.edges[i]);
+                        }
                     }
+                    this.anim.connNodes = this.anim.findConnNodes(this.anim.edges);
+                    this.anim.grad = this.anim.constructMesh(this.anim.sigma);
                 }
-                this.anim.connNodes = this.anim.findConnNodes(this.anim.edges);
-                this.anim.grad = this.anim.constructMesh(this.anim.sigma);
                 this.anim.drawAnnotation();
                 this.anim.addedges();
             })
