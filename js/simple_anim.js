@@ -211,22 +211,6 @@ class anim{
         // }
         function draggedNode(d,i){
             // **** need boundary control ****
-            if([0,1].indexOf(d[0][0])!=-1){
-                // node on vertical frame
-                d3.select(this).attr("cy", d[0][1] = that.yMapReverse(d3.event.y));
-                that.edges[d[1]][2][1] = that.yMapReverse(d3.event.y);
-            }
-            else if([0,1].indexOf(d[0][1])!=-1){
-                // node on horizontal frame
-                d3.select(this).attr("cx", d[0][0] = that.xMapReverse(d3.event.x));
-                that.edges[d[1]][2][0] = that.xMapReverse(d3.event.x);
-            }
-            else {
-                // node not on the frame
-                d3.select(this).attr("cx", d[0][0] = that.xMapReverse(d3.event.x)).attr("cy", d[0][1] = that.yMapReverse(d3.event.y));
-                that.edges[d[1]][1] = [that.xMapReverse(d3.event.x), that.yMapReverse(d3.event.y)]
-                that.connNodes[i][0] = [that.xMapReverse(d3.event.x), that.yMapReverse(d3.event.y)];
-            } 
             let pathid = "p"+d[1];
             let totalLength = d3.select("#"+pathid).node().getTotalLength();
             let stepLength = totalLength/that.numSeg;
@@ -239,8 +223,26 @@ class anim{
                 }
                 newPoints.push([that.xMapReverse(pt.x), that.yMapReverse(pt.y)]);
             }
-            that.mapEdges(pathid, newPoints);
-            that.grad = that.constructMesh(that.sigma);
+            if(that.ifCurvesIntersect(pathid, newPoints)===false){
+                that.mapEdges(pathid, newPoints);
+                if([0,1].indexOf(d[0][0])!=-1){
+                    // node on vertical frame
+                    d3.select(this).attr("cy", d[0][1] = that.yMapReverse(d3.event.y));
+                    that.edges[d[1]][2][1] = that.yMapReverse(d3.event.y);
+                }
+                else if([0,1].indexOf(d[0][1])!=-1){
+                    // node on horizontal frame
+                    d3.select(this).attr("cx", d[0][0] = that.xMapReverse(d3.event.x));
+                    that.edges[d[1]][2][0] = that.xMapReverse(d3.event.x);
+                }
+                else {
+                    // node not on the frame
+                    d3.select(this).attr("cx", d[0][0] = that.xMapReverse(d3.event.x)).attr("cy", d[0][1] = that.yMapReverse(d3.event.y));
+                    that.edges[d[1]][1] = [that.xMapReverse(d3.event.x), that.yMapReverse(d3.event.y)]
+                    that.connNodes[i][0] = [that.xMapReverse(d3.event.x), that.yMapReverse(d3.event.y)];
+                } 
+                that.grad = that.constructMesh(that.sigma);
+            }
 
             // let checkCircles = that.checkGroup.selectAll("circle").data(newPoints)
             // checkCircles.exit().remove();
@@ -281,6 +283,71 @@ class anim{
         // console.log(newPoints)
         
 
+    }
+
+    ifLinesIntersect(line1,line2){
+        // for example, line1 = [pt1,pt2]; pt1 = {x:0,y:0};
+        let pt1 = line1[0];
+        let pt2 = line1[1];
+        let pt3 = line2[0];
+        let pt4 = line2[1];
+        let x = undefined;
+        let y = undefined;
+        if(pt1.x===pt2.x&&pt3.x===pt4.x){ // if two lines are both vertical
+            if(pt1.x===pt3.x){
+                return true;
+            } else {
+                return false;
+            }
+        } else if(pt1.x===pt2.x){ // if line1 is vertical
+            let a2 = (pt3.y-pt4.y)/(pt3.x-pt4.x);
+            let b2 = (pt3.x*pt4.y-pt4.x*pt3.y)/(pt3.x-pt4.x);
+            x = pt1.x;
+            y = a2*x+b2;
+        } else if(pt3.x===pt4.x){
+            let a1 = (pt1.y-pt2.y)/(pt1.x-pt2.x);
+            let b1 = (pt1.x*pt2.y-pt2.x*pt1.y)/(pt1.x-pt2.x);
+            x = pt3.x;
+            y = a1*x+b1;
+        } else {
+            let a1 = (pt1.y-pt2.y)/(pt1.x-pt2.x);
+            let b1 = (pt1.x*pt2.y-pt2.x*pt1.y)/(pt1.x-pt2.x);
+            let a2 = (pt3.y-pt4.y)/(pt3.x-pt4.x);
+            let b2 = (pt3.x*pt4.y-pt4.x*pt3.y)/(pt3.x-pt4.x);
+            if(a1===a2){
+                return false;
+            } else {
+                x = (b2-b1)/(a1-a2);
+                y = (a1*b2-a2*b1)/(a1-a2);
+            }
+        }        
+        if((Math.min(pt1.x,pt2.x)<x && x<Math.max(pt1.x,pt2.x))&&(Math.min(pt1.y,pt2.y)<y && y<Math.max(pt1.y,pt2.y))&&(Math.min(pt3.x,pt4.x)<x && x<Math.max(pt3.x,pt4.x))&&(Math.min(pt3.y,pt4.y)<y && y<Math.max(pt3.y,pt4.y))){
+            return true;
+        } else { return false;}
+    
+    }
+
+    ifCurvesIntersect(pathid, newpoints){
+        for(let i=0;i<Object.keys(this.edgeMapper).length;i++){
+            if(Object.keys(this.edgeMapper)[i]!=pathid){
+                console.log("sp",Object.keys(this.edgeMapper)[i],pathid)
+                let ed = this.edgeMapper[Object.keys(this.edgeMapper)[i]];
+                console.log(ed,newpoints)
+                for(let j=1;j<ed.length;j++){
+                    for(let k=1;k<newpoints.length;k++){
+                        let sp1 = [{"x":ed[j-1].x_new+0.0001,"y":ed[j-1].y_new+0.0001},{"x":ed[j].x_new-0.0001,"y":ed[j].y_new-0.0001}];
+                        let sp2 = [{"x":newpoints[k-1][0]+0.0001, "y":newpoints[k-1][1]+0.0001},{"x":newpoints[k][0]-0.0001, "y":newpoints[k][1]-0.0001}];
+                        // console.log(sp1,sp2)
+                        if(this.ifLinesIntersect(sp1,sp2)){
+                            console.log("return true")
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+        // one edge is the current line being moved, how to find another edge?
     }
 
     
@@ -328,8 +395,8 @@ class anim{
 
 
 
-            // if(xRange===0){
-            if(a===1){
+            if(xRange===0){
+            // if(a===1){
                 // now only deal with vertical lines
                 if(Math.min(ed[0][1],ed[2][1])<=y&&y<=Math.max(ed[0][1],ed[2][1])){ // only these points need to change
                     let edMap = this.edgeMapper["p"+i];
@@ -623,14 +690,10 @@ class anim{
                 cp_max.push(this.cp[i]);
             }
         }
-        console.log(cp_max)
         for(let x=0;x<=1;x+=this.step){
             for(let y=0;y<=1;y+=this.step){
                 let cpt = this.findMinPt([x,y],this.cp);
                 let idx = cpt.slice(2);
-                if(idx[0]===-1&&idx[1]===-1){
-                    console.log("min")
-                }
                 let x_new = x + (0.5 - cpt[0]);
                 let y_new = y + (0.5 - cpt[1]);
                 let dx = idx[0]*(1/sigma) * (x_new-0.5) * Math.exp(-(Math.pow(x_new-0.5,2)+Math.pow(y_new-0.5,2))/sigma);
@@ -645,8 +708,7 @@ class anim{
                     dy = dy_new;
                     
                 }
-                // let pt_new = this.adjustFlow(x,y);
-                let pt_new = [x,y];
+                let pt_new = this.adjustFlow(x,y);
                 grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1]]);
                 // grad_new.push([x,y,dx,dy]);
             }
