@@ -9,6 +9,8 @@ class anim{
         .attr("id","edgegroup");
         this.pointsGroup = this.svg.append("g")
             .attr("id","pointgroup");
+        this.heightsGroup = this.svg.append("g")
+            .attr("id","heightsgroup");
         this.frameGroup = this.svg.append("g")
             .attr("id","framegroup");
         this.checkGroup= this.svg.append("g")
@@ -108,26 +110,46 @@ class anim{
             .attr("y",(d)=>this.yMap(d[1]))
             .attr("class",(d)=>{
                 if(d[2]===1&&d[3]===1){
-                    return "fas max"
+                    return "far max"
                 } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
                     return "far saddle"
                 } else if (d[2]===-1&&d[3]===-1){
-                    return "far min"
+                    return "fas min"
                 }
             })
             .text((d)=>{
                     if(d[2]===1&&d[3]===1){
-                        return "\uf140"
+                        return "\uf192"
                     } else if ((d[2]===-1&&d[3]===1)||(d[2]===1&&d[3]===-1)){
                         return "\uf057"
                     } else if (d[2]===-1&&d[3]===-1){
-                        return "\uf192"
+                        return "\uf140"
                     }
                 })
             .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", dragged)
                     .on("end", dragended)); 
+        
+        let heights = this.heightsGroup.selectAll("text").data(this.cp);
+        heights.exit().remove();
+        let newheights = heights.enter().append("text");
+        heights = newheights.merge(heights);
+        heights
+            .attr("x",(d)=>this.xMap(d[0]))
+            .attr("y",(d)=>this.yMap(d[1])+50)
+            .text((d)=>{
+                if(d[2]===1&&d[3]===1){
+                    return this.fmax(1,0,0,this.sigma);
+                } else if(d[2]*d[3]===-1){
+                    return this.fmax(1,-0.25,0,this.sigma);
+                }
+            })
+            .attr("fill","red")
+            
+            // this.fmax(1,-0.25,0,this.sigma)
+
+
 
         let that=this;
 
@@ -137,12 +159,13 @@ class anim{
               
         function dragged(d,i) {
             for(let j=0;j<that.edges.length;j++){
-                let ed = that.edges[j];
+                // let ed = that.edges[j];
                 if(that.edges[j][0].join()===that.cp[i].slice(0,2).join()) {
                     that.edges[j][0] = [that.xMapReverse(d3.event.x),that.yMapReverse(d3.event.y)];
                 } else if (that.edges[j][2].join()===that.cp[i].slice(0,2).join()) {
                     that.edges[j][2] = [that.xMapReverse(d3.event.x),that.yMapReverse(d3.event.y)];
                 }
+                that.edges[j][1] = [(that.edges[j][0][0]+that.edges[j][2][0])/2,(that.edges[j][0][1]+that.edges[j][2][1])/2]
                 
                 // let totalLength = d3.select("#p"+j).node().getTotalLength();
                 // let stepLength = totalLength/that.numSeg;
@@ -161,6 +184,7 @@ class anim{
             that.cp[i][1] = that.yMapReverse(d3.event.y);        
             that.connNodes = that.findConnNodes(that.edges);
             that.grad = that.constructMesh(that.sigma);
+            console.log("conn",that.connNodes)
         }
               
         function dragended(d) {
@@ -467,10 +491,7 @@ class anim{
     }
     
 
-    animation(){
-        // this.clearCanvas()
-        // this.edges = this.findEdges(this.cp);
-            
+    animation(){            
         let N = 50;
         var dt = 0.001;
         var X0 = [], Y0 = []; // to store initial starting locations
@@ -558,7 +579,8 @@ class anim{
                     Y[i]+=dr[1]*dt;
                     g.lineWidth = 1;
                     // g.strokeStyle = "#FF8000";
-                    g.strokeStyle = "rgb(141,106,184)"
+                    // g.strokeStyle = "rgb(141,106,184)"
+                    g.strokeStyle = "rgb(110,24,110)"
                     g.stroke(); // final draw command
                     if (age[i]++ > MaxAge) {
                         // increment age of each curve, restart if MaxAge is reached
@@ -670,6 +692,7 @@ class anim{
 
     findConnNodes(edges){
         // find the location of control nodes on each edge
+        console.log("finding conn")
         let connNodes = [];
         // console.log(edges)
         for(let i=0;i<edges.length;i++){
@@ -710,11 +733,21 @@ class anim{
             for(let y=0;y<=1;y+=this.step){
                 let cpt = this.findMinPt([x,y],this.cp);
                 let idx = cpt.slice(2);
-                let x_new = x + (0.5 - cpt[0]);
-                let y_new = y + (0.5 - cpt[1]);
-                let dx = idx[0]*(1/sigma) * (x_new-0.5) * Math.exp(-(Math.pow(x_new-0.5,2)+Math.pow(y_new-0.5,2))/sigma);
-                let dy = idx[1]*(1/sigma) * (y_new-0.5) * (Math.exp(-(Math.pow(x_new-0.5,2)+Math.pow(y_new-0.5,2))/sigma));
+                let x_new = x - cpt[0];
+                let y_new = y - cpt[1];
+                let dx = idx[0]*(1/sigma) * x_new * Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
+                let dy = idx[1]*(1/sigma) * y_new * (Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma));
+                // let dx = x_new;
+                // let dy = y_new;
+                // if(idx[0]*idx[1]<0){
+                    
+                // }
+                
                 if(idx[0]*idx[1]===-1){
+                    // dx = -x_new;
+                    // dy = y_new;
+                    // dx = -(1/sigma)*x_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
+                    // dy = (1/sigma)*y_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
                     // flow rotation
                     let pts = this.find2MinPt(cpt,cp_max);
                     let theta = Math.atan2(pts[1][1]-pts[0][1],pts[1][0]-pts[0][0])*2;
@@ -765,6 +798,10 @@ class anim{
         let pt_new = [x_new,y_new]
         return [ex_v,pt_new];
         // return ex_v;
+    }
+
+    fmax(w,x,y,sigma){
+        return w*Math.exp(-(Math.pow(x,2)+Math.pow(y,2))/sigma)
     }
 
     clearCanvas(){

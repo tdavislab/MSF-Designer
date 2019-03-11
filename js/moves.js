@@ -15,15 +15,17 @@ class moves{
         d3.select("#annotation")
             .on("click", ()=>{
                 let x = this.anim.xMapReverse(d3.event.x-80);
-                let y = this.anim.yMapReverse(d3.event.y-30+7.5);
+                let y = this.anim.yMapReverse(d3.event.y-100+7.5);
+                let mincp = this.anim.findMinPt([x,y],this.anim.cp);
                 if(this.apType === "max"){
                     this.anim.cp.push([x,y,1,1]);
                     this.apType = "saddle";
-                    d3.select("#amoveplus")
-                        .attr("value","Add a saddle point")
-                }
-                else if(this.apType === "saddle"){
-                    this.anim.cp.push([x,y,-1,1]);
+                    // d3.select("#amoveplus")
+                        // .attr("value","Add a saddle point")
+                    this.anim.cp.push([(x+mincp[0])/2,(y+mincp[1])/2,-1,1])
+                // }
+                // else if(this.apType === "saddle"){
+                    // this.anim.cp.push([x,y,-1,1]);
                     this.anim.drawFlag=true;
                     d3.select("#annotation")
                         .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
