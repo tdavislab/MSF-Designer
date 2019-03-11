@@ -13,6 +13,10 @@ class anim{
             .attr("id","framegroup");
         this.checkGroup= this.svg.append("g")
             .attr("id", "checkgroup")
+        this.additionalEdge = this.svg.append("path")
+            .attr("id","additionalEdge")
+            .attr("stroke","red")
+            .attr("fill","none")
         this.connNodesGroup = this.svg.append("g")
             .attr("id","connNodesgroup");
         // this.currentPoint = this.svg.append("circle")
@@ -23,6 +27,7 @@ class anim{
         //     .attr("id","currentNewPoint")
         //     .attr("r",10)
         //     .attr("fill", "lightblue")
+        
         
         
 
@@ -212,14 +217,18 @@ class anim{
         function draggedNode(d,i){
             // **** need boundary control ****
             let pathid = "p"+d[1];
-            let totalLength = d3.select("#"+pathid).node().getTotalLength();
-            let stepLength = totalLength/that.numSeg;
             let ed = that.edges[d[1]];
+            let ed_new = [ed[0],[that.xMapReverse(d3.event.x),that.yMapReverse(d3.event.y)], ed[2]]
+            d3.select("#additionalEdge")
+                .attr("d",(d)=>that.curve0(ed_new))
+                .style("opacity",0)
+            let totalLength = d3.select("#additionalEdge").node().getTotalLength();
+            let stepLength = totalLength/that.numSeg;
             let newPoints = [];
             for(let i=0;i<that.numSeg;i++){
-                let pt = d3.select("#"+pathid).node().getPointAtLength(i*stepLength)
+                let pt = d3.select("#additionalEdge").node().getPointAtLength(i*stepLength)
                 if((ed[0][0]>ed[2][0])||(ed[0][1]>ed[2][1])){
-                    pt = d3.select("#"+pathid).node().getPointAtLength((that.numSeg-i)*stepLength)
+                    pt = d3.select("#additionalEdge").node().getPointAtLength((that.numSeg-i)*stepLength)
                 }
                 newPoints.push([that.xMapReverse(pt.x), that.yMapReverse(pt.y)]);
             }
@@ -242,6 +251,11 @@ class anim{
                     that.connNodes[i][0] = [that.xMapReverse(d3.event.x), that.yMapReverse(d3.event.y)];
                 } 
                 that.grad = that.constructMesh(that.sigma);
+            } else {
+                ed_new = [ed[0], [(ed[0][0]+ed[2][0])/2,(ed[0][1]+ed[2][1])/2], ed[2]]
+                d3.select("#additionalEdge")
+                    .attr("d",(d)=>that.curve0(ed_new))
+                    .style("opacity",0)
             }
 
             // let checkCircles = that.checkGroup.selectAll("circle").data(newPoints)
@@ -330,9 +344,9 @@ class anim{
     ifCurvesIntersect(pathid, newpoints){
         for(let i=0;i<Object.keys(this.edgeMapper).length;i++){
             if(Object.keys(this.edgeMapper)[i]!=pathid){
-                console.log("sp",Object.keys(this.edgeMapper)[i],pathid)
+                // console.log("sp",Object.keys(this.edgeMapper)[i],pathid)
                 let ed = this.edgeMapper[Object.keys(this.edgeMapper)[i]];
-                console.log(ed,newpoints)
+                // console.log(ed,newpoints)
                 for(let j=1;j<ed.length;j++){
                     for(let k=1;k<newpoints.length;k++){
                         let sp1 = [{"x":ed[j-1].x_new+0.0001,"y":ed[j-1].y_new+0.0001},{"x":ed[j].x_new-0.0001,"y":ed[j].y_new-0.0001}];
@@ -346,6 +360,7 @@ class anim{
                 }
             }
         }
+        console.log("return false")
         return false;
         // one edge is the current line being moved, how to find another edge?
     }
@@ -573,7 +588,7 @@ class anim{
     }
 
     addedges(){
-        let curve0 = d3.line()
+        this.curve0 = d3.line()
             .x(d=>this.xMap(d[0]))
             .y(d=>this.yMap(d[1]))
             .curve(d3.curveCardinal.tension(0));
@@ -584,7 +599,8 @@ class anim{
         edges
             .attr("d",(d)=>{
                 let d_new = d.slice(0,3);
-                return curve0(d_new);
+                // console.log(this.curve0(d_new))
+                return this.curve0(d_new);
             })
             .attr("class",(d)=>d[3]+"edge") // minedge/maxedge
             .attr("id",(d,i)=>"p"+i)
