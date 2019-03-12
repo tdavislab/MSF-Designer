@@ -41,8 +41,8 @@
     stroke-width: 5;
 }
 
-.mouseover{
-    r: 10;
+circle.mouseover{
+    r: 15;
 }
 
 text.max{
@@ -63,13 +63,59 @@ text.min{
     stroke-linecap: round;
     stroke: #000;
     stroke-opacity: 0.3;
-    stroke-width: 10px;
+    stroke-width: 8px;
 }
 
 .handle {
-  fill: #fff;
-  stroke: #000;
-  stroke-opacity: 0.5;
-  stroke-width: 1.25px;
+  /* fill: #fff; */
+  /* stroke: #000; */
+  /* stroke-opacity: 1; */
+  /* stroke-width: 1.5px; */
+}
+
+/* circle.activec{
+    r: 13;
+} */
+
+.showbar {
+    stroke-linecap: round;
+    stroke-opacity: 1;
+    stroke-width: 8px;
+}
+
+line.max{
+    stroke: #E71818;
+}
+
+line.saddle{
+    stroke: #13B913;
+}
+
+line.min{
+    stroke: rgb(44,123,246);
+}
+
+circle.max{
+    fill: #E71818;
+}
+
+circle.saddle{
+    fill: #13B913;
+}
+
+circle.min{
+    fill:rgb(44,123,246);
+}
+
+text.values{
+    font-weight: bold;
+    font-size:18px;
+  /* line-height: 100px; */
+}
+
+text.label{
+    /* font-weight: bold; */
+    font-size:18px;
+  /* line-height: 100px; */
 }
 

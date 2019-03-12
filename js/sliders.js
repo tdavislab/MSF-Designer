@@ -6,9 +6,13 @@ class sliders{
         this.svg = d3.select("#functionValues").append("svg")
             .attr("width",this.svgWidth)
             .attr("height",this.svgHeight)
-            .style("opacity",0);
+            .style("opacity",1);
         this.slidersgroup = this.svg.append("g")
             .attr("id","slidersgroup");
+        this.slidershowgroup = this.svg.append("g")
+            .attr("id","slidershowgroup");
+        this.sliderhandlegroup = this.svg.append("g")
+            .attr("id","sliderhandlegroup");
         this.sliderlabelgroup = this.svg.append("g")
             .attr("id","sliderlabelgroup")
         this.xMap = d3.scaleLinear()
@@ -23,10 +27,17 @@ class sliders{
                     ifShow = false;
                     d3.select("#functionValues").select("svg")
                         .style("opacity",0)
+                    d3.select("#enableFV")
+                        .attr("value","Enable Function Value Control")
+                        // .attr("class", "btn btn-outline-primary btn-block")
+                    
                 } else {
                     ifShow = true;
                     d3.select("#functionValues").select("svg")
                         .style("opacity",1)
+                    d3.select("#enableFV")
+                        .attr("value","Disable Function Value Control")
+                        // .attr("class","btn btn-primary btn-block")
                 }
             })
     }
@@ -46,29 +57,61 @@ class sliders{
             .attr("y1", (d,i)=>this.yMap(i+0.5))
             .attr("y2",(d,i)=>this.yMap(i+0.5))
 
-        let handles = this.slidersgroup.selectAll("circle").data(this.anim.cp);
+        let handles = this.sliderhandlegroup.selectAll("circle").data(this.anim.cp);
         handles.exit().remove();
         let newhandles = handles.enter().append("circle");
         handles = newhandles.merge(handles);
         handles
-            .attr("class", "handle")
+            .attr("class", (d)=>{
+                if(d[2]===1&&d[3]===1){
+                    return "max";
+                } else if(d[2]===-1&&d[3]===-1){
+                    return "min";
+                } else if(d[2]*d[3]<0){
+                    return "saddle";
+                }
+            })
             .attr("id",(d,i)=>"handle"+i)
             .attr("cx",this.xMap.range()[1]/2)
             .attr("cy",(d,i)=>this.yMap(i+0.5))
-            .attr("r", 9)
+            .attr("r", 12)
+            .on("mouseover",mouseover)
+            .on("mouseout",mouseout)
             .call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", dragged)
                 .on("end", dragended));
+        
+        let showbars = this.slidershowgroup.selectAll("line").data(this.anim.cp);
+        showbars.exit().remove();
+        let newshowbars = showbars.enter().append("line");
+        showbars = newshowbars.merge(showbars);
+        showbars
+            .attr("class", (d)=>{
+                if(d[2]===1&&d[3]===1){
+                    return "showbar max";
+                } else if(d[2]===-1&&d[3]===-1){
+                    return "showbar min";
+                } else if(d[2]*d[3]<0){
+                    return "showbar saddle";
+                }
+            })
+            .attr("id",(d,i)=>"showbar"+i)
+            .attr("x1", this.xMap.range()[0])
+            .attr("x2", (d,i)=>(d3.select("#handle"+i).attr("cx")))
+            .attr("y1", (d,i)=>this.yMap(i+0.5))
+            .attr("y2",(d,i)=>this.yMap(i+0.5))
+
         
         let values = this.slidersgroup.selectAll("text").data(this.anim.cp);
         values.exit().remove();
         let newvalues = values.enter().append("text");
         values = newvalues.merge(values);
         values
+            .attr("class","values")
             .attr("id",(d,i)=>"value"+i)
             .attr("x",this.svgWidth-40)
-            .attr("y",(d,i)=>this.yMap(i+0.5))
+            .attr("y",(d,i)=>this.yMap(i+0.5)+6)
             .text((d,i)=>Math.round(that.xMap.invert(d3.select("#handle"+i).attr("cx")*100))/100);
         
         let labels = this.sliderlabelgroup.selectAll("text").data(this.anim.cp);
@@ -76,20 +119,51 @@ class sliders{
         let newlabels = labels.enter().append("text");
         labels = newlabels.merge(labels);
         labels
+            .attr("class",(d)=>{
+                if(d[2]===1&&d[3]===1){
+                    return "label max";
+                } else if(d[2]===-1&&d[3]===-1){
+                    return "label min";
+                } else if(d[2]*d[3]<0){
+                    return "label saddle";
+                }
+            })
             .attr("x",this.xMap.range()[0])
-            .attr("y",(d,i)=>this.yMap(i+0.2))
-            .text((d,i)=>i);
+            .attr("y",(d,i)=>this.yMap(i+0.4))
+            .text((d,i)=>"Point "+(i+1));
+        
+        function mouseover(){
+            d3.select(this)
+                .classed("mouseover",true);
+        }
+
+        function mouseout(){
+            d3.select(this)
+                .classed("mouseover",false);
+
+        }
         
         function dragstarted(d) {
-            d3.select(this).raise().classed("active", true);
+            d3.select(this).raise().classed("active", true)
+                .classed("mouseover",true);
         }
         function dragged(d,i){
-            d3.select(this).attr("cx",d3.event.x);
-            d3.select("#value"+i).text(Math.round(that.xMap.invert(d3.event.x)*100)/100);
+            d3.select(this)
+                .classed("mouseover",true);
+            let p = d3.event.x;
+            if (p<that.xMap(0)){
+                p=that.xMap(0);
+            } else if(p>that.xMap(1)){
+                p=that.xMap(1);
+            }
+            d3.select(this).attr("cx",p);
+            d3.select("#value"+i).text(Math.round(that.xMap.invert(p)*100)/100);
+            d3.select("#showbar"+i).attr("x2",p);
         }
 
         function dragended(d) {
-            d3.select(this).classed("active", false);
+            d3.select(this).classed("active", false)
+                .classed("mouseover",false);
         }
 
     }

@@ -151,7 +151,7 @@ class anim{
             //         return this.fmax(1,-0.25,0,this.sigma);
             //     }
             // })
-            .text((d,i)=>i)
+            .text((d,i)=>i+1)
             .attr("fill","red")
             
             // this.fmax(1,-0.25,0,this.sigma)
