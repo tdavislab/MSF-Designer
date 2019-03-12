@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
     <script src="js/simple_anim.js" async></script>
     <script src="js/moves.js" async></script>
+    <script src="js/sliders.js" async></script>
     <script src="js/script.js" async></script>
     <link rel="stylesheet" href="style.css"/>
 </head>
@@ -24,12 +25,7 @@
                                             
                         <canvas id="animation" style="position: absolute; top:100px; left:80px; z-index:1" width="1000" height="1000" ></canvas>
                         <svg id="annotation" style="position: absolute; top:100px; left:80px; z-index:1" width="1000" height="1000"></svg>
-                    <!-- </div> -->
                     
-                    <!-- <div></div> -->
-                    
-                
-                    <!-- <svg id="annotation" width="1000" height="600"></svg> -->
                 </td>
                 <td id="button-group" style="vertical-align: top; padding: 20px; border: 2px solid grey">
                         <h4>Control Panel</h4>
@@ -60,6 +56,13 @@
                         </p>     
                         <p><input type="button" id="reset" class="btn btn-primary btn-block"  value="Reset"></p>                   
                         
+                </td>
+            </tr>
+            <tr>
+                <td id="functionValues" style="padding: 20px; border: 1px solid black">
+                    <p><input type="button" id="enableFV" class="btn btn-primary"  value="Enable Function Value Control"></p> 
+
+
                 </td>
             </tr>
         </table>

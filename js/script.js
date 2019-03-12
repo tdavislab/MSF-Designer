@@ -1,5 +1,7 @@
 let Anim = new anim();
-let Moves = new moves(Anim);
+let Sliders = new sliders(Anim);
+let Moves = new moves(Anim,Sliders);
+
 
 d3.select("#reset")
     .on("click",()=>{

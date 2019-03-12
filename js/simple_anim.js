@@ -82,8 +82,14 @@ class anim{
        
         this.grad = this.constructMesh(this.sigma)
         console.log(this.grad)
+        // this.addSlider();
     }
 
+    // addSlider(){
+    //     let slides = 
+    //     d3.select("#functionValues").append("input")
+    //         .attr("type","range")
+    // }
     
 
     drawAnnotation(){
@@ -138,13 +144,14 @@ class anim{
         heights
             .attr("x",(d)=>this.xMap(d[0]))
             .attr("y",(d)=>this.yMap(d[1])+50)
-            .text((d)=>{
-                if(d[2]===1&&d[3]===1){
-                    return this.fmax(1,0,0,this.sigma);
-                } else if(d[2]*d[3]===-1){
-                    return this.fmax(1,-0.25,0,this.sigma);
-                }
-            })
+            // .text((d)=>{
+            //     if(d[2]===1&&d[3]===1){
+            //         return this.fmax(1,0,0,this.sigma);
+            //     } else if(d[2]*d[3]===-1){
+            //         return this.fmax(1,-0.25,0,this.sigma);
+            //     }
+            // })
+            .text((d,i)=>i)
             .attr("fill","red")
             
             // this.fmax(1,-0.25,0,this.sigma)

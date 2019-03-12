@@ -1,6 +1,7 @@
 class moves{
-    constructor(anim){
+    constructor(anim, sliders){
         this.anim = anim;
+        this.sliders = sliders;
 
         this.apType = "";
         this.amType = "";
@@ -55,6 +56,7 @@ class moves{
                 }
                 this.anim.drawAnnotation();
                 this.anim.addedges();
+                this.sliders.addSlider();
             })
     }
 
