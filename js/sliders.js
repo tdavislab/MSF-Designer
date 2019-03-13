@@ -62,17 +62,9 @@ class sliders{
         let newhandles = handles.enter().append("circle");
         handles = newhandles.merge(handles);
         handles
-            .attr("class", (d)=>{
-                if(d[2]===1&&d[3]===1){
-                    return "handle max";
-                } else if(d[2]===-1&&d[3]===-1){
-                    return "handle min";
-                } else if(d[2]*d[3]<0){
-                    return "handle saddle";
-                }
-            })
+            .attr("class", (d)=>"handle "+d.type)
             .attr("id",(d,i)=>"handle"+i)
-            .attr("cx",d=>this.xMap(d[4]))
+            .attr("cx",d=>this.xMap(d.fv))
             .attr("cy",(d,i)=>this.yMap(i+0.5))
             .attr("r", 12)
             .on("mouseover",mouseover)
@@ -87,15 +79,7 @@ class sliders{
         let newshowbars = showbars.enter().append("line");
         showbars = newshowbars.merge(showbars);
         showbars
-            .attr("class", (d)=>{
-                if(d[2]===1&&d[3]===1){
-                    return "showbar max";
-                } else if(d[2]===-1&&d[3]===-1){
-                    return "showbar min";
-                } else if(d[2]*d[3]<0){
-                    return "showbar saddle";
-                }
-            })
+            .attr("class", (d)=>"showbar "+d.type)
             .attr("id",(d,i)=>"showbar"+i)
             .attr("x1", this.xMap.range()[0])
             .attr("x2", (d,i)=>(d3.select("#handle"+i).attr("cx")))
@@ -119,16 +103,7 @@ class sliders{
         let newlabels = labels.enter().append("text");
         labels = newlabels.merge(labels);
         labels
-            .attr("class",(d)=>{
-                if(d[2]===1&&d[3]===1){
-                    return "label max";
-                } else if(d[2]===-1&&d[3]===-1){
-                    return "label min";
-                } else if(d[2]*d[3]<0){
-                    return "label saddle";
-                }
-            })
-            // .attr("class","label")
+            .attr("class",(d)=>"label "+d.type)
             .attr("x",this.xMap.range()[0])
             .attr("y",(d,i)=>this.yMap(i+0.4))
             .text((d,i)=>(i+1));
@@ -151,7 +126,7 @@ class sliders{
         function dragged(d,i){
             d3.select(this)
                 .classed("mouseover",true);
-            let p = d3.event.x;
+            let p = d3.mouse(this)[0];
             if (p<that.xMap(0)){
                 p=that.xMap(0);
             } else if(p>that.xMap(1)){

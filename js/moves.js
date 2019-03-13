@@ -17,13 +17,16 @@ class moves{
             .on("click", ()=>{
                 let x = this.anim.xMapReverse(d3.event.x-80);
                 let y = this.anim.yMapReverse(d3.event.y-100+7.5);
-                let mincp = this.anim.findMinPt([x,y],this.anim.cp);
+                let mincp = this.anim.findMinPt({"x":x,"y":y},this.anim.cp);
                 if(this.apType === "max"){
-                    this.anim.cp.push([x,y,1,1,this.anim.fmax(1,0,0,this.anim.sigma)]);
+                    // this.anim.cp.push([x,y,1,1,this.anim.fmax(1,0,0,this.anim.sigma)]);
+                    let id = this.anim.cp.length;
+                    this.anim.cp.push(new criticalPoint(id,x,y,"max"))
                     this.apType = "saddle";
                     // d3.select("#amoveplus")
                         // .attr("value","Add a saddle point")
-                    this.anim.cp.push([(x+mincp[0])/2,(y+mincp[1])/2,-1,1,this.anim.fmax(1,0.25,0,this.anim.sigma)])
+                    // this.anim.cp.push([(x+mincp[0])/2,(y+mincp[1])/2,-1,1,this.anim.fmax(1,0.25,0,this.anim.sigma)])
+                    this.anim.cp.push(new criticalPoint(id+1,(x+mincp.x)/2,(y+mincp.y)/2,"saddle"))
                 // }
                 // else if(this.apType === "saddle"){
                     // this.anim.cp.push([x,y,-1,1]);

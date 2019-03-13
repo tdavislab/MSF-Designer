@@ -2,13 +2,6 @@
     font-family: 'Roboto', sans-serif;
 } */
 
-/* @font-face {
-    font-family:'FontAwesome';
-    src:url("https://use.fontawesome.com/releases/v5.7.2/css/all.css");
-    font-weight:normal;
-    font-style:normal
-  } */
-
 /* .minedge{
     stroke: white;
     stroke-width: 2;
@@ -21,11 +14,6 @@
     stroke-width: 2;
     stroke-dasharray: 5,5; 
     fill: none;
-} */
-
-/* @font-face {
-    font-family: 'font1';
-    src: url('assets/bullseye-solid.svg');
 } */
 
 
@@ -68,15 +56,7 @@ text.min{
 
 .handle {
     opacity:1;
-  /* fill: #fff; */
-  /* stroke: #000; */
-  /* stroke-opacity: 1; */
-  /* stroke-width: 1.5px; */
 }
-
-/* circle.activec{
-    r: 13;
-} */
 
 .showbar {
     stroke-linecap: round;
@@ -111,13 +91,9 @@ circle.min{
 text.values{
     font-weight: bold;
     font-size:18px;
-  /* line-height: 100px; */
 }
 
 text.label{
-    /* font-weight: bold; */
     font-size:18px;
-    /* fill:grey; */
-  /* line-height: 100px; */
 }
 
