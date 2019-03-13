@@ -62,11 +62,12 @@ text.min{
 .track {
     stroke-linecap: round;
     stroke: #000;
-    stroke-opacity: 0.3;
+    stroke-opacity: 0.2;
     stroke-width: 8px;
 }
 
 .handle {
+    opacity:1;
   /* fill: #fff; */
   /* stroke: #000; */
   /* stroke-opacity: 1; */
@@ -79,7 +80,7 @@ text.min{
 
 .showbar {
     stroke-linecap: round;
-    stroke-opacity: 1;
+    stroke-opacity: 0.8;
     stroke-width: 8px;
 }
 
@@ -116,6 +117,7 @@ text.values{
 text.label{
     /* font-weight: bold; */
     font-size:18px;
+    /* fill:grey; */
   /* line-height: 100px; */
 }
 

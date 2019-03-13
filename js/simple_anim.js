@@ -37,9 +37,9 @@ class anim{
         this.step = 0.01;
         // this.step = 0.05;
         this.numSeg = 10;
-        this.cp = [[0.25,0.5,1,1],[0.5,0.5,-1,1],[0.75,0.5,1,1]];
-        // this.cp = [[0.5,0.5,1,1]];
         this.sigma = 0.1;
+        this.cp = [[0.25,0.5,1,1,this.fmax(1,0,0,this.sigma)],[0.5,0.5,-1,1,this.fmax(1,0.25,0,this.sigma)],[0.75,0.5,1,1,this.fmax(1,0,0,this.sigma)]];
+        // this.cp = [[0.5,0.5,1,1]];
         this.edges = this.findEdges(this.cp);
         this.connNodes = this.findConnNodes(this.edges);
         // this.edgeMapper = this.initializeEdgeMapper(this.edges);
@@ -649,7 +649,7 @@ class anim{
         let cp_new = {"max":[], "min":[], "saddle":[]};
         for(let i=0;i<cp.length;i++){
             let loc = cp[i].slice(0,2);
-            let type = cp[i].slice(2);
+            let type = cp[i].slice(2,4);
 
             if(type.join()==="1,1"){
                 cp_new.max.push(loc);

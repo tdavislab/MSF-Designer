@@ -6,7 +6,7 @@ class sliders{
         this.svg = d3.select("#functionValues").append("svg")
             .attr("width",this.svgWidth)
             .attr("height",this.svgHeight)
-            .style("opacity",1);
+            .style("opacity",0);
         this.slidersgroup = this.svg.append("g")
             .attr("id","slidersgroup");
         this.slidershowgroup = this.svg.append("g")
@@ -64,15 +64,15 @@ class sliders{
         handles
             .attr("class", (d)=>{
                 if(d[2]===1&&d[3]===1){
-                    return "max";
+                    return "handle max";
                 } else if(d[2]===-1&&d[3]===-1){
-                    return "min";
+                    return "handle min";
                 } else if(d[2]*d[3]<0){
-                    return "saddle";
+                    return "handle saddle";
                 }
             })
             .attr("id",(d,i)=>"handle"+i)
-            .attr("cx",this.xMap.range()[1]/2)
+            .attr("cx",d=>this.xMap(d[4]))
             .attr("cy",(d,i)=>this.yMap(i+0.5))
             .attr("r", 12)
             .on("mouseover",mouseover)
@@ -128,9 +128,10 @@ class sliders{
                     return "label saddle";
                 }
             })
+            // .attr("class","label")
             .attr("x",this.xMap.range()[0])
             .attr("y",(d,i)=>this.yMap(i+0.4))
-            .text((d,i)=>"Point "+(i+1));
+            .text((d,i)=>(i+1));
         
         function mouseover(){
             d3.select(this)
@@ -166,5 +167,8 @@ class sliders{
                 .classed("mouseover",false);
         }
 
+    }
+    findValueRange(){
+        
     }
 }

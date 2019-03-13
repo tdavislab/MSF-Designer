@@ -19,11 +19,11 @@ class moves{
                 let y = this.anim.yMapReverse(d3.event.y-100+7.5);
                 let mincp = this.anim.findMinPt([x,y],this.anim.cp);
                 if(this.apType === "max"){
-                    this.anim.cp.push([x,y,1,1]);
+                    this.anim.cp.push([x,y,1,1,this.anim.fmax(1,0,0,this.anim.sigma)]);
                     this.apType = "saddle";
                     // d3.select("#amoveplus")
                         // .attr("value","Add a saddle point")
-                    this.anim.cp.push([(x+mincp[0])/2,(y+mincp[1])/2,-1,1])
+                    this.anim.cp.push([(x+mincp[0])/2,(y+mincp[1])/2,-1,1,this.anim.fmax(1,0.25,0,this.anim.sigma)])
                 // }
                 // else if(this.apType === "saddle"){
                     // this.anim.cp.push([x,y,-1,1]);
