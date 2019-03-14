@@ -1,12 +1,13 @@
 // **** : to do list
 
 class criticalPoint{
-    constructor(id,x,y,type){
+    constructor(id,x,y,type,edges){
         this.id = id;
         this.x = x;
         this.y = y;
         this.type = type;
         this.fv = this.f(x,y,type); // function value
+        this.edges = edges;
     }
 
     f(x,y,type){
@@ -63,9 +64,9 @@ class anim{
         // this.cp = [[0.25,0.5,1,1,this.fmax(1,0,0,this.sigma)],[0.5,0.5,-1,1,this.fmax(1,0.25,0,this.sigma)],[0.75,0.5,1,1,this.fmax(1,0,0,this.sigma)]];
         // this.cp = [{"id":0,"x":0.25,"y":0.5,"type":"max","fv":this.fmax(1,0,0,this.sigma)},{"id":1,"x":0.5,"y":0.5,"type":"saddle","fv":this.fmax(1,0.25,0,this.sigma)},{"id":2,"x":0.75,"y":0.5,"type":"max","fv":this.fmax(1,0,0,this.sigma)}]
         this.cp = [];
-        this.cp.push(new criticalPoint(0,0.25,0.5,"max"));
-        this.cp.push(new criticalPoint(1,0.5,0.5,"saddle"));
-        this.cp.push(new criticalPoint(2,0.75,0.5,"max"));
+        this.cp.push(new criticalPoint(0,0.25,0.5,"max",0));
+        this.cp.push(new criticalPoint(1,0.5,0.5,"saddle",[0,1,2,3]));
+        this.cp.push(new criticalPoint(2,0.75,0.5,"max",1));
         console.log(this.cp)
         this.cp_saddle = [];
         for(let i=0;i<this.cp.length;i++){
@@ -214,7 +215,7 @@ class anim{
                 } else if ([that.edges[j][2].x,that.edges[j][2].y].join()===[that.cp[i].x,that.cp[i].y].join()) {
                     that.edges[j][2] = {"x":that.xMapReverse(d3.mouse(this)[0]),"y":that.yMapReverse(d3.mouse(this)[1])};
                 }
-                that.edges[j][1] = {"x":(that.edges[j][0].x+that.edges[j][2].x)/2,"y":(that.edges[j][0].y+that.edges[j][2].y)/2};
+                // that.edges[j][1] = {"x":(that.edges[j][0].x+that.edges[j][2].x)/2,"y":(that.edges[j][0].y+that.edges[j][2].y)/2};
             }
             //     // let totalLength = d3.select("#p"+j).node().getTotalLength();
             //     // let stepLength = totalLength/that.numSeg;
@@ -320,6 +321,7 @@ class anim{
                     // node on horizontal frame
                     d3.select(this).attr("cx", d[0].x = that.xMapReverse(d3.event.x));
                     that.edges[d[1]][2].x = that.xMapReverse(d3.event.x);
+                    // that.edges[d[1]][1].x = (that.edges[d[1]][2].x+that.edges[d[1]][0].x)/2;
                 }
                 else {
                     // node not on the frame
@@ -447,13 +449,17 @@ class anim{
         // map the original point to a new location when the boundary geometry is changed
         let x_new = x;
         let y_new = y;
+        // console.log("adjusting flow")
 
         // now only deal with vertical lines
         for(let i=0;i<this.edges.length;i++){
             let ed = this.edges[i];
-            // let edMap = this.edgeMapper["p"+i];
+            let edMap = this.edgeMapper["p"+i];
             let xRange = Math.abs(ed[2].x-ed[0].x);
             let yRange = Math.abs(ed[2].y-ed[0].y);
+            if(xRange!=0 && yRange!=0){
+                // console.log("i am here")
+            }
             // if((Math.min(ed[0][1],ed[2][1])<=y&&y<=Math.max(ed[0][1],ed[2][1]))||(Math.min(ed[0][0],ed[2][0])<=x&&x<=Math.max(ed[0][0],ed[2][0])))
             // let edMap = this.edgeMapper["p"+i];
             // let xSeg = Math.abs(ed[2][0]-ed[0][0])/this.numSeg;
@@ -487,8 +493,8 @@ class anim{
 
 
 
-            if(xRange===0){
-            // if(a===1){
+            // if(xRange===0){
+            if(a===1){
                 // now only deal with vertical lines
                 if(Math.min(ed[0].y,ed[2].y)<=y&&y<=Math.max(ed[0].y,ed[2].y)){ // only these points need to change
                     let edMap = this.edgeMapper["p"+i];
@@ -775,6 +781,17 @@ class anim{
         for(let x=0;x<=1;x+=this.step){
             for(let y=0;y<=1;y+=this.step){
                 let cpt = this.findMinPt({"x":x,"y":y},this.cp);
+                if(this.cp.length===3){
+                    if(x>0.35 && x<0.65){
+                        cpt = this.cp[1];
+                    } else if (x <= 0.35){
+                        cpt = this.cp[0];
+                    } else {
+                        cpt = this.cp[2];
+                    }
+
+                }
+                
                 let idx = [];
                 let x_new = x - cpt.x;
                 let y_new = y - cpt.y;
@@ -794,18 +811,56 @@ class anim{
                     
                 // }
                 // console.log(dx,dy)
-                if(idx[0]*idx[1]===-1){
+                // if(cpt.type === "max"){
+                //     let ed = this.edges[cpt.edges];
+                //     if(ed[0].x-ed[2].x!=0 && ed[0].y-ed[2].y!=0){
+                //         let theta = Math.atan2(ed[0].y-ed[2].y,ed[0].x-ed[2].x)*2;
+                //         if(x>0.5 && x<0.75){
+                //             let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+                //             let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+                //             dx = dx_new;
+                //             dy = dy_new;  
+    
+                //         }
+                //     }
+                    
+
+
+                // }
+
+                if(cpt.type==="saddle"){
+                    // for(let i=0;i<cpt.edges.length;i++){
+                    //     let ed = this.edges[cpt.edges[i]];
+                    //     if(ed[0].x-ed[2].x!=0 && ed[0].y-ed[2].y!=0){
+                    //         let theta = Math.atan2(ed[0].y-ed[2].y,ed[0].x-ed[2].x)*2;
+                    //         // if(this.calDist({"x":x,"y":y},ed[1])<0.05){
+                    //         if(x>0.5 && (y>0.25 && y < 0.75)){
+                    //             let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+                    //             let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+                    //             dx = dx_new;
+                    //             dy = dy_new;  
+
+                    //         }
+
+                    //     }
+                        
+                                              
+                    // }
                     // dx = -x_new;
                     // dy = y_new;
                     // dx = -(1/sigma)*x_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
                     // dy = (1/sigma)*y_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
                     // flow rotation
-                    let pts = this.find2MinPt(cpt,cp_max);
-                    let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
-                    let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-                    let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-                    dx = dx_new;
-                    dy = dy_new;
+                    // if([cpt.x,cpt.y].join!=[0.5,0.5].join()){
+                    //     let pts = this.find2MinPt(cpt,cp_max);
+                    //     let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
+                    //     let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+                    //     let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+                    //     dx = dx_new;
+                    //     dy = dy_new;
+
+                    // }
+                    
                     
                 }
                 let pt_new = this.adjustFlow(x,y);

@@ -115,25 +115,33 @@ class moves{
                 let x = this.anim.xMapReverse(d3.event.x-80);
                 let y = this.anim.yMapReverse(d3.event.y-30+7.5);
                 if(this.bpType === "max"){
-                    this.anim.cp.push([x,y,1,1]);
+                    // this.anim.cp.push([x,y,1,1]);
+                    let id = this.anim.cp.length;
+                    this.anim.cp.push(new criticalPoint(id,x,y,"max"))
                     this.bpType = "saddle1";
                     d3.select("#bmoveplus")
                         .attr("value","Add a saddle point");
                 }
                 else if(this.bpType === "saddle1"){
-                    this.anim.cp.push([x,y,-1,1]);  
+                    // this.anim.cp.push([x,y,-1,1]);  
+                    let id = this.anim.cp.length;
+                    this.anim.cp.push(new criticalPoint(id,x,y,"saddle"))
                     this.bpType="min";                  
                     d3.select("#bmoveplus")
                         .attr("value","Add a min point");
                 }
                 else if(this.bpType === "min"){
-                    this.anim.cp.push([x,y,-1,-1]);  
+                    // this.anim.cp.push([x,y,-1,-1]); 
+                    let id = this.anim.cp.length;
+                    this.anim.cp.push(new criticalPoint(id,x,y,"min")) 
                     this.bpType="saddle2";                  
                     d3.select("#bmoveplus")
                         .attr("value","Add a saddle point");
                 }
                 else if(this.bpType === "saddle2"){
-                    this.anim.cp.push([x,y,-1,1]);
+                    // this.anim.cp.push([x,y,-1,1]);
+                    let id = this.anim.cp.length;
+                    this.anim.cp.push(new criticalPoint(id,x,y,"saddle"))
                     this.anim.drawFlag=true;
                     d3.select("#annotation")
                         .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
