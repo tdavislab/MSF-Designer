@@ -11,7 +11,7 @@ bundles = {
         # 'js/lib/three.min.js',
         # 'js/lib/STLLoader.js',
         # 'js/lib/TrackballControls.js',
-        'js/simple_anim.js',
+        'js/animation.js',
         'js/moves.js',
         'js/sliders.js',
         'js/script.js',
