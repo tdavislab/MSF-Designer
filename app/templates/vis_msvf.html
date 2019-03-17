@@ -74,13 +74,17 @@
                 </td>
             </tr>
         </table>
-        <br>
         <p>
-            <input type="button" id="export" value="Export Current Configuration">
+            <div>
+                <label for="exFilename">File Name</label>
+                <input class="form-control" type="text" placeholder="Input file name" id="exFilename">
+                <small id="exHelp" class="form-text text-muted">The default name is "export"</small>
+            </div>
+            <input type="button" class="btn btn-outline-dark" id="export" value="Export Current Configuration">
         </p>
         <p>
             <input type="file" style="display:none" id="files">
-            <input type="button" id="import" value="Import A Configuration">
+            <input type="button" class="btn btn-outline-dark" id="import" value="Import A Configuration">
         </p>
         
         

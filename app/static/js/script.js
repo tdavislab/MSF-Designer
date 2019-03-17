@@ -1,8 +1,13 @@
+d3.json('static/assets/export.json').then(d=>{
+    console.log(d);
+})
+
 let Anim = new anim();
 let Sliders = new sliders(Anim);
 let Moves = new moves(Anim,Sliders);
 
 function init(){
+    
     $("#import").click(function(){
         $("#files").click();
     });
@@ -19,15 +24,10 @@ function init(){
         })
     $("#export").click(function(){
         console.log("cp",Anim.cp)
-        console.log("edges",Anim.edges)
-        // let content = {"cp":1,"np":2};
-        // let cp_json = {};
-        // for(let i=0;i<Anim.cp.length;i++){
-        //     cp_json[i] = Anim.cp[i]
-        // }
-        // console.log(cp_json)
+        let v = $("#exFilename").val();
+        let anim_info = {"cp":Anim.cp, "edge":Anim.edges, "filename":v}
         $.post( "/export", {
-            javascript_data: JSON.stringify(Anim.cp)
+            javascript_data: JSON.stringify(anim_info)
         });
     })
 }

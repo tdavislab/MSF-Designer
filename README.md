@@ -13,6 +13,3 @@ Exporting files requires a server, please follow the instruction to set up.
 2 Drag the yellow node to change the boundary geometry.
 
 3 Click buttons to add moves (D moves are still under construction).
-
-
-pip install Flask-Assets

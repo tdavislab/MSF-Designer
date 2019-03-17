@@ -17,9 +17,11 @@ def index():
 def exportFile():
     # print("i am here")
     jsdata = request.form.get('javascript_data')
-    print(jsdata)
-    cpfile = open(APP_STATIC+"cp.txt","w")
-    cpfile.write(jsdata)
-    cpfile.close()
+    jsdata1 = json.loads(jsdata)
+    if jsdata1["filename"] == "":
+        filename = path.join(APP_STATIC,"assets/export.json")
+    else: filename = jsdata1["filename"]+".json"
+    with open(filename,"w") as outfile:
+        json.dump(jsdata1,outfile)
+    outfile.close()
     return jsdata
-    # return json.loads(jsdata)[0]
