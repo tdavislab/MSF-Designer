@@ -6,9 +6,9 @@ from os import path
 from os.path import splitext
 
 @app.route('/')
-@app.route('/simple')
+@app.route('/vis_msvf')
 def index():
-    return render_template('simple.html')
+    return render_template('vis_msvf.html')
 
 
 @app.route('/export', methods=['POST','GET'])
