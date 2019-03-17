@@ -2,6 +2,24 @@ let Anim = new anim();
 let Sliders = new sliders(Anim);
 let Moves = new moves(Anim,Sliders);
 
+function init(){
+    $("#import").click(function(){
+        $("#files").click();
+    });
+    d3.select("#files")
+        .on("change",()=>{
+            let selectedFile = document.getElementById("files").files[0];
+            console.log(selectedFile)
+            let reader = new FileReader();
+            reader.readAsText(selectedFile);
+            reader.onload = function(){
+                console.log(this)
+                console.log(this.result);
+            };
+        })
+}
+init();
+
 
 d3.select("#reset")
     .on("click",()=>{
