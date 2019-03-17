@@ -4,6 +4,8 @@ from app import APP_STATIC
 from app import APP_ROOT
 from os import path
 from os.path import splitext
+import json
+
 
 @app.route('/')
 @app.route('/vis_msvf')
@@ -12,5 +14,12 @@ def index():
 
 
 @app.route('/export', methods=['POST','GET'])
-def demo1():
-    print("i am here")
+def exportFile():
+    # print("i am here")
+    jsdata = request.form.get('javascript_data')
+    print(jsdata)
+    cpfile = open(APP_STATIC+"cp.txt","w")
+    cpfile.write(jsdata)
+    cpfile.close()
+    return jsdata
+    # return json.loads(jsdata)[0]

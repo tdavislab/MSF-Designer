@@ -18,34 +18,17 @@ function init(){
             };
         })
     $("#export").click(function(){
-        // console.log("i am here")
-        // var w = window.open("", "export", "height=0,width=0,toolbar=no,menubar=no,scrollbars=no,resizable=on,location=no,status=no");
- 
-        //     // var dt = new Date();
-        // w.document.charset = "UTF-8";
-        // w.document.write("just try");
-        // w.document.execCommand("SaveAs", false,  "export.txt");
-        // w.close();
-    
-        let content = {"cp":[1,2]};
-        $.ajax({
-            type: "GET",
-            enctype: 'multipart/form-data',
-            url: "/export",
-            data: content,
-            processData: false, //prevent jQuery from automatically transforming the data into a query string
-            contentType: false,
-            cache: false,
-            dataType:'json',
-            success: function (response) {
-                console.log(response)
-            //   data=response;
-            //   onChartTypechange()
-            },
-            error: function (error) {
-                  console.log("error",error);
-            }
-          });
+        console.log("cp",Anim.cp)
+        console.log("edges",Anim.edges)
+        // let content = {"cp":1,"np":2};
+        // let cp_json = {};
+        // for(let i=0;i<Anim.cp.length;i++){
+        //     cp_json[i] = Anim.cp[i]
+        // }
+        // console.log(cp_json)
+        $.post( "/export", {
+            javascript_data: JSON.stringify(Anim.cp)
+        });
     })
 }
 init();
