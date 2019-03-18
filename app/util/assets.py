@@ -7,6 +7,7 @@ bundles = {
         'js/animation.js',
         'js/moves.js',
         'js/sliders.js',
+        'js/persistence.js',
         'js/script.js',
         output='gen/script.js'
         ),

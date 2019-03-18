@@ -5,6 +5,7 @@ d3.json('static/assets/export.json').then(d=>{
 let Anim = new anim();
 let Sliders = new sliders(Anim);
 let Moves = new moves(Anim,Sliders);
+let Persistence = new persistence(Anim);
 
 function init(){
     
