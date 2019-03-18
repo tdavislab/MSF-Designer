@@ -24,7 +24,7 @@ class criticalPoint{
 }
 
 class anim{
-    constructor() {
+    constructor(cp=undefined, edges=undefined) {
         this.canvasWidth = document.getElementById('animation').offsetWidth;
         this.canvasHeight = document.getElementById('animation').offsetHeight;
         this.svg = d3.select("#annotation");
@@ -61,12 +61,21 @@ class anim{
         // this.step = 0.05;
         this.numSeg = 10;
         this.sigma = 0.1;
-        // this.cp = [[0.25,0.5,1,1,this.fmax(1,0,0,this.sigma)],[0.5,0.5,-1,1,this.fmax(1,0.25,0,this.sigma)],[0.75,0.5,1,1,this.fmax(1,0,0,this.sigma)]];
-        // this.cp = [{"id":0,"x":0.25,"y":0.5,"type":"max","fv":this.fmax(1,0,0,this.sigma)},{"id":1,"x":0.5,"y":0.5,"type":"saddle","fv":this.fmax(1,0.25,0,this.sigma)},{"id":2,"x":0.75,"y":0.5,"type":"max","fv":this.fmax(1,0,0,this.sigma)}]
-        this.cp = [];
-        this.cp.push(new criticalPoint(0,0.25,0.5,"max",0));
-        this.cp.push(new criticalPoint(1,0.5,0.5,"saddle",[0,1,2,3]));
-        this.cp.push(new criticalPoint(2,0.75,0.5,"max",1));
+        if(cp===undefined){
+            this.cp = [];
+            this.cp.push(new criticalPoint(0,0.25,0.5,"max",0));
+            this.cp.push(new criticalPoint(1,0.5,0.5,"saddle",[0,1,2,3]));
+            this.cp.push(new criticalPoint(2,0.75,0.5,"max",1));
+        } else {
+            this.cp = cp
+        }
+        if(edges===undefined){
+            this.edges = this.findEdges(this.cp);
+        } else{
+            this.edges = edges
+        }
+        
+        
         console.log(this.cp)
         this.cp_saddle = [];
         for(let i=0;i<this.cp.length;i++){
@@ -74,7 +83,7 @@ class anim{
                 this.cp_saddle.push(this.cp[i]);
             }
         }
-        this.edges = this.findEdges(this.cp);
+        
         this.connNodes = this.findConnNodes(this.edges);
         // this.edgeMapper = this.initializeEdgeMapper(this.edges);
         this.edgeMapper = {};

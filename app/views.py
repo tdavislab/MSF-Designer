@@ -5,6 +5,8 @@ from app import APP_ROOT
 from os import path
 from os.path import splitext
 import json
+# import pandas
+import numpy as np
 
 
 @app.route('/')
@@ -15,13 +17,21 @@ def index():
 
 @app.route('/export', methods=['POST','GET'])
 def exportFile():
-    # print("i am here")
     jsdata = request.form.get('javascript_data')
     jsdata1 = json.loads(jsdata)
     if jsdata1["filename"] == "":
         filename = path.join(APP_STATIC,"assets/export.json")
-    else: filename = jsdata1["filename"]+".json"
+    else: filename = path.join(APP_STATIC,"assets/",jsdata1["filename"]+".json")
     with open(filename,"w") as outfile:
         json.dump(jsdata1,outfile)
     outfile.close()
     return jsdata
+
+@app.route('/import', methods=['POST','GET'])
+def importFile():
+    jsdata = request.files['files']
+    filename = path.join(APP_STATIC,"assets/",jsdata.filename)
+    with open(filename) as f:
+        data = json.load(f)
+    f.close()
+    return jsonify(data)

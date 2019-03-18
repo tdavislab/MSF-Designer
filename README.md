@@ -6,6 +6,8 @@ Exporting files requires a server, please follow the instruction to set up.
 3. Use `python3 run.py` to run the server.
 4. Visit http://localhost:8080/ (If possible, please use Chrome.)
 
+When export configurations, files will be saved in `app/static/assets/`
+
 ## Current Functions
 
 1 Drag the critical points to change the position.

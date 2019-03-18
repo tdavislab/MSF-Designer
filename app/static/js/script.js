@@ -14,14 +14,30 @@ function init(){
     });
     d3.select("#files")
         .on("change",()=>{
-            let selectedFile = document.getElementById("files").files[0];
-            console.log(selectedFile)
-            let reader = new FileReader();
-            reader.readAsText(selectedFile);
-            reader.onload = function(){
-                console.log(this)
-                console.log(this.result);
-            };
+            let form = $('#upload')[0];
+            let content = new FormData(form);
+            $.ajax({
+                type: "POST",
+                enctype: 'multipart/form-data',
+                url: "/import",
+                data: content,
+                processData: false, //prevent jQuery from automatically transforming the data into a query string
+                contentType: false,
+                cache: false,
+                dataType:'json',
+                success: function (response) {
+                    data=response;
+                    Anim.clearCanvas();
+                    Anim = new anim(data.cp,data.edge);
+                    Sliders = new sliders(Anim);
+                    Moves = new moves(Anim,Sliders);
+                    Persistence = new persistence(Anim);
+                },
+                error: function (error) {
+                    console.log("error",error);
+                }
+            });
+
         })
     $("#export").click(function(){
         console.log("cp",Anim.cp)
@@ -30,6 +46,7 @@ function init(){
         $.post( "/export", {
             javascript_data: JSON.stringify(anim_info)
         });
+        alert("Configuration saved")
     })
 }
 init();
@@ -39,7 +56,9 @@ d3.select("#reset")
     .on("click",()=>{
         Anim.clearCanvas();
         Anim = new anim();
-        Moves = new moves(Anim);
+        Sliders = new sliders(Anim);
+        Moves = new moves(Anim,Sliders);
+        Persistence = new persistence(Anim);
         
     })
 d3.select("#amoveplus")

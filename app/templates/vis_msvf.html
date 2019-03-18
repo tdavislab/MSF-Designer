@@ -59,27 +59,33 @@
                         <p><input type="button" id="reset" class="btn btn-primary btn-block"  value="Reset"></p>                   
                         
                 </td>
+                <td rowspan="2" id="functionValues" style="padding: 20px; border: 1px solid black">
+                        <p><input type="button" id="enableFV" class="btn btn-outline-primary btn-block"  value="Enable Function Value Control"></p> 
+    
+    
+                    </td>
             </tr>
             <tr>
-                <td id="functionValues" style="padding: 20px; border: 1px solid black">
-                    <p><input type="button" id="enableFV" class="btn btn-outline-primary btn-block"  value="Enable Function Value Control"></p> 
-
-
+                <td id="filegroup" style="padding: 20px; border: 1px solid black">
+                    <p>
+                        <form method="post" id="upload" enctype="multipart/form-data" action="" >
+                            <input type="file" style="display:none" id="files" name="files">
+                            <input type="button" class="btn btn-outline-primary" id="import" value="Import A Configuration">
+                        </form>
+                    </p>
+                    <br>
+                    <p>
+                        <div>
+                            <label for="exFilename">File Name</label>
+                            <input class="form-control" type="text" placeholder="Input file name" id="exFilename">
+                            <small id="exHelp" class="form-text text-muted">The default name is "export"</small>
+                        </div>
+                            <input style="position: relative; top:5px" type="button" class="btn btn-outline-primary" id="export" value="Export Current Configuration">
+                    </p> 
                 </td>
             </tr>
         </table>
-        <p>
-            <div>
-                <label for="exFilename">File Name</label>
-                <input class="form-control" type="text" placeholder="Input file name" id="exFilename">
-                <small id="exHelp" class="form-text text-muted">The default name is "export"</small>
-            </div>
-            <input type="button" class="btn btn-outline-dark" id="export" value="Export Current Configuration">
-        </p>
-        <p>
-            <input type="file" style="display:none" id="files">
-            <input type="button" class="btn btn-outline-dark" id="import" value="Import A Configuration">
-        </p>
+        
         <div id="persistencegroup"></div>
         
         
