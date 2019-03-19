@@ -1,7 +1,8 @@
 class moves{
-    constructor(anim, sliders){
+    constructor(anim, sliders, persistence){
         this.anim = anim;
         this.sliders = sliders;
+        this.persistence = persistence;
 
         this.apType = "";
         this.amType = "";
@@ -60,6 +61,9 @@ class moves{
                 this.anim.drawAnnotation();
                 this.anim.addedges();
                 this.sliders.addSlider();
+                this.anim.findNearestPoint();
+                this.persistence.calPersistence();
+                this.persistence.drawPersistence();
             })
     }
 

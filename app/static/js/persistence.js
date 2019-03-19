@@ -1,6 +1,6 @@
 class persistence{
     constructor(anim){
-        // this.anim = anim;
+        this.anim = anim;
         this.cp = anim.cp;
         this.local_max = 1;
         this.local_min = 0;
@@ -20,9 +20,11 @@ class persistence{
         this.drawPersistence();
     }
     calPersistence(){
+        console.log("calculatings")
         let cp_new = [];
         for(let i=0;i<this.cp.length;i++){
-            cp_new.push({"id":this.cp[i].id,"type":this.cp[i].type,"fv":this.cp[i].fv})
+            // cp_new.push({"id":this.cp[i].id,"type":this.cp[i].type,"fv":this.cp[i].fv})
+            cp_new.push(this.cp[i])
         }
         // To avoid two critical points have the same function value.
         let cp_fv = [this.local_min,this.local_max];
@@ -46,13 +48,20 @@ class persistence{
 
         for(let i=0;i<cp_new.length;i++){
             if(cp_new[i].type === "max"){ // max is corresponding to the birth of a component
-                this.pc.push({"id":this.pc.length, "birth":cp_new[i].fv_new, "death":undefined});
+                this.pc.push({"id":this.pc.length, "birth":cp_new[i].fv_new, "death":undefined,"max_id":i});
                 numCC += 1;
-            } else { // saddle/min: corresponding to the death of a component
-                // **** need modification ****
-                this.pc[0].death = cp_new[i].fv_new;
+            } else if(cp_new[i].type === "saddle"){ // saddle/min: corresponding to the death of a component
+                let candidate_max = this.anim.findMinPt(cp_new[i],cp_new[i].np.max);
+                for(let j=0;j<this.pc.length;j++){
+                    if(this.pc[j].max_id===candidate_max.id){
+                        this.pc[j].death = cp_new[i].fv_new
+                    }
+                }
                 numCC -= 1;
-
+            } else if (cp_new[i].type === "min"){
+                // **** need modification ****
+                // let candidata_saddle = this.anim.findMinPt(cp_new[i],cp_new[i].np);
+                // let candidate_max = this.anim.findMinPt(candidata_saddle,candidata_saddle.np.max);
             }
         }
         
@@ -79,7 +88,7 @@ class persistence{
         bars = newbars.merge(bars);
         bars
             .attr("x",d=>xScale(Math.round(d.birth*10)/10))
-            .attr("y",(d,i)=>-(i+1)*20+(this.svgHeight-this.margin.bottom))
+            .attr("y",(d,i)=>-(i+1)*18+(this.svgHeight-this.margin.bottom))
             .attr("width",d=>{
                 if(d.death===undefined){
                     return xScale(1)
@@ -88,8 +97,8 @@ class persistence{
                 }
             })
             .attr("height",15)
-            .attr("stroke","black")
-            .attr("fill","none")
+            // .attr("stroke","black")
+            .attr("fill","rgb(172,218,224)")
 
 
     }

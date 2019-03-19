@@ -8,6 +8,13 @@ class criticalPoint{
         this.type = type;
         this.fv = this.f(x,y,type); // function value
         this.edges = edges;
+        if(type === "saddle"){ // initialize nearest points
+            this.np = {"max":[],"min":[]}; // np: nearest points
+        } else {
+            this.np = [] // max/min only connects to saddle
+        }
+        this.lvalue = 0;
+        this.uvalue = 1;
     }
 
     f(x,y,type){
@@ -125,6 +132,8 @@ class anim{
        
         this.grad = this.constructMesh(this.sigma)
         console.log(this.grad)
+        this.findNearestPoint();
+        this.findRange()
         // this.addSlider();
     }
 
@@ -134,11 +143,74 @@ class anim{
     //         .attr("type","range")
     // }
 
-    findNearestPoint(cp){
+    findNearestPoint(){
+        let cp_max = [];
+        let cp_min = [];
+        for(let i=0;i<this.cp.length;i++){
+            if(this.cp[i].type==="max"){
+                cp_max.push(this.cp[i]);
+            } else if (this.cp[i].type==="min"){
+                cp_min.push(this.cp[i])
+            }
+        }
+        for(let i=0;i<this.cp.length;i++){
+            if(this.cp[i].type==="saddle"){
+                if(cp_max.length>2){
+                    this.cp[i].np.max = this.find2MinPt(this.cp[i],cp_max);
+                } else { this.cp[i].np.max = cp_max;}
+                for(let j=0;j<this.cp[i].np.max.length;j++){
+                    let max_id = this.cp[i].np.max[j].id;
+                    this.cp[max_id].np.push(this.cp[i]); // add this saddle as a np to the related max
+                }
+                let cp_min_new = cp_min.slice(0);
+                cp_min_new.push({"x":this.cp[i].x,"y":0});
+                cp_min_new.push({"x":this.cp[i].x,"y":1});
+                if(cp_min.length>2){
+                    this.cp[i].np.min = this.find2MinPt(this.cp[i],cp_min);
+                } else {this.cp[i].np.min = cp_min_new;}
+                for(let j=0;j<this.cp[i].np.min.length;j++){
+                    let min_id = this.cp[i].np.min[j].id;
+                    if(min_id!=undefined){
+                        this.cp[min_id].np.push(this.cp[i]); // add this saddle as a np to the related min
+                    }
+                }
+            }
+        }
+        console.log(this.cp)
         // if cp.type === max or min, return the nearest saddle point
         // if cp.type === saddle, return 2 max, 2 min
     }
     
+    findRange(){
+        for(let i=0;i<this.cp.length;i++){
+            this.cp[i].lvalue = 0;
+            this.cp[i].uvalue = 1;
+            if(this.cp[i].type==="max"){
+                for(let j=0;j<this.cp[i].np.length;j++){
+                    if(this.cp[i].np[j].fv>this.cp[i].lvalue){
+                        this.cp[i].lvalue = this.cp[i].np[j].fv;
+                    }
+                }
+            } else if(this.cp[i].type==="min"){
+                for(let j=0;j<this.cp[i].np.length;j++){
+                    if(this.cp[i].np[j].fv<this.cp[i].uvalue){
+                        this.cp[i].uvalue = this.cp[i].np[j].fv;
+                    }
+                }
+            } else if(this.cp[i].type==="saddle"){
+                for(let j=0;j<this.cp[i].np.max.length;j++){
+                    if(this.cp[i].np.max[j].fv<this.cp[i].uvalue){
+                        this.cp[i].uvalue = this.cp[i].np.max[j].fv
+                    }
+                }
+                for(let j=0;j<this.cp[i].np.min.length;j++){
+                    if(this.cp[i].np.min[j].fv>this.cp[i].lvalue){
+                        this.cp[i].lvalue = this.cp[i].np.min[j].fv
+                    }
+                }
+            }
+        }
+    }
 
     drawAnnotation(){
         // draw critical points
@@ -629,6 +701,7 @@ class anim{
                     let pt_new = that.findV(X[i],Y[i],that.grad)[1]
                     let X_new = pt_new[0];
                     let Y_new = pt_new[1];
+                    let fv = that.findV(X[i],Y[i],that.grad)[2]
 
                         
                     
@@ -637,8 +710,12 @@ class anim{
                     g.beginPath();
                     g.moveTo(that.xMap(X_new), that.yMap(Y_new)); // the start point of the path
                     g.lineTo(that.xMap(X_new+dr[0]*dt), that.yMap(Y_new+dr[1]*dt)); // the end point
+                    // X[i]+=dr[0]*(dt+dt*fv*5);
+                    // Y[i]+=dr[1]*(dt+dt*fv*5);
+                    // dt = dt*2
                     X[i]+=dr[0]*dt;
                     Y[i]+=dr[1]*dt;
+
                     g.lineWidth = 1;
                     // g.strokeStyle = "#FF8000";
                     // g.strokeStyle = "rgb(141,106,184)"
@@ -778,6 +855,10 @@ class anim{
         return [pt1,pt2];
     }
 
+    adjustMesh(sigma){
+
+    }
+
     constructMesh(sigma){
         console.log("constucting")
         let grad_new = [];
@@ -790,16 +871,16 @@ class anim{
         for(let x=0;x<=1;x+=this.step){
             for(let y=0;y<=1;y+=this.step){
                 let cpt = this.findMinPt({"x":x,"y":y},this.cp);
-                if(this.cp.length===3){
-                    if(x>0.35 && x<0.65){
-                        cpt = this.cp[1];
-                    } else if (x <= 0.35){
-                        cpt = this.cp[0];
-                    } else {
-                        cpt = this.cp[2];
-                    }
+                // if(this.cp.length===3){
+                //     if(x>0.35 && x<0.65){
+                //         cpt = this.cp[1];
+                //     } else if (x <= 0.35){
+                //         cpt = this.cp[0];
+                //     } else {
+                //         cpt = this.cp[2];
+                //     }
 
-                }
+                // }
                 
                 let idx = [];
                 let x_new = x - cpt.x;
@@ -860,20 +941,21 @@ class anim{
                     // dx = -(1/sigma)*x_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
                     // dy = (1/sigma)*y_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
                     // flow rotation
-                    // if([cpt.x,cpt.y].join!=[0.5,0.5].join()){
-                    //     let pts = this.find2MinPt(cpt,cp_max);
-                    //     let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
-                    //     let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-                    //     let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-                    //     dx = dx_new;
-                    //     dy = dy_new;
+                    if([cpt.x,cpt.y].join!=[0.5,0.5].join()){
+                        let pts = this.find2MinPt(cpt,cp_max);
+                        let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
+                        let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+                        let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+                        dx = dx_new;
+                        dy = dy_new;
 
-                    // }
+                    }
                     
                     
                 }
                 let pt_new = this.adjustFlow(x,y);
-                grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1]]);
+                // let pt_new = [x,y];
+                grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1],cpt.fv]);
                 // grad_new.push([x,y,dx,dy]);
             }
         }
@@ -911,7 +993,8 @@ class anim{
         let x_new = ((triang[1][0]-x)*triang[0][4]+(x-triang[0][0])*triang[1][4])/(triang[1][0]-triang[0][0]);
         let y_new = ((triang[2][1]-y)*triang[1][5]+(y-triang[1][1])*triang[2][5])/(triang[2][1]-triang[1][1]);
         let pt_new = [x_new,y_new]
-        return [ex_v,pt_new];
+        let fv = (triang[0][6] + triang[1][6] + triang[2][6])/3
+        return [ex_v,pt_new,fv];
         // return ex_v;
     }
 

@@ -4,8 +4,9 @@ d3.json('static/assets/export.json').then(d=>{
 
 let Anim = new anim();
 let Sliders = new sliders(Anim);
-let Moves = new moves(Anim,Sliders);
 let Persistence = new persistence(Anim);
+let Moves = new moves(Anim,Sliders,Persistence);
+
 
 function init(){
     
@@ -30,8 +31,8 @@ function init(){
                     Anim.clearCanvas();
                     Anim = new anim(data.cp,data.edge);
                     Sliders = new sliders(Anim);
-                    Moves = new moves(Anim,Sliders);
                     Persistence = new persistence(Anim);
+                    Moves = new moves(Anim,Sliders,Persistence);
                 },
                 error: function (error) {
                     console.log("error",error);
@@ -57,8 +58,8 @@ d3.select("#reset")
         Anim.clearCanvas();
         Anim = new anim();
         Sliders = new sliders(Anim);
-        Moves = new moves(Anim,Sliders);
         Persistence = new persistence(Anim);
+        Moves = new moves(Anim,Sliders,Persistence);
         
     })
 d3.select("#amoveplus")
