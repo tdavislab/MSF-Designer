@@ -7,6 +7,7 @@ from os.path import splitext
 import json
 # import pandas
 import numpy as np
+import pandas as pd
 
 
 @app.route('/')
@@ -35,3 +36,13 @@ def importFile():
         data = json.load(f)
     f.close()
     return jsonify(data)
+
+@app.route('/grad', methods=['POST','GET'])
+def exportGrad():
+    jsdata = request.form.get('grad_data')
+    jsdata1 = json.loads(jsdata)
+    jsdata1 = pd.DataFrame(jsdata1)
+    filename = path.join(APP_STATIC,"assets/grad.csv")
+    jsdata1.to_csv(filename)
+    # print(jsdata1)
+    return jsdata

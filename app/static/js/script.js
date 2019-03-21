@@ -9,6 +9,8 @@ let Moves = new moves(Anim,Sliders,Persistence);
 
 
 function init(){
+
+
     
     $("#import").click(function(){
         $("#files").click();
@@ -48,6 +50,14 @@ function init(){
             javascript_data: JSON.stringify(anim_info)
         });
         alert("Configuration saved")
+    })
+
+    $("#grad").click(function(){
+        $.post( "/grad", {
+            grad_data: JSON.stringify(Anim.grad)
+        });
+        
+
     })
 }
 init();

@@ -954,16 +954,33 @@ class anim{
                     
                 }
                 let pt_new = this.adjustFlow(x,y);
+                let fv = this.calFV(x,y,cpt);
                 // let pt_new = [x,y];
-                grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1],cpt.fv]);
+                grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1],fv]);
                 // grad_new.push([x,y,dx,dy]);
             }
         }
         grad_new.sort(function(x,y){
             return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
         })
-        // console.log(grad_new)
+        console.log("*** grad_new",grad_new)
         return grad_new;
+    }
+
+    calFV(x,y,cp){
+        let w = 1;
+        let sigma = 0.1;
+        let x_new = x-cp.x;
+        let y_new = y-cp.y;
+        if(cp.type === "max"){
+            return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
+        } else if(cp.type === "saddle"){
+            if(x_new<0){
+                x_new = x - 0.25
+            } else{ x_new = x-0.75}
+            return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
+        }
+        // return w*Math.exp(-(Math.pow(x,2)+Math.pow(y,2))/sigma)
     }
 
     findV(x,y, grad){
