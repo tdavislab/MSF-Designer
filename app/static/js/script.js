@@ -9,6 +9,16 @@ let Moves = new moves(Anim,Sliders,Persistence);
 
 
 function init(){
+    d3.select("#ifflow")
+        .on("click", ()=>{
+            if(d3.select("#ifflow").node().value === "Disable Flow"){
+                d3.select("#ifflow").node().value = "Enable Flow";
+                Anim.drawFlag = false;
+            } else if (d3.select("#ifflow").node().value === "Enable Flow"){
+                d3.select("#ifflow").node().value = "Disable Flow";
+                Anim.drawFlag = true;
+            }
+        })
 
 
     

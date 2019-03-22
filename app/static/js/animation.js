@@ -51,18 +51,8 @@ class anim{
             .attr("fill","none")
         this.connNodesGroup = this.svg.append("g")
             .attr("id","connNodesgroup");
-        // this.currentPoint = this.svg.append("circle")
-        //     .attr("id","currentPoint")
-        //     .attr("r",10)
-        //     .attr("fill", "yellow")
-        // this.currentNewPoint = this.svg.append("circle")
-        //     .attr("id","currentNewPoint")
-        //     .attr("r",10)
-        //     .attr("fill", "lightblue")
+        this.frames = [[0,0,0,1],[0,1,1,1],[0,0,1,0],[1,0,1,1,]]; //used for drawing frames
         
-        
-        
-
         this.drawFlag = true;
         this.step = 0.01;
         // this.step = 0.05;
@@ -82,7 +72,6 @@ class anim{
             this.edges = edges
         }
         
-        
         console.log(this.cp)
         this.cp_saddle = [];
         for(let i=0;i<this.cp.length;i++){
@@ -92,19 +81,15 @@ class anim{
         }
         
         this.connNodes = this.findConnNodes(this.edges);
-        // this.edgeMapper = this.initializeEdgeMapper(this.edges);
         this.edgeMapper = {};
         for(let i=0;i<this.edges.length;i++){
             this.edgeMapper["p"+i] = this.initializeEdgeMapper(this.edges[i]);
         }
-        this.frames = [[0,0,0,1],[0,1,1,1],[0,0,1,0],[1,0,1,1,]]; //used for drawing frames
-        
 
-        console.log(this.edges)
-        console.log(this.edgeMapper)
+        // console.log(this.edges)
+        // console.log(this.edgeMapper)
 
-        //// curve ////
-        let N = 50; // 25^2 curves
+        let N = 50;
         // discretize the vfield coords
         this.xp = d3.range(N).map(
                 function (i) {
@@ -130,18 +115,11 @@ class anim{
 
         this.animation();
        
-        this.grad = this.constructMesh(this.sigma)
+        this.grad = this.initializeMesh(this.sigma)
         console.log(this.grad)
         this.findNearestPoint();
         this.findRange()
-        // this.addSlider();
     }
-
-    // addSlider(){
-    //     let slides = 
-    //     d3.select("#functionValues").append("input")
-    //         .attr("type","range")
-    // }
 
     findNearestPoint(){
         let cp_max = [];
@@ -177,8 +155,6 @@ class anim{
             }
         }
         console.log(this.cp)
-        // if cp.type === max or min, return the nearest saddle point
-        // if cp.type === saddle, return 2 max, 2 min
     }
     
     findRange(){
@@ -859,6 +835,52 @@ class anim{
 
     }
 
+    initializeMesh(sigma){
+        // initialize the triangulation
+        let grad_new = [];
+        let cp_max = [];
+        for(let i=0;i<this.cp.length;i++){
+            if(this.cp[i].type==="max"){
+                cp_max.push(this.cp[i]);
+            }
+        }
+        for(let x=0;x<=1;x+=this.step){
+            for(let y=0;y<=1;y+=this.step){
+                let cpt = this.findMinPt({"x":x,"y":y},this.cp);
+                let idx = [];
+                let x_new = x - cpt.x;
+                let y_new = y - cpt.y;
+                if(cpt.type === "max"){
+                    idx=[1,1];
+                } else if(cpt.type==="saddle"){
+                    idx=[-1,1];
+                } else if(cpt.type==="min"){
+                    idx=[-1,-1];
+                }
+                let dx = idx[0]*(1/sigma) * x_new * Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
+                let dy = idx[1]*(1/sigma) * y_new * (Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma));
+                if(cpt.type==="saddle"){
+                    // flow rotation
+                    let pts = this.find2MinPt(cpt,cp_max);
+                    let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
+                    let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+                    let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+                    dx = dx_new;
+                    dy = dy_new;
+                }
+                let fv = this.calFV(x,y,cpt);
+                let pt_new = [x,y];
+                grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1],fv])
+            }
+        }
+        grad_new.sort(function(x,y){
+            return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
+        })
+        return grad_new;
+
+
+    }
+
     constructMesh(sigma){
         console.log("constucting")
         let grad_new = [];
@@ -941,15 +963,15 @@ class anim{
                     // dx = -(1/sigma)*x_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
                     // dy = (1/sigma)*y_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
                     // flow rotation
-                    if([cpt.x,cpt.y].join!=[0.5,0.5].join()){
-                        let pts = this.find2MinPt(cpt,cp_max);
-                        let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
-                        let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-                        let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-                        dx = dx_new;
-                        dy = dy_new;
+                    // if([cpt.x,cpt.y].join!=[0.5,0.5].join()){
+                    //     let pts = this.find2MinPt(cpt,cp_max);
+                    //     let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
+                    //     let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+                    //     let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+                    //     dx = dx_new;
+                    //     dy = dy_new;
 
-                    }
+                    // }
                     
                     
                 }

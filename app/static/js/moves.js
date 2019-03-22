@@ -56,7 +56,7 @@ class moves{
                         }
                     }
                     this.anim.connNodes = this.anim.findConnNodes(this.anim.edges);
-                    this.anim.grad = this.anim.constructMesh(this.anim.sigma);
+                    this.anim.grad = this.anim.initializeMesh(this.anim.sigma);
                 }
                 this.anim.drawAnnotation();
                 this.anim.addedges();

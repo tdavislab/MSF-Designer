@@ -2,7 +2,7 @@ class sliders{
     constructor(anim){
         this.anim = anim;
         this.svgWidth = 300;
-        this.svgHeight = 400;
+        this.svgHeight = 800;
         this.svg = d3.select("#functionValues").append("svg")
             .attr("width",this.svgWidth)
             .attr("height",this.svgHeight)
@@ -19,16 +19,7 @@ class sliders{
             .attr("id","lowrangegroup")
         this.highrangegroup = this.svg.append("g")
             .attr("id","highrangegroup")
-        this.xMap = [];
-        for(let i=0;i<this.anim.cp.length;i++){
-            let map = d3.scaleLinear()
-                        .domain([this.anim.cp[i].lvalue, this.anim.cp[i].uvalue])
-                        .range([0, this.svgWidth-60]);
-            this.xMap.push(map)
-        } 
-        // this.xMap = d3.scaleLinear()
-        //     .domain([0, 1])
-        //     .range([0, this.svgWidth-60]);
+        
         
         this.addSlider();
         let ifShow = false;
@@ -40,7 +31,6 @@ class sliders{
                         .style("opacity",0)
                     d3.select("#enableFV")
                         .attr("value","Enable Function Value Control")
-                        // .attr("class", "btn btn-outline-primary btn-block")
                     
                 } else {
                     ifShow = true;
@@ -48,11 +38,17 @@ class sliders{
                         .style("opacity",1)
                     d3.select("#enableFV")
                         .attr("value","Disable Function Value Control")
-                        // .attr("class","btn btn-primary btn-block")
                 }
             })
     }
     addSlider(){
+        this.xMap = [];
+        for(let i=0;i<this.anim.cp.length;i++){
+            let map = d3.scaleLinear()
+                        .domain([this.anim.cp[i].lvalue, this.anim.cp[i].uvalue])
+                        .range([0, this.svgWidth-60]);
+            this.xMap.push(map)
+        } 
         this.yMap = d3.scaleLinear()
             .domain([0, this.anim.cp.length])
             .range([0, this.svgHeight]);
@@ -107,14 +103,7 @@ class sliders{
             .attr("id",(d,i)=>"value"+i)
             .attr("x",this.svgWidth-40)
             .attr("y",(d,i)=>this.yMap(i+0.5)+6)
-            .text((d,i)=>{
-                if(d.type === "max"){
-                    return 10;
-                } else {
-                    return Math.round(that.xMap[i].invert(d3.select("#handle"+i).attr("cx")*100))/100*10
-                }
-
-            })
+            .text(d=>Math.round(d.fv*100)/10)
             ;
         
         let labels = this.sliderlabelgroup.selectAll("text").data(this.anim.cp);
@@ -124,7 +113,7 @@ class sliders{
         labels
             .attr("class",(d)=>"label "+d.type)
             .attr("x",(d,i)=>this.xMap[i].range()[d.lvalue])
-            .attr("y",(d,i)=>this.yMap(i+0.4))
+            .attr("y",(d,i)=>this.yMap(i+0.5)-10)
             .text((d,i)=>(i+1));
 
         let ranges_low = this.lowrangegroup.selectAll("text").data(this.anim.cp);
@@ -134,9 +123,9 @@ class sliders{
         ranges_low
             // .attr("class",(d)=>"label "+d.type)
             .attr("x",(d,i)=>this.xMap[i].range()[d.lvalue])
-            .attr("y",(d,i)=>this.yMap(i+0.7))
+            .attr("y",(d,i)=>this.yMap(i+0.5)+25)
             .attr("id",(d,i)=>"low"+i)
-            .text((d)=>Math.round(d.lvalue*100)/100*10);
+            .text((d)=>Math.round(d.lvalue*100)/10);
         
         let ranges_high = this.highrangegroup.selectAll("text").data(this.anim.cp);
         ranges_high.exit().remove();
@@ -145,9 +134,9 @@ class sliders{
         ranges_high
             // .attr("class",(d)=>"label "+d.type)
             .attr("x",(d,i)=>this.xMap[i].range()[d.uvalue])
-            .attr("y",(d,i)=>this.yMap(i+0.7))
+            .attr("y",(d,i)=>this.yMap(i+0.5)+25)
             .attr("id",(d,i)=>"high"+i)
-            .text((d)=>Math.round(d.uvalue*100)/100*10);
+            .text((d)=>Math.round(d.uvalue*100)/10);
         
         function mouseover(){
             d3.select(this)
@@ -178,7 +167,7 @@ class sliders{
             
             d.fv = that.xMap[i].invert(p);
             that.anim.findRange();
-            that.anim.constructMesh();
+            // that.anim.constructMesh();
             for(let j=0;j<that.anim.cp.length;j++){
                 let map = d3.scaleLinear()
                             .domain([that.anim.cp[j].lvalue, that.anim.cp[j].uvalue])
@@ -186,15 +175,14 @@ class sliders{
                 that.xMap[j] = map;
             } 
             for(let j=0;j<that.anim.cp.length;j++){
-                d3.select("#high"+j).text(Math.round(that.anim.cp[j].uvalue*100)/100*10)
-                d3.select("#low"+j).text(Math.round(that.anim.cp[j].lvalue*100)/100*10)
+                d3.select("#high"+j).text(Math.round(that.anim.cp[j].uvalue*100)/10)
+                d3.select("#low"+j).text(Math.round(that.anim.cp[j].lvalue*100)/10)
 
             }
 
             d3.select("#high")
-            // that.addSlider();
             d3.select(this).attr("cx",p);
-            d3.select("#value"+i).text(Math.round(that.xMap[i].invert(p)*100)/100*10);
+            d3.select("#value"+i).text(Math.round(that.xMap[i].invert(p)*100)/10);
             // console.log(that.xMap[i].invert(p))
             d3.select("#showbar"+i).attr("x2",p);
         }
