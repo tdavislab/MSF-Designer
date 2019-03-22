@@ -8,6 +8,25 @@ import json
 # import pandas
 import numpy as np
 import pandas as pd
+import os
+
+def constructSp(df): # construct simplices
+    df = np.array(df)
+    sp = []
+    fmax = np.max(df[:,2])
+    for i in range(0,99):
+        for j in range(0,99):
+            # print(i,j)
+            idx = 100*j+i
+            pt1 = df[idx,:]
+            pt2 = df[idx+1,:]
+            pt3 = df[idx+100,:]
+            pt4 = df[idx+101,:]
+            line1 = str(int(round(pt1[0]*100)))+" "+str(int(round(pt1[1]*100)))+" "+str(int(round(pt2[0]*100)))+" "+str(int(round(pt2[1]*100)))+" "+str(int(round(pt3[0]*100)))+" "+str(int(round(pt3[1]*100)))+" "+str(int(round((fmax-pt1[2])*100)+1))+"\n"
+            line2 = str(int(round(pt2[0]*100)))+" "+str(int(round(pt2[1]*100)))+" "+str(int(round(pt3[0]*100)))+" "+str(int(round(pt3[1]*100)))+" "+str(int(round(pt4[0]*100)))+" "+str(int(round(pt4[1]*100)))+" "+str(int(round((fmax-pt4[2])*100)+1))+"\n" 
+            sp.append(line1)
+            sp.append(line2)
+    return sp
 
 
 @app.route('/')
@@ -40,9 +59,42 @@ def importFile():
 @app.route('/grad', methods=['POST','GET'])
 def exportGrad():
     jsdata = request.form.get('grad_data')
+    print(jsdata)
     jsdata1 = json.loads(jsdata)
     jsdata1 = pd.DataFrame(jsdata1)
     filename = path.join(APP_STATIC,"assets/grad.csv")
     jsdata1.to_csv(filename)
-    # print(jsdata1)
-    return jsdata
+
+    grad = pd.read_csv(filename)
+    grad = grad.iloc[:,1:]
+    grad = grad.iloc[:,[0,1,6]]
+
+    sp = constructSp(grad)
+    with open(path.join(APP_STATIC,"assets/grad.txt"),"w") as f:
+        for line in sp:
+            f.write(line)
+        f.close()
+    
+    sp = pd.read_csv(path.join(APP_STATIC,"assets/grad.txt"),sep=" ",header=None)
+    sp = sp.sort_values(by=[6]) # sort by birth time
+    with open(path.join(APP_STATIC,"assets/grad.txt"),"w") as f:
+        f.write("2\n")
+        f.write("2\n")
+        for i in range(0,len(sp)):
+            line = list(sp.iloc[i,:])
+            s = ""
+            for e in line:
+                s+= str(e)+" "
+            s += "\n"
+            f.write(s)
+    f.close()
+
+    os.system(APP_STATIC+"/assets/./perseusMac simtop "+APP_STATIC+"/assets/grad.txt "+APP_STATIC+"/assets/grad")
+    dim0 = pd.read_csv(path.join(APP_STATIC,"assets/grad_0.txt"),sep=" ",header=None)
+    bar = []
+    for i in range(0,len(dim0)):
+        bar.append(list(dim0.iloc[i,:]))
+    return jsonify(data=bar)
+
+
+

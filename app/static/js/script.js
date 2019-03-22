@@ -62,10 +62,37 @@ function init(){
         alert("Configuration saved")
     })
 
-    $("#grad").click(function(){
+    $("#computeBarcode").click(function(){
+        alert("grad saved")
         $.post( "/grad", {
             grad_data: JSON.stringify(Anim.grad)
+        }, function(res){
+            // let response = $.parseJSON(res);
+            console.log("response",res)
         });
+        // let content = new FormData();
+        // $.ajax({
+        //     type: "POST",
+        //     enctype: 'multipart/form-data',
+        //     url: "/barcode",
+        //     data: content,
+        //     processData: false, //prevent jQuery from automatically transforming the data into a query string
+        //     contentType: false,
+        //     cache: false,
+        //     dataType:'json',
+        //     success: function (response) {
+        //         data=response;
+        //         console.log("dd",data)
+        //         // Anim.clearCanvas();
+        //         // Anim = new anim(data.cp,data.edge);
+        //         // Sliders = new sliders(Anim);
+        //         // Persistence = new persistence(Anim);
+        //         // Moves = new moves(Anim,Sliders,Persistence);
+        //     },
+        //     error: function (error) {
+        //         console.log("error",error);
+        //     }
+        // });
         
 
     })
