@@ -1,9 +1,11 @@
 class persistence{
-    constructor(anim){
-        this.anim = anim;
-        this.cp = anim.cp;
-        this.local_max = 1;
+    constructor(barcode){
+        // this.anim = anim;
+        // this.cp = anim.cp;
+        this.local_max = 10;
         this.local_min = 0;
+        this.barcode = barcode;
+        console.log(barcode)
         this.margin = {"top":10,"bottom":20,"left":10,"right":10};
         this.svgWidth = 600;
         this.svgHeight = 200;
@@ -14,75 +16,88 @@ class persistence{
             .attr('id','xAxis');
         this.persistenceBarGroup = this.svg.append('g')
             .attr("id","persistencebargroup")
+        this.arrowMarker = this.svg.append("marker")
+            .attr("id","arrowmarker")
+            .attr("markerUnits","strokeWidth")
+            .attr("markerWidth",12)
+            .attr("markerHeight",12)
+            .attr("viewBox","10 10 12 12")
+            .attr("refX",20)
+            .attr("refY",20)
+            .attr("orient","auto")
+
 
         // console.log(this.cp)
-        this.calPersistence();
+        // this.calPersistence();
         this.drawPersistence();
     }
-    calPersistence(){
-        console.log("calculatings")
-        let cp_new = [];
-        for(let i=0;i<this.cp.length;i++){
-            // cp_new.push({"id":this.cp[i].id,"type":this.cp[i].type,"fv":this.cp[i].fv})
-            cp_new.push(this.cp[i])
-        }
-        // To avoid two critical points have the same function value.
-        let cp_fv = [this.local_min,this.local_max];
-        for(let i=0;i<cp_new.length;i++){
-            if(cp_fv.indexOf(cp_new[i].fv)!=-1){
-                if(cp_new[i].fv === this.local_max){
-                    cp_new[i].fv -= Math.random()/100;
-                } else {
-                    cp_new[i].fv += Math.random()/100;
-                }
-            }
-            cp_fv.push(cp_new[i].fv);
-            cp_new[i].fv_new = this.local_max - cp_new[i].fv;
-        }
-        // cp_new.push({"id":"local_min","fv":this.local_min,"fv_new":this.local_max-this.local_min});
-        // cp_new.push({"id":"local_max","fv":this.local_max,"fv_new":0});
-        cp_new.sort((a,b)=>d3.ascending(a.fv_new,b.fv_new))
+    // calPersistence(){
+    //     console.log("calculatings")
+    //     let cp_new = [];
+    //     for(let i=0;i<this.cp.length;i++){
+    //         // cp_new.push({"id":this.cp[i].id,"type":this.cp[i].type,"fv":this.cp[i].fv})
+    //         cp_new.push(this.cp[i])
+    //     }
+    //     // To avoid two critical points have the same function value.
+    //     let cp_fv = [this.local_min,this.local_max];
+    //     for(let i=0;i<cp_new.length;i++){
+    //         if(cp_fv.indexOf(cp_new[i].fv)!=-1){
+    //             if(cp_new[i].fv === this.local_max){
+    //                 cp_new[i].fv -= Math.random()/100;
+    //             } else {
+    //                 cp_new[i].fv += Math.random()/100;
+    //             }
+    //         }
+    //         cp_fv.push(cp_new[i].fv);
+    //         cp_new[i].fv_new = this.local_max - cp_new[i].fv;
+    //     }
+    //     // cp_new.push({"id":"local_min","fv":this.local_min,"fv_new":this.local_max-this.local_min});
+    //     // cp_new.push({"id":"local_max","fv":this.local_max,"fv_new":0});
+    //     cp_new.sort((a,b)=>d3.ascending(a.fv_new,b.fv_new))
 
-        this.pc = [];
-        let numCC = 0;
+    //     this.pc = [];
+    //     let numCC = 0;
 
-        for(let i=0;i<cp_new.length;i++){
-            if(cp_new[i].type === "max"){ // max is corresponding to the birth of a component
-                this.pc.push({"id":this.pc.length, "birth":cp_new[i].fv_new, "death":undefined,"max_id":i});
-                numCC += 1;
-            } else if(cp_new[i].type === "saddle"){ // saddle/min: corresponding to the death of a component
-                let candidate_max = this.anim.findMinPt(cp_new[i],cp_new[i].np.max);
-                for(let j=0;j<this.pc.length;j++){
-                    if(this.pc[j].max_id===candidate_max.id){
-                        this.pc[j].death = cp_new[i].fv_new
-                    }
-                }
-                numCC -= 1;
-            } else if (cp_new[i].type === "min"){
-                // **** need modification ****
-                // let candidata_saddle = this.anim.findMinPt(cp_new[i],cp_new[i].np);
-                // let candidate_max = this.anim.findMinPt(candidata_saddle,candidata_saddle.np.max);
-            }
-        }
+        // for(let i=0;i<cp_new.length;i++){
+        //     if(cp_new[i].type === "max"){ // max is corresponding to the birth of a component
+        //         this.pc.push({"id":this.pc.length, "birth":cp_new[i].fv_new, "death":undefined,"max_id":i});
+        //         numCC += 1;
+        //     } else if(cp_new[i].type === "saddle"){ // saddle/min: corresponding to the death of a component
+        //         let candidate_max = this.anim.findMinPt(cp_new[i],cp_new[i].np.max);
+        //         for(let j=0;j<this.pc.length;j++){
+        //             if(this.pc[j].max_id===candidate_max.id){
+        //                 this.pc[j].death = cp_new[i].fv_new
+        //             }
+        //         }
+        //         numCC -= 1;
+        //     } else if (cp_new[i].type === "min"){
+        //         // **** need modification ****
+        //         // let candidata_saddle = this.anim.findMinPt(cp_new[i],cp_new[i].np);
+        //         // let candidate_max = this.anim.findMinPt(candidata_saddle,candidata_saddle.np.max);
+        //     }
+        // }
         
-        console.log(numCC)
-        console.log(this.pc)
+        // console.log(numCC)
+        // console.log(this.pc)
         // console.log(Math.random()/100)
 
         // expected output: [{"id":0,"birth":0.1,"death":inf},...]
-    }
+    // }
     drawPersistence(){
+        console.log("i am here")
         let xScale = d3.scaleLinear()
             .domain([this.local_min, this.local_max])
-            .range([0,this.svgWidth-this.margin.right]);
+            .range([this.margin.left,this.svgWidth-this.margin.right]);
         // let yScale = d3.scaleLinear()
 
         let xAxis = d3.axisBottom(xScale);
         this.xAxisGroup
             .classed("axis", true)
-            .attr("transform", "translate(0," + (this.svgHeight-this.margin.bottom) + ")")
+            // .style("dominant-baseline", "central")
+            .attr("marker-end", "url(#arrowhead)")
+            .attr("transform", "translate(0, "+ (this.svgHeight-this.margin.bottom) + ")")
             .call(xAxis);
-        let bars = this.persistenceBarGroup.selectAll("rect").data(this.pc);
+        let bars = this.persistenceBarGroup.selectAll("rect").data(this.barcode);
         bars.exit().remove();
         let newbars = bars.enter().append("rect");
         bars = newbars.merge(bars);
@@ -90,13 +105,14 @@ class persistence{
             .attr("x",d=>xScale(Math.round(d.birth*10)/10))
             .attr("y",(d,i)=>-(i+1)*18+(this.svgHeight-this.margin.bottom))
             .attr("width",d=>{
-                if(d.death===undefined){
-                    return xScale(1)
+                if(d.death<0){
+                    return xScale.range()[1]
                 } else {
-                    return xScale(d.death-d.birth)
+                    return xScale(d.death)
                 }
             })
             .attr("height",15)
+            // .attr("transform", "translate("+this.margin.left+", 0)")
             // .attr("stroke","black")
             .attr("fill","rgb(172,218,224)")
 

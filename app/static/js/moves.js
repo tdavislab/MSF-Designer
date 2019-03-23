@@ -62,8 +62,8 @@ class moves{
                 this.anim.addedges();
                 this.sliders.addSlider();
                 this.anim.findNearestPoint();
-                this.persistence.calPersistence();
-                this.persistence.drawPersistence();
+                // this.persistence.calPersistence();
+                // this.persistence.drawPersistence();
             })
     }
 

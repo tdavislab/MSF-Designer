@@ -1,10 +1,10 @@
-d3.json('static/assets/export.json').then(d=>{
-    console.log(d);
-})
+
+// local minimum always equal to 0 
+let barcode = [{"birth":0,"death":5},{"birth":0,"death":-1}]
 
 let Anim = new anim();
 let Sliders = new sliders(Anim);
-let Persistence = new persistence(Anim);
+let Persistence = new persistence(barcode);
 let Moves = new moves(Anim,Sliders,Persistence);
 
 
@@ -67,37 +67,13 @@ function init(){
         $.post( "/grad", {
             grad_data: JSON.stringify(Anim.grad)
         }, function(res){
-            // let response = $.parseJSON(res);
+            Persistence.barcode = res.data;
+            Persistence.drawPersistence();
             console.log("response",res)
         });
-        // let content = new FormData();
-        // $.ajax({
-        //     type: "POST",
-        //     enctype: 'multipart/form-data',
-        //     url: "/barcode",
-        //     data: content,
-        //     processData: false, //prevent jQuery from automatically transforming the data into a query string
-        //     contentType: false,
-        //     cache: false,
-        //     dataType:'json',
-        //     success: function (response) {
-        //         data=response;
-        //         console.log("dd",data)
-        //         // Anim.clearCanvas();
-        //         // Anim = new anim(data.cp,data.edge);
-        //         // Sliders = new sliders(Anim);
-        //         // Persistence = new persistence(Anim);
-        //         // Moves = new moves(Anim,Sliders,Persistence);
-        //     },
-        //     error: function (error) {
-        //         console.log("error",error);
-        //     }
-        // });
-        
-
     })
-}
-init();
+} init();
+
 
 
 d3.select("#reset")
