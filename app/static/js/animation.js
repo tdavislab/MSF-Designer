@@ -14,17 +14,29 @@ class criticalPoint{
             this.np = [] // max/min only connects to saddle
         }
         this.lvalue = 0;
-        this.uvalue = 1;
+        this.uvalue = 10;
     }
 
     f(x,y,type){
         // **** now only calculate max ****
         let w = 1;
         let sigma = 0.1;
+        // if(type === "max"){
+        //     return w*Math.exp(-(Math.pow(0,2)+Math.pow(0,2))/sigma);
+        // } else if(type === "saddle"){
+        //     return w*Math.exp(-(Math.pow(0.25,2)+Math.pow(0,2))/sigma);
+        // }
         if(type === "max"){
-            return w*Math.exp(-(Math.pow(0,2)+Math.pow(0,2))/sigma);
+            // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
+            return -Math.pow(0,2) - Math.pow(0,2)+10;
         } else if(type === "saddle"){
-            return w*Math.exp(-(Math.pow(0.25,2)+Math.pow(0,2))/sigma);
+            // if(x_new<0){
+            //     x_new = x - 0.25
+            // } else{ x_new = x-0.75}
+            // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
+            return Math.pow(0,2) - Math.pow(0,2)+5;
+        } else if(type === "min"){
+            return Math.pow(0,2) + Math.pow(0,2);
         }
         
     }
@@ -160,7 +172,7 @@ class anim{
     findRange(){
         for(let i=0;i<this.cp.length;i++){
             this.cp[i].lvalue = 0;
-            this.cp[i].uvalue = 1;
+            this.cp[i].uvalue = 10;
             if(this.cp[i].type==="max"){
                 for(let j=0;j<this.cp[i].np.length;j++){
                     if(this.cp[i].np[j].fv>this.cp[i].lvalue){
@@ -696,6 +708,7 @@ class anim{
                     // g.strokeStyle = "#FF8000";
                     // g.strokeStyle = "rgb(141,106,184)"
                     g.strokeStyle = "rgb(110,24,110)"
+                    // g.strokeStyle = "white"
                     g.stroke(); // final draw command
                     if (age[i]++ > MaxAge) {
                         // increment age of each curve, restart if MaxAge is reached
@@ -996,15 +1009,15 @@ class anim{
         let y_new = y-cp.y;
         if(cp.type === "max"){
             // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-            return -Math.pow(x_new,2) - Math.pow(y_new,2)+10;
+            return -Math.pow(x_new,2) - Math.pow(y_new,2)+cp.fv;
         } else if(cp.type === "saddle"){
             // if(x_new<0){
             //     x_new = x - 0.25
             // } else{ x_new = x-0.75}
             // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-            return Math.pow(x_new,2) - Math.pow(y_new,2)+5;
-        } else if(cp.tyep === "min"){
-            return Math.pow(x_new,2) + Math.pow(y_new,2);
+            return Math.pow(x_new,2) - Math.pow(y_new,2)+cp.fv;
+        } else if(cp.type === "min"){
+            return Math.pow(x_new,2) + Math.pow(y_new,2)+cp.fv;
         }
         // return w*Math.exp(-(Math.pow(x,2)+Math.pow(y,2))/sigma)
     }

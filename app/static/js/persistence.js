@@ -1,14 +1,14 @@
 class persistence{
-    constructor(barcode){
-        // this.anim = anim;
+    constructor(barcode, anim){
+        this.anim = anim;
         // this.cp = anim.cp;
         this.local_max = 10;
         this.local_min = 0;
         this.barcode = barcode;
         console.log(barcode)
         this.margin = {"top":10,"bottom":20,"left":10,"right":10};
-        this.svgWidth = 600;
-        this.svgHeight = 200;
+        this.svgWidth = 1200;
+        this.svgHeight = 300;
         this.svg = d3.select("#persistencegroup").append("svg")
             .attr("width", this.svgWidth)
             .attr("height", this.svgHeight);
@@ -16,20 +16,47 @@ class persistence{
             .attr('id','xAxis');
         this.persistenceBarGroup = this.svg.append('g')
             .attr("id","persistencebargroup")
-        this.arrowMarker = this.svg.append("marker")
-            .attr("id","arrowmarker")
-            .attr("markerUnits","strokeWidth")
-            .attr("markerWidth",12)
-            .attr("markerHeight",12)
-            .attr("viewBox","10 10 12 12")
-            .attr("refX",20)
-            .attr("refY",20)
-            .attr("orient","auto")
+        // this.arrowMarker = this.svg.append("marker")
+        //     .attr("id","arrowmarker")
+        //     .attr("markerUnits","strokeWidth")
+        //     .attr("markerWidth",12)
+        //     .attr("markerHeight",12)
+        //     .attr("viewBox","10 10 12 12")
+        //     .attr("refX",20)
+        //     .attr("refY",20)
+        //     .attr("orient","auto")
 
 
         // console.log(this.cp)
         // this.calPersistence();
+        // this.recoverCP();
         this.drawPersistence();
+    }
+    recoverCP(){
+        for(let i=0;i<this.barcode.length;i++){
+            let birth_fv = this.local_max - this.barcode[i].birth;
+            let birth_cp = this.findCP(birth_fv);
+            let death_cp = undefined;
+            if(this.barcode[i].death>0){
+                let death_fv = this.local_max - this.barcode[i].death;
+                death_cp = this.findCP(death_fv);
+            }
+            this.barcode[i].birth_cp = birth_cp;
+            this.barcode[i].death_cp = death_cp;
+        }
+    }
+
+    findCP(fv){
+        // given the function value, find the cp id
+        let min_dist = Math.abs(this.anim.cp[0] - fv);
+        let cp = this.anim.cp[0];
+        for(let i=1;i<this.anim.cp.length;i++){
+            if(Math.abs(this.anim.cp[i].fv - fv)<min_dist){
+                cp = this.anim.cp[i];
+                min_dist = this.anim.cp[i].fv - fv;
+            }
+        }
+        return cp
     }
     // calPersistence(){
     //     console.log("calculatings")
@@ -103,18 +130,31 @@ class persistence{
         bars = newbars.merge(bars);
         bars
             .attr("x",d=>xScale(Math.round(d.birth*10)/10))
-            .attr("y",(d,i)=>-(i+1)*18+(this.svgHeight-this.margin.bottom))
+            .attr("y",(d,i)=>-(i+1)*25+(this.svgHeight-this.margin.bottom))
             .attr("width",d=>{
                 if(d.death<0){
                     return xScale.range()[1]
                 } else {
-                    return xScale(d.death)
+                    return xScale(d.death-d.birth)
                 }
             })
-            .attr("height",15)
+            .attr("height",20)
             // .attr("transform", "translate("+this.margin.left+", 0)")
             // .attr("stroke","black")
-            .attr("fill","rgb(172,218,224)")
+            // .attr("fill","rgb(172,218,224)")
+            .attr("fill","rgb(187,160,203)")
+            .on("mouseover",mouseover)
+            .on("mouseout",mouseout)
+
+            function mouseover(d){
+                d3.select(this).classed("phactive",true);
+                d3.select("#p0").style("stroke","red");
+            }
+
+            function mouseout(d){
+                d3.select(this).classed("phactive",false);
+                d3.select("#p0").style("stroke","black");
+            }
 
 
     }

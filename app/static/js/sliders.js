@@ -59,8 +59,8 @@ class sliders{
         sliders = newsliders.merge(sliders);
         sliders
             .attr("class", "track")
-            .attr("x1", (d,i)=>this.xMap[i].range()[d.lvalue])
-            .attr("x2", (d,i)=>this.xMap[i].range()[d.uvalue])
+            .attr("x1", (d,i)=>this.xMap[i](d.lvalue))
+            .attr("x2", (d,i)=>this.xMap[i](d.uvalue))
             .attr("y1", (d,i)=>this.yMap(i+0.5))
             .attr("y2",(d,i)=>this.yMap(i+0.5))
 
@@ -88,8 +88,8 @@ class sliders{
         showbars
             .attr("class", (d)=>"showbar "+d.type)
             .attr("id",(d,i)=>"showbar"+i)
-            .attr("x1", (d,i)=>this.xMap[i].range()[d.lvalue])
-            .attr("x2", (d,i)=>(d3.select("#handle"+i).attr("cx")))
+            .attr("x1", (d,i)=>this.xMap[i](d.lvalue))
+            .attr("x2", (d,i)=>this.xMap[i](d.fv))
             .attr("y1", (d,i)=>this.yMap(i+0.5))
             .attr("y2",(d,i)=>this.yMap(i+0.5))
 
@@ -103,7 +103,7 @@ class sliders{
             .attr("id",(d,i)=>"value"+i)
             .attr("x",this.svgWidth-40)
             .attr("y",(d,i)=>this.yMap(i+0.5)+6)
-            .text(d=>Math.round(d.fv*100)/10)
+            .text(d=>Math.round(d.fv*10)/10)
             ;
         
         let labels = this.sliderlabelgroup.selectAll("text").data(this.anim.cp);
@@ -122,10 +122,11 @@ class sliders{
         ranges_low = newranges_low.merge(ranges_low);
         ranges_low
             // .attr("class",(d)=>"label "+d.type)
-            .attr("x",(d,i)=>this.xMap[i].range()[d.lvalue])
+            .attr("x",(d,i)=>this.xMap[i](d.lvalue))
             .attr("y",(d,i)=>this.yMap(i+0.5)+25)
             .attr("id",(d,i)=>"low"+i)
-            .text((d)=>Math.round(d.lvalue*100)/10);
+            .text((d)=>Math.round(d.lvalue*10)/10)
+
         
         let ranges_high = this.highrangegroup.selectAll("text").data(this.anim.cp);
         ranges_high.exit().remove();
@@ -133,10 +134,10 @@ class sliders{
         ranges_high = newranges_high.merge(ranges_high);
         ranges_high
             // .attr("class",(d)=>"label "+d.type)
-            .attr("x",(d,i)=>this.xMap[i].range()[d.uvalue])
+            .attr("x",(d,i)=>this.xMap[i](d.uvalue))
             .attr("y",(d,i)=>this.yMap(i+0.5)+25)
             .attr("id",(d,i)=>"high"+i)
-            .text((d)=>Math.round(d.uvalue*100)/10);
+            .text((d)=>Math.round(d.uvalue*10)/10)
         
         function mouseover(){
             d3.select(this)
@@ -157,8 +158,6 @@ class sliders{
             d3.select(this)
                 .classed("mouseover",true);
             let p = d3.mouse(this)[0];
-            // console.log(i)
-            // console.log()
             if (p<that.xMap[i](d.lvalue)){
                 p=that.xMap[i](d.lvalue);
             } else if(p>that.xMap[i](d.uvalue)){
@@ -175,16 +174,18 @@ class sliders{
                 that.xMap[j] = map;
             } 
             for(let j=0;j<that.anim.cp.length;j++){
-                d3.select("#high"+j).text(Math.round(that.anim.cp[j].uvalue*100)/10)
-                d3.select("#low"+j).text(Math.round(that.anim.cp[j].lvalue*100)/10)
+                d3.select("#high"+j).text(Math.round(that.anim.cp[j].uvalue*10)/10)
+                d3.select("#low"+j).text(Math.round(that.anim.cp[j].lvalue*10)/10)
 
             }
 
             d3.select("#high")
             d3.select(this).attr("cx",p);
-            d3.select("#value"+i).text(Math.round(that.xMap[i].invert(p)*100)/10);
+            d3.select("#value"+i).text(Math.round(that.xMap[i].invert(p)*10)/10);
             // console.log(that.xMap[i].invert(p))
             d3.select("#showbar"+i).attr("x2",p);
+            console.log("critical point",that.anim.cp)
+            that.anim.grad = that.anim.constructMesh(that.anim.sigma)
         }
 
         function dragended(d) {

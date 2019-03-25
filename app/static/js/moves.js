@@ -20,7 +20,6 @@ class moves{
                 let y = this.anim.yMapReverse(d3.event.y-100+7.5);
                 let mincp = this.anim.findMinPt({"x":x,"y":y},this.anim.cp);
                 if(this.apType === "max"){
-                    // this.anim.cp.push([x,y,1,1,this.anim.fmax(1,0,0,this.anim.sigma)]);
                     let id = this.anim.cp.length;
                     this.anim.cp.push(new criticalPoint(id,x,y,"max"))
                     this.apType = "saddle";
@@ -176,6 +175,9 @@ class moves{
                 this.anim.grad = this.anim.constructMesh(this.anim.sigma);
                 this.anim.drawAnnotation();
                 this.anim.addedges();
+                this.sliders.addSlider();
+                this.anim.findNearestPoint();
+                this.anim.findRange();
             })
     }
 

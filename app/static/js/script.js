@@ -4,7 +4,7 @@ let barcode = [{"birth":0,"death":5},{"birth":0,"death":-1}]
 
 let Anim = new anim();
 let Sliders = new sliders(Anim);
-let Persistence = new persistence(barcode);
+let Persistence = new persistence(barcode,Anim);
 let Moves = new moves(Anim,Sliders,Persistence);
 
 
@@ -43,7 +43,7 @@ function init(){
                     Anim.clearCanvas();
                     Anim = new anim(data.cp,data.edge);
                     Sliders = new sliders(Anim);
-                    Persistence = new persistence(Anim);
+                    Persistence = new persistence(barcode,Anim);
                     Moves = new moves(Anim,Sliders,Persistence);
                 },
                 error: function (error) {
@@ -63,11 +63,12 @@ function init(){
     })
 
     $("#computeBarcode").click(function(){
-        alert("grad saved")
+        alert("Please allow a few seconds for computing.")
         $.post( "/grad", {
             grad_data: JSON.stringify(Anim.grad)
         }, function(res){
             Persistence.barcode = res.data;
+            // Persistence.recoverCP();
             Persistence.drawPersistence();
             console.log("response",res)
         });
@@ -81,7 +82,7 @@ d3.select("#reset")
         Anim.clearCanvas();
         Anim = new anim();
         Sliders = new sliders(Anim);
-        Persistence = new persistence(Anim);
+        Persistence = new persistence(barcode,Anim);
         Moves = new moves(Anim,Sliders,Persistence);
         
     })

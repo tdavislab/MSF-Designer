@@ -92,14 +92,15 @@ def exportGrad():
     os.system(APP_STATIC+"/assets/./perseusMac simtop "+APP_STATIC+"/assets/grad.txt "+APP_STATIC+"/assets/grad")
     dim0 = pd.read_csv(path.join(APP_STATIC,"assets/grad_0.txt"),sep=" ",header=None)
     bar = []
-    fmax = np.max(grad.iloc[:,2])
+    # fmax = np.max(grad.iloc[:,2])
     for i in range(0,len(dim0)):
         # bar.append(list(dim0.iloc[i,:]))
         if len(list(dim0.iloc[i,:]))>=2:
             row = list(dim0.iloc[i,:])
             birth = (row[0]-1)/100
             death = (row[1]-1)/100
-            bar.append({"birth":birth,"death":death})
+            if death - birth > 0.01 or death < 0:
+                bar.append({"birth":birth,"death":death})
     return jsonify(data=bar)
 
 
