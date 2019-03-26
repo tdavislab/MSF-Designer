@@ -156,3 +156,51 @@ d3.select("#cmoveminus")
         }
         
     })
+
+d3.select("#dmoveplus")
+    .on("click",()=>{
+        if(Moves.dpType===""){
+            Anim.drawFlag=false;
+            Moves.dpType = "add";
+            Moves.dmovePlus();
+            d3.select("#dmoveplus")
+                .attr("value","Click a max point");
+        }
+        
+    })
+
+d3.select("#dmoveminus")
+    .on("click",()=>{
+        if(Moves.dmType===""){
+            Anim.drawFlag=false;
+            Moves.dmType = "add";
+            Moves.dmoveMinus();
+            d3.select("#dmoveminus")
+                .attr("value","Click a min point");
+        }
+        
+    })
+
+d3.select("#dmoveevenplus")
+    .on("click",()=>{
+        if(Moves.dpeType===""){
+            Anim.drawFlag=false;
+            Moves.dpeType = "add";
+            Moves.dmoveEvenPlus();
+            d3.select("#dmoveevenplus")
+                .attr("value","Click a saddle point");
+        }
+        
+    })
+
+d3.select("#dmoveevenminus")
+    .on("click",()=>{
+        if(Moves.dmeType===""){
+            Anim.drawFlag=false;
+            Moves.dmeType = "add";
+            Moves.dmoveEvenMinus();
+            d3.select("#dmoveevenminus")
+                .attr("value","Click a saddle point");
+        }
+        
+    })

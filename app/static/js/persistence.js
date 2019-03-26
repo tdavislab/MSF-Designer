@@ -148,12 +148,12 @@ class persistence{
 
             function mouseover(d){
                 d3.select(this).classed("phactive",true);
-                d3.select("#p0").style("stroke","red");
+                // d3.select("#p0").style("stroke","red");
             }
 
             function mouseout(d){
                 d3.select(this).classed("phactive",false);
-                d3.select("#p0").style("stroke","black");
+                // d3.select("#p0").style("stroke","black");
             }
 
 

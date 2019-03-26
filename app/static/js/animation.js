@@ -807,10 +807,28 @@ class anim{
                 pts = this.find2MinPt(cp_new.saddle[i],cp_new_min);
             } else { pts = cp_new_min;}
             for(let j=0;j<pts.length;j++){
+                // let ifinter = false;
+                // for(let k=0;k<edges.length;k++){
+                //     let line1 = [edges[k][0],edges[k][2]]
+                //     let line2 = [cp_new.saddle[i],pts[j]]
+                //     if(this.ifLinesIntersect(line1,line2)){
+                //         ifinter=true;
+                //         break;
+                //     }
+                // }
+                // if(ifinter){
+                //     let minpt = {"x":cp_new.saddle[i].x,"y":1};
+                //     let midpt = {"x":(cp_new.saddle[i].x+minpt.x)/2, "y":(cp_new.saddle[i].y+minpt.y)/2};
+                //     edges.push([cp_new.saddle[i],midpt,minpt,"min"])
+
+                // } else {
                 let midpt = {"x":(cp_new.saddle[i].x+pts[j].x)/2, "y":(cp_new.saddle[i].y+pts[j].y)/2};
                 edges.push([cp_new.saddle[i],midpt,pts[j],"min"]);
+                // }
+                
             }
         }
+        console.log(edges)
         return edges;
     }
 
