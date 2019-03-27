@@ -6,12 +6,14 @@ class persistence{
         this.local_min = 0;
         this.barcode = barcode;
         console.log(barcode)
-        this.margin = {"top":10,"bottom":20,"left":10,"right":10};
+        this.margin = {"top":20,"bottom":20,"left":10,"right":10};
         this.svgWidth = 1200;
         this.svgHeight = 300;
         this.svg = d3.select("#persistencegroup").append("svg")
             .attr("width", this.svgWidth)
-            .attr("height", this.svgHeight);
+            .attr("height", this.svgHeight)
+            // .style("position","relative")
+            // .style("top","5px");
         this.xAxisGroup = this.svg.append('g')
             .attr('id','xAxis');
         this.persistenceBarGroup = this.svg.append('g')
@@ -111,6 +113,16 @@ class persistence{
         // expected output: [{"id":0,"birth":0.1,"death":inf},...]
     // }
     drawPersistence(){
+        this.barcode.sort(function(a,b){
+            if(a.death<0){
+                return d3.descending(b.death,a.death);
+            } else if(b.death<0){
+                return d3.descending(a.death,b.death);
+            } else {
+                return d3.descending(a.death-a.birth,b.death-b.birth);
+            }
+            
+        })
         console.log("i am here")
         let xScale = d3.scaleLinear()
             .domain([this.local_min, this.local_max])
@@ -121,8 +133,10 @@ class persistence{
         this.xAxisGroup
             .classed("axis", true)
             // .style("dominant-baseline", "central")
-            .attr("marker-end", "url(#arrowhead)")
-            .attr("transform", "translate(0, "+ (this.svgHeight-this.margin.bottom) + ")")
+            // .attr("marker-end", "url(#arrowhead)")
+            // .attr("transform", "translate(0, "+ (this.svgHeight-this.margin.bottom) + ")")
+            .style("font-size","15px")
+            .attr("transform", "translate(0, "+ this.margin.top + ")")
             .call(xAxis);
         let bars = this.persistenceBarGroup.selectAll("rect").data(this.barcode);
         bars.exit().remove();
@@ -130,7 +144,7 @@ class persistence{
         bars = newbars.merge(bars);
         bars
             .attr("x",d=>xScale(Math.round(d.birth*10)/10))
-            .attr("y",(d,i)=>-(i+1)*25+(this.svgHeight-this.margin.bottom))
+            .attr("y",(d,i)=>(i+1)*25+this.margin.top*2)
             .attr("width",d=>{
                 if(d.death<0){
                     return xScale.range()[1]

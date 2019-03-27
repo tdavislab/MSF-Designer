@@ -63,13 +63,17 @@ function init(){
     })
 
     $("#computeBarcode").click(function(){
-        alert("Please allow a few seconds for computing.")
+        // alert("Please allow a few seconds for computing.")
+        d3.select("#loadergroup").classed("loader",true)
+        d3.select("#persistencegroup").select("svg").style("visibility","hidden")
         $.post( "/grad", {
             grad_data: JSON.stringify(Anim.grad)
         }, function(res){
             Persistence.barcode = res.data;
             // Persistence.recoverCP();
             Persistence.drawPersistence();
+            d3.select("#loadergroup").classed("loader",false)
+            d3.select("#persistencegroup").select("svg").style("visibility","visible")
             console.log("response",res)
         });
     })
