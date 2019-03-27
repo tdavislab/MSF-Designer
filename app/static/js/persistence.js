@@ -10,10 +10,9 @@ class persistence{
         this.svgWidth = 1200;
         this.svgHeight = 300;
         this.svg = d3.select("#persistencegroup").append("svg")
+            .attr("id","phSVG")
             .attr("width", this.svgWidth)
-            .attr("height", this.svgHeight)
-            // .style("position","relative")
-            // .style("top","5px");
+            .attr("height", this.svgHeight);
         this.xAxisGroup = this.svg.append('g')
             .attr('id','xAxis');
         this.persistenceBarGroup = this.svg.append('g')
@@ -33,6 +32,16 @@ class persistence{
         // this.calPersistence();
         // this.recoverCP();
         this.drawPersistence();
+        this.barcode.sort(function(a,b){
+            if(a.death<0){
+                return d3.descending(b.death,a.death);
+            } else if(b.death<0){
+                return d3.descending(a.death,b.death);
+            } else {
+                return d3.descending(a.death-a.birth,b.death-b.birth);
+            }
+            
+        })
     }
     recoverCP(){
         for(let i=0;i<this.barcode.length;i++){

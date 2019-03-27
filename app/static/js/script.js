@@ -9,14 +9,33 @@ let Moves = new moves(Anim,Sliders,Persistence);
 
 
 function init(){
+    d3.select("#ifskeleton")
+        .on("click",()=>{
+            if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                d3.select("#ifskeleton").node().value = "Show Flow";
+                d3.select("#animation")
+                    .style("visibility","hidden")
+                d3.select("#ifflow").classed("disabled",true)
+                Anim.drawFlag = false;
+            } else if(d3.select("#ifskeleton").node().value === "Show Flow"){
+                d3.select("#ifskeleton").node().value = "Only Display Skeleton";
+                d3.select("#animation")
+                    .style("visibility","visible")
+                d3.select("#ifflow").classed("disabled",false)
+                Anim.drawFlag = true;                
+            }
+        })
+
     d3.select("#ifflow")
         .on("click", ()=>{
-            if(d3.select("#ifflow").node().value === "Disable Flow"){
-                d3.select("#ifflow").node().value = "Enable Flow";
-                Anim.drawFlag = false;
-            } else if (d3.select("#ifflow").node().value === "Enable Flow"){
-                d3.select("#ifflow").node().value = "Disable Flow";
-                Anim.drawFlag = true;
+            if(!d3.select("#ifflow").classed("disabled")){
+                if(d3.select("#ifflow").node().value === "Disable Flow"){
+                    d3.select("#ifflow").node().value = "Enable Flow";
+                    Anim.drawFlag = false;
+                } else if (d3.select("#ifflow").node().value === "Enable Flow"){
+                    d3.select("#ifflow").node().value = "Disable Flow";
+                    Anim.drawFlag = true;
+                }
             }
         })
 

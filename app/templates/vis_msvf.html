@@ -57,17 +57,18 @@
                             <input type="button" id="dmoveoddminus" class = "btn btn-info disabled" value="D- odd Move">
                         </p>     
                         <p><input type="button" id="reset" class="btn btn-primary btn-block"  value="Reset"></p>  
-                        <p><input type="button" id="ifflow" class="btn btn-primary btn-block"  value="Disable Flow"></p>                 
+                        <p><input type="button" id="ifflow" class="btn btn-primary btn-block"  value="Disable Flow"></p>  
+                        <p><input type="button" id="ifskeleton" class="btn btn-primary btn-block"  value="Only Display Skeleton"></p>                 
                         
                 </td>
                 <td rowspan="2" id="functionValues" style="padding: 20px; border: 1px solid black">
                         <p><input type="button" id="enableFV" class="btn btn-outline-primary btn-block"  value="Enable Function Value Control"></p> 
     
     
-                    </td>
+                </td>
             </tr>
             <tr>
-                <td id="filegroup" style="padding: 20px; border: 1px solid black">
+                <td id="filegroup" style="padding: 20px; border: 1px solid grey">
                     <p>
                         <form method="post" id="upload" enctype="multipart/form-data" action="" >
                             <input type="file" style="display:none" id="files" name="files">
@@ -86,7 +87,7 @@
                 </td>
             </tr>
             <tr>
-                <td id="phgroup" style="padding: 20px; border: 1px solid black;" colspan="3">
+                <td id="phgroup" style="padding: 20px; border: 1px solid grey;" colspan="3">
                     <div class="scrollable" style="height: 350px;">
                         <input type="button" class="btn btn-outline-primary" id="computeBarcode" value="Compute Barcode">
                         <div id="persistencegroup">

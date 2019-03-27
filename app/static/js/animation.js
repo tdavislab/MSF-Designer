@@ -130,7 +130,9 @@ class anim{
         this.grad = this.initializeMesh(this.sigma)
         console.log(this.grad)
         this.findNearestPoint();
-        this.findRange()
+        this.findRange();
+        this.drawAnnotation();
+        this.addedges();
     }
 
     findNearestPoint(){
@@ -1081,7 +1083,9 @@ class anim{
         this.drawFlag = false;
         $('#animation').remove();
         $('#annotation').remove();
-        $('#container').append('<canvas id="animation" style="position: absolute; top:100px; left:80px; z-index:1" width="1000" height="1000" ></canvas>');
-        $('#container').append('<svg id="annotation" style="position: absolute; top:100px; left:80px; z-index:1" width="1000" height="1000"></svg>');
+        $('#slidersSVG').remove();
+        $('#phSVG').remove();
+        $('#container').append('<canvas id="animation" style="position: absolute; top:100px; left:110px; z-index:1" width="1000" height="1000" ></canvas>');
+        $('#container').append('<svg id="annotation" style="position: absolute; top:100px; left:110px; z-index:1" width="1000" height="1000"></svg>');
     }  
 }

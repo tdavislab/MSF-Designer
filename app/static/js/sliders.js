@@ -4,6 +4,7 @@ class sliders{
         this.svgWidth = 300;
         this.svgHeight = 800;
         this.svg = d3.select("#functionValues").append("svg")
+            .attr("id","slidersSVG")
             .attr("width",this.svgWidth)
             .attr("height",this.svgHeight)
             .style("opacity",0);
@@ -19,6 +20,8 @@ class sliders{
             .attr("id","lowrangegroup")
         this.highrangegroup = this.svg.append("g")
             .attr("id","highrangegroup")
+        
+        d3.select("#enableFV").attr("value","Enable Function Value Control");
         
         
         this.addSlider();
