@@ -14,14 +14,18 @@ function init(){
             if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
                 d3.select("#ifskeleton").node().value = "Show Flow";
                 d3.select("#animation")
-                    .style("visibility","hidden")
-                d3.select("#ifflow").classed("disabled",true)
+                    .style("visibility","hidden");
+                d3.select("#ifflow")
+                    .classed("disabled",true);
                 Anim.drawFlag = false;
             } else if(d3.select("#ifskeleton").node().value === "Show Flow"){
                 d3.select("#ifskeleton").node().value = "Only Display Skeleton";
                 d3.select("#animation")
-                    .style("visibility","visible")
-                d3.select("#ifflow").classed("disabled",false)
+                    .style("visibility","visible");
+                d3.select("#ifflow")
+                    .classed("disabled",false)
+                    .attr("value","Disable Flow");
+                Anim.grad = Anim.constructMesh(Anim.sigma);
                 Anim.drawFlag = true;                
             }
         })

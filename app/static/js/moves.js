@@ -34,9 +34,11 @@ class moves{
                 // }
                 // else if(this.apType === "saddle"){
                     // this.anim.cp.push([x,y,-1,1]);
-                    this.anim.drawFlag=true;
-                    d3.select("#annotation")
-                        .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        this.anim.drawFlag=true;
+                    }
+                    // d3.select("#annotation")
+                    //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     d3.select("#amoveplus")
                         .attr("value","A+ move")
                     this.apType="";
@@ -88,9 +90,11 @@ class moves{
                     let id = this.anim.cp.length;
                     this.anim.cp.push(new criticalPoint(id,x,y,"saddle"))
                     // this.anim.cp.push([x,y,-1,1]);
-                    this.anim.drawFlag=true;
-                    d3.select("#annotation")
-                        .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        this.anim.drawFlag=true;
+                    }
+                    // d3.select("#annotation")
+                    //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     d3.select("#amoveminus")
                         .attr("value","A- move")
                     this.amType="";
@@ -156,9 +160,11 @@ class moves{
                     // this.anim.cp.push([x,y,-1,1]);
                     let id = this.anim.cp.length;
                     this.anim.cp.push(new criticalPoint(id,x,y,"saddle"))
-                    this.anim.drawFlag=true;
-                    d3.select("#annotation")
-                        .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        this.anim.drawFlag=true;
+                    }
+                    // d3.select("#annotation")
+                    //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     d3.select("#bmoveplus")
                         .attr("value","B+ move")
                     this.bpType="";
@@ -225,9 +231,11 @@ class moves{
                     let id = this.anim.cp.length;
                     this.anim.cp.push(new criticalPoint(id,x,y,"saddle"))
                     // this.anim.cp.push([x,y,-1,1]);
-                    this.anim.drawFlag=true;
-                    d3.select("#annotation")
-                        .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        this.anim.drawFlag=true;
+                    }                    
+                    // d3.select("#annotation")
+                    //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     d3.select("#bmoveminus")
                         .attr("value","B- move")
                     this.bmType="";
@@ -279,9 +287,11 @@ class moves{
                     let id = this.anim.cp.length;
                     this.anim.cp.push(new criticalPoint(id,x,y,"saddle"))
                     // this.anim.cp.push([x,y,-1,1]);
-                    this.anim.drawFlag=true;
-                    d3.select("#annotation")
-                        .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        this.anim.drawFlag=true;
+                    }                    
+                    // d3.select("#annotation")
+                    //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     d3.select("#cmoveplus")
                         .attr("value","C+ move")
                     this.cpType="";
@@ -331,9 +341,11 @@ class moves{
                     let id = this.anim.cp.length;
                     this.anim.cp.push(new criticalPoint(id,x,y,"saddle"))
                     // this.anim.cp.push([x,y,-1,1]);
-                    this.anim.drawFlag=true;
-                    d3.select("#annotation")
-                        .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        this.anim.drawFlag=true;
+                    }                    
+                    // d3.select("#annotation")
+                    //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     d3.select("#cmoveminus")
                         .attr("value","C- move")
                     this.cmType="";
@@ -379,9 +391,11 @@ class moves{
                     this.anim.cp.push(new criticalPoint(id+1,cp.x+0.05,cp.y-0.05,"max"))
                     this.anim.cp[cp.id].x = cp.x - 0.05;
                     this.anim.cp[cp.id].y = cp.y + 0.05;
-                    this.anim.drawFlag=true;
-                    d3.select("#annotation")
-                        .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        this.anim.drawFlag=true;
+                    }                    
+                    // d3.select("#annotation")
+                    //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     this.dpType=""
                     this.anim.edges = this.anim.findEdges(this.anim.cp);
                     d3.select("#dmoveplus")
@@ -419,9 +433,11 @@ class moves{
                     this.anim.cp.push(new criticalPoint(id+1,cp.x+0.05,cp.y-0.05,"min"))
                     this.anim.cp[cp.id].x = cp.x - 0.05;
                     this.anim.cp[cp.id].y = cp.y + 0.05;
-                    this.anim.drawFlag=true;
-                    d3.select("#annotation")
-                        .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        this.anim.drawFlag=true;
+                    }                    
+                    // d3.select("#annotation")
+                    //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     this.dmType=""
                     this.anim.edges = this.anim.findEdges(this.anim.cp);
                     d3.select("#dmoveminus")
@@ -459,9 +475,11 @@ class moves{
                     this.anim.cp.push(new criticalPoint(id+1,cp.x+0.05,cp.y-0.05,"saddle"))
                     this.anim.cp[cp.id].x = cp.x - 0.05;
                     this.anim.cp[cp.id].y = cp.y + 0.05;
-                    this.anim.drawFlag=true;
-                    d3.select("#annotation")
-                        .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        this.anim.drawFlag=true;
+                    }                    
+                    // d3.select("#annotation")
+                    //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     this.dpeType=""
                     this.anim.edges = this.anim.findEdges(this.anim.cp);
                     d3.select("#dmoveevenplus")
@@ -500,9 +518,11 @@ class moves{
                     this.anim.cp.push(new criticalPoint(id+1,cp.x+0.05,cp.y-0.05,"saddle"))
                     this.anim.cp[cp.id].x = cp.x - 0.05;
                     this.anim.cp[cp.id].y = cp.y + 0.05;
-                    this.anim.drawFlag=true;
-                    d3.select("#annotation")
-                        .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        this.anim.drawFlag=true;
+                    }                    
+                    // d3.select("#annotation")
+                    //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     this.dmeType=""
                     this.anim.edges = this.anim.findEdges(this.anim.cp);
                     d3.select("#dmoveevenminus")

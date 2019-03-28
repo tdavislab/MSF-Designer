@@ -306,8 +306,13 @@ class anim{
             that.cp[i].x = that.xMap.invert(d3.mouse(this)[0]);
             that.cp[i].y = that.yMap.invert(d3.mouse(this)[1]);        
             that.connNodes = that.findConnNodes(that.edges);
-            that.grad = that.constructMesh(that.sigma);
+            if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                that.grad = that.constructMesh(that.sigma);
+
+            }
             // console.log("cp",that.cp)
+            that.drawAnnotation();
+            that.addedges();
         }
               
         function dragended(d) {
@@ -350,17 +355,17 @@ class anim{
                 .on("start", dragstarted)
                 .on("drag", draggedNode)
                 .on("end", dragended))
-            // .on("mouseover",mouseover)
-            // .on("mouseout",mouseout);
+                .on("mouseover",mouseover)
+                .on("mouseout",mouseout);
 
-        // function mouseover(d) {
-        //     console.log("i am here")
-        //     d3.select(this).classed("mouseover", true);
-        // }
+        function mouseover(d) {
+            console.log("i am here")
+            d3.select(this).classed("mouseover", true);
+        }
         
-        // function mouseout(d){
-        //     d3.select(this).classed("mouseover", false);
-        // }
+        function mouseout(d){
+            d3.select(this).classed("mouseover", false);
+        }
         function draggedNode(d,i){
             // **** need boundary control ****
             console.log("d3",d3.event)
@@ -400,13 +405,18 @@ class anim{
                     that.edges[d[1]][1] = {"x":that.xMapReverse(d3.event.x), "y":that.yMapReverse(d3.event.y)}
                     that.connNodes[i][0] = {"x":that.xMapReverse(d3.event.x), "y":that.yMapReverse(d3.event.y)};
                 } 
-                that.grad = that.constructMesh(that.sigma);
+                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                    that.grad = that.constructMesh(that.sigma);
+                }
+                
             } else {
                 ed_new = [ed[0], {"x":(ed[0].x+ed[2].x)/2,"y":(ed[0].y+ed[2].y)/2}, ed[2]]
                 d3.select("#additionalEdge")
                     .attr("d",that.curve0(ed_new))
                     .style("opacity",0)
             }
+            that.drawAnnotation();
+            that.addedges();
 
             // let checkCircles = that.checkGroup.selectAll("circle").data(newPoints)
             // checkCircles.exit().remove();
@@ -653,24 +663,18 @@ class anim{
         // let drawFlag = this.drawFlag
         setInterval(function () {if (that.drawFlag) {draw();}}, frameRate);
         d3.timer(function () {if (that.drawFlag) {draw();}}, frameRate);
-        d3.select("#annotation")
-            .on("click", function() {that.drawFlag = (that.drawFlag) ? false : true;});
+        // d3.select("#annotation")
+        //     .on("click", function() {that.drawFlag = (that.drawFlag) ? false : true;});
             
         g.globalCompositeOperation = "source-over";
         
         function draw() {
+            console.log("drawing")
             let width = document.getElementById('animation').offsetWidth;
             let height = document.getElementById('animation').offsetHeight;
             g.fillStyle = "rgba(255,255, 255, 0.05)";
             // g.fillStyle = "black";
-            g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba            
-
-            that.drawAnnotation();
-            that.addedges()
-
-            // d3.select("#checkcircle")
-            //     .attr("cx",that.xMap(0.5))
-            //     .attr("cy",that.yMap(0.15))
+            g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba   
 
             
             for (let i=0; i<M; i++) { // draw a single timestep for every curve
