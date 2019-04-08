@@ -1,3 +1,5 @@
+Edge moves are still under construction. I will upload the code for edge moves as soon as possible.
+
 ## How to run
 Exporting files requires a server, please follow the instruction to set up.
 1. Run
@@ -14,4 +16,4 @@ When export configurations, files will be saved in `app/static/assets/`
 
 2 Drag the yellow node to change the boundary geometry.
 
-3 Click buttons to add moves (D moves are still under construction).
+3 Click buttons to add moves.
