@@ -33,29 +33,29 @@
                         <h4>Control Panel</h4>
                         <br>
                         <p>                    
-                            <input type="button" id="amoveplus" class = "btn btn-danger" value="A+ Move">
-                            <input type="button" id="amoveminus" class = "btn btn-danger" value="A- Move">
+                            <input type="button" id="amoveplus" class = "btn btn-danger" value="Face-max Move"></p>
+                            <p><input type="button" id="amoveminus" class = "btn btn-danger" value="Face-min Move">
                         </p>
                         <p>
-                            <input type="button" id="bmoveplus" class = "btn btn-warning" value="B+ Move">
-                            <input type="button" id="bmoveminus" class = "btn btn-warning" value="B- Move">
+                            <input type="button" id="bmoveplus" class = "btn btn-warning" value="Edge-max Move"></p>
+                            <p><input type="button" id="bmoveminus" class = "btn btn-warning" value="Edge-min Move">
                         </p>
+                        <!-- <p> -->
+                            <!-- <input type="button" id="cmoveplus" class = "btn btn-success" value="C+ Move"> -->
+                            <!-- <input type="button" id="cmoveminus" class = "btn btn-success" value="C- Move"> -->
+                        <!-- </p> -->
                         <p>
-                            <input type="button" id="cmoveplus" class = "btn btn-success" value="C+ Move">
-                            <input type="button" id="cmoveminus" class = "btn btn-success" value="C- Move">
+                            <input type="button" id="dmoveplus" class = "btn btn-info" value="Vertex-max Move"></p>
+                            <p><input type="button" id="dmoveminus" class = "btn btn-info" value="Vertex-min Move">
                         </p>
-                        <p>
-                            <input type="button" id="dmoveplus" class = "btn btn-info" value="D+ Move">
-                            <input type="button" id="dmoveminus" class = "btn btn-info" value="D- Move">
-                        </p>
-                        <p>
-                            <input type="button" id="dmoveevenplus" class = "btn btn-info" value="D+ even Move">
-                            <input type="button" id="dmoveevenminus" class = "btn btn-info" value="D- even Move">
-                        </p>
-                        <p>
-                            <input type="button" id="dmoveoddplus" class = "btn btn-info disabled" value="D+ odd Move">
-                            <input type="button" id="dmoveoddminus" class = "btn btn-info disabled" value="D- odd Move">
-                        </p>     
+                        <!-- <p> -->
+                            <!-- <input type="button" id="dmoveevenplus" class = "btn btn-info" value="D+ even Move"> -->
+                            <!-- <input type="button" id="dmoveevenminus" class = "btn btn-info" value="D- even Move"> -->
+                        <!-- </p> -->
+                        <!-- <p> -->
+                            <!-- <input type="button" id="dmoveoddplus" class = "btn btn-info disabled" value="D+ odd Move"> -->
+                            <!-- <input type="button" id="dmoveoddminus" class = "btn btn-info disabled" value="D- odd Move"> -->
+                        <!-- </p>      -->
                         <p><input type="button" id="reset" class="btn btn-primary btn-block"  value="Reset"></p>  
                         <p><input type="button" id="ifflow" class="btn btn-primary btn-block"  value="Disable Flow"></p>  
                         <p><input type="button" id="ifskeleton" class="btn btn-primary btn-block"  value="Only Display Skeleton"></p>                 
@@ -90,6 +90,7 @@
                 <td id="phgroup" style="padding: 20px; border: 1px solid grey;" colspan="3">
                     <div class="scrollable" style="height: 350px;">
                         <input type="button" class="btn btn-outline-primary" id="computeBarcode" value="Compute Barcode">
+                        <input type="button" class="btn btn-outline-primary" id="simplifyBarcode" value="Simplification">
                         <div id="persistencegroup">
                             <div style="position: relative; top: 50px; left: 700px;" id="loadergroup"></div>
                         </div> 

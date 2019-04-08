@@ -31,6 +31,7 @@ class persistence{
         // console.log(this.cp)
         // this.calPersistence();
         // this.recoverCP();
+        // this.birthID = [];
         this.drawPersistence();
         this.barcode.sort(function(a,b){
             if(a.death<0){
@@ -42,29 +43,121 @@ class persistence{
             }
             
         })
+        this.recoverCP();
+        console.log(this.barcode)
+        this.recoverEdge();
+        this.recoverPersisitence();
+        
+    }
+    recoverPersisitence(){
+        let that=this;
+        d3.select("#simplifyBarcode")
+            .on("click",()=>{
+                console.log(that.barcode)
+                for(let i=0;i<that.barcode.length;i++){
+                    if(that.barcode[i].edgeID!=undefined){
+                        d3.select("#"+that.barcode[i].edgeID)
+                            .style("stroke","red")
+                            .style("stroke-width","10")
+                            .on("mouseover",()=>{
+                                d3.select("#"+that.barcode[i].edgeID)
+                                    .style("stroke-width","15")
+                            })
+                            .on("mouseout",()=>{
+                                d3.select("#"+that.barcode[i].edgeID)
+                                    .style("stroke-width","10")
+                            })
+                            .on("click",()=>{
+                                console.log("i am hre")
+                                console.log(that.barcode[i])
+                                let birthid = that.barcode[i].birth_cp.id
+                                let deathid = that.barcode[i].death_cp.id
+                                let cp = that.anim.cp
+                                that.anim.cp = []
+                                for(let i=0;i<cp.length;i++){
+                                    if(i!=birthid && i!= deathid){
+                                        that.anim.cp.push(cp[i])
+                                    }
+                                }
+                                console.log(that.anim.cp)
+                                that.anim.edges = that.anim.findEdges(that.anim.cp)
+                                that.anim.connNodes = that.anim.findConnNodes(that.anim.edges);
+                                that.anim.grad = that.anim.initializeMesh(that.anim.sigma)
+                                that.anim.drawAnnotation();
+                                that.anim.addedges();
+                                d3.event.stopPropagation();
+                            })
+                    }
+                }
+            })
+
     }
     recoverCP(){
+        let birthID = [];
         for(let i=0;i<this.barcode.length;i++){
             let birth_fv = this.local_max - this.barcode[i].birth;
-            let birth_cp = this.findCP(birth_fv);
+            // console.log(birthID)
+
+            let birth_cp = this.findCP(birth_fv,birthID);
+            console.log(birth_fv,birth_cp)
+
+            birthID.push(birth_cp.id);
             let death_cp = undefined;
             if(this.barcode[i].death>0){
                 let death_fv = this.local_max - this.barcode[i].death;
-                death_cp = this.findCP(death_fv);
+                death_cp = this.findCP1(death_fv,birth_cp);
             }
             this.barcode[i].birth_cp = birth_cp;
             this.barcode[i].death_cp = death_cp;
         }
     }
 
-    findCP(fv){
+    recoverEdge(){
+        for(let i=0;i<this.barcode.length;i++){
+            if(this.barcode[i].death>0){
+                if(this.barcode[i].birth_cp.type==="saddle"){
+                    this.barcode[i].edgeID = "edge"+this.barcode[i].birth_cp.id.toString()+this.barcode[i].death_cp.id.toString()
+                } else {
+                    this.barcode[i].edgeID = "edge"+this.barcode[i].death_cp.id.toString()+this.barcode[i].birth_cp.id.toString()
+                }
+            } else {
+                this.barcode[i].edgeID = undefined;
+            }
+            
+        }
+        console.log(this.barcode)
+    }
+
+    findCP(fv,birthid){
+        console.log(birthid)
         // given the function value, find the cp id
-        let min_dist = Math.abs(this.anim.cp[0] - fv);
-        let cp = this.anim.cp[0];
-        for(let i=1;i<this.anim.cp.length;i++){
-            if(Math.abs(this.anim.cp[i].fv - fv)<min_dist){
+        let min_dist = 100;
+        let cp = undefined;
+        for(let i=0;i<this.anim.cp.length;i++){
+            // console.log(i)
+            // console.log(birthid.indexOf(i))
+            // console.log(min_dist,this.anim.cp[i].fv - fv)
+            if(Math.abs(this.anim.cp[i].fv - fv)<min_dist && birthid.indexOf(i)===-1){
                 cp = this.anim.cp[i];
-                min_dist = this.anim.cp[i].fv - fv;
+                min_dist = Math.abs(this.anim.cp[i].fv - fv);
+                
+            }
+        }
+        return cp
+    }
+    findCP1(fv,birthcp){
+        // given the function value, find the cp id
+        let np = []
+        for(let i=0;i<birthcp.np.length;i++){
+            np.push(birthcp.np[i].id)
+        }
+        let min_dist = 100;
+        let cp = undefined;
+        for(let i=0;i<this.anim.cp.length;i++){
+            if(Math.abs(this.anim.cp[i].fv - fv)<min_dist && np.indexOf(i)!=-1){
+                cp = this.anim.cp[i];
+                min_dist = Math.abs(this.anim.cp[i].fv - fv);
+                
             }
         }
         return cp
@@ -171,11 +264,18 @@ class persistence{
 
             function mouseover(d){
                 d3.select(this).classed("phactive",true);
+                console.log(d.edgeID)
+                d3.select("#"+d.edgeID)
+                    .style("stroke","red")
+                    .style("stroke-width","10")
                 // d3.select("#p0").style("stroke","red");
             }
 
             function mouseout(d){
                 d3.select(this).classed("phactive",false);
+                d3.select("#"+d.edgeID)
+                    .style("stroke","black")
+                    .style("stroke-width","2")
                 // d3.select("#p0").style("stroke","black");
             }
 

@@ -99,7 +99,7 @@ def exportGrad():
             row = list(dim0.iloc[i,:])
             birth = (row[0]-1)/100
             death = (row[1]-1)/100
-            if death - birth > 0.01 or death < 0:
+            if death - birth > 0.1 or death < 0:
                 bar.append({"birth":birth,"death":death})
     return jsonify(data=bar)
 

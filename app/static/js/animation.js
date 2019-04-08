@@ -7,6 +7,7 @@ class criticalPoint{
         this.y = y;
         this.type = type;
         this.fv = this.f(x,y,type); // function value
+        this.fv_perb = this.fv + Math.random();
         this.edges = edges;
         if(type === "saddle"){ // initialize nearest points
             this.np = {"max":[],"min":[]}; // np: nearest points
@@ -63,6 +64,8 @@ class anim{
             .attr("fill","none")
         this.connNodesGroup = this.svg.append("g")
             .attr("id","connNodesgroup");
+        this.terminalNodesGroup = this.svg.append("g")
+            .attr("id","terminalNodesGroup");
         this.frames = [[0,0,0,1],[0,1,1,1],[0,0,1,0],[1,0,1,1,]]; //used for drawing frames
         
         this.drawFlag = true;
@@ -84,19 +87,23 @@ class anim{
             this.edges = edges
         }
         
+        // this.cp_saddle = [];
+        // for(let i=0;i<this.cp.length;i++){
+        //     if(this.cp[i].type==="saddle"){
+        //         this.cp_saddle.push(this.cp[i]);
+        //     }
+        // }
+
+
         console.log(this.cp)
-        this.cp_saddle = [];
-        for(let i=0;i<this.cp.length;i++){
-            if(this.cp[i].type==="saddle"){
-                this.cp_saddle.push(this.cp[i]);
-            }
-        }
+
         
         this.connNodes = this.findConnNodes(this.edges);
         this.edgeMapper = {};
         for(let i=0;i<this.edges.length;i++){
             this.edgeMapper["p"+i] = this.initializeEdgeMapper(this.edges[i]);
         }
+        // this.findTerminalNodes(this.edges);
 
         // console.log(this.edges)
         // console.log(this.edgeMapper)
@@ -128,7 +135,7 @@ class anim{
         this.animation();
        
         this.grad = this.initializeMesh(this.sigma)
-        console.log(this.grad)
+        // console.log(this.grad)
         this.findNearestPoint();
         this.findRange();
         this.drawAnnotation();
@@ -669,7 +676,7 @@ class anim{
         g.globalCompositeOperation = "source-over";
         
         function draw() {
-            console.log("drawing")
+            // console.log("drawing")
             let width = document.getElementById('animation').offsetWidth;
             let height = document.getElementById('animation').offsetHeight;
             g.fillStyle = "rgba(255,255, 255, 0.05)";
@@ -759,7 +766,7 @@ class anim{
                 return this.curve0(d_new);
             })
             .attr("class",(d)=>d[3]+"edge") // minedge/maxedge
-            .attr("id",(d,i)=>"p"+i)
+            .attr("id",(d)=>d[4])
             .style("fill", "none")
             .style("stroke", "black")
             .style("stroke-width",2)
@@ -776,17 +783,17 @@ class anim{
         console.log("finding edge")
         let cp_new = {"max":[], "min":[], "saddle":[]};
         for(let i=0;i<cp.length;i++){
-            let loc = {"x":cp[i].x,"y":cp[i].y};
+            // let loc = {"x":cp[i].x,"y":cp[i].y};
             let type = cp[i].type;
 
             if(type==="max"){
-                cp_new.max.push(loc);
+                cp_new.max.push(cp[i]);
             }
             else if (type==="saddle"){
-                cp_new.saddle.push(loc);
+                cp_new.saddle.push(cp[i]);
             }
             else if(type==="min"){
-                cp_new.min.push(loc);
+                cp_new.min.push(cp[i]);
             }    
         }
         let edges = [];
@@ -834,6 +841,17 @@ class anim{
                 
             }
         }
+        for(let i=0;i<edges.length;i++){
+            let ed = edges[i];
+            if(ed[2].id!=undefined){
+                let id = "edge"+ed[0].id.toString()+ed[2].id.toString();
+                ed.push(id);
+            }
+            else{
+                ed.push("edgebound")
+            }
+            
+        }
         console.log(edges)
         return edges;
     }
@@ -845,17 +863,25 @@ class anim{
         // console.log(edges)
         for(let i=0;i<edges.length;i++){
             // edge[i]: [saddle, mid point, max/min, "max"/"min"]
-            if(edges[i][3]==="min"){
-                if(([0,1].indexOf(edges[i][2].x)!=-1)||([0,1].indexOf(edges[i][2].y)!=-1)){
-                    // if the edge is between a saddle and a min point on the frame
-                    connNodes.push([edges[i][2],i]);
-                    // node: [position, corresponding index in edges]
-                } 
-            }
+            // if(edges[i][3]==="min"){
+            //     if(([0,1].indexOf(edges[i][2].x)!=-1)||([0,1].indexOf(edges[i][2].y)!=-1)){
+            //         // if the edge is between a saddle and a min point on the frame
+            //         connNodes.push([edges[i][2],i]);
+            //         // node: [position, corresponding index in edges]
+            //     } 
+            // }
             connNodes.push([edges[i][1],i]);
         }
         // console.log(connNodes)
         return connNodes;
+    }
+
+    findTerminalNodes(edges){
+        console.log("terminal",edges)
+        for(let i=0;i<edges.length;i++){
+            
+        }
+
     }
 
     find2MinPt(pt,pts){

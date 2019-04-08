@@ -95,6 +95,8 @@ function init(){
             Persistence.barcode = res.data;
             // Persistence.recoverCP();
             Persistence.drawPersistence();
+            Persistence.recoverCP();
+            Persistence.recoverEdge();
             d3.select("#loadergroup").classed("loader",false)
             d3.select("#persistencegroup").select("svg").style("visibility","visible")
             console.log("response",res)

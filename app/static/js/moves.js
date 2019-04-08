@@ -40,7 +40,7 @@ class moves{
                     // d3.select("#annotation")
                     //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     d3.select("#amoveplus")
-                        .attr("value","A+ move")
+                        .attr("value","Face-max move")
                     this.apType="";
                     // let cp_new = []
                     // for(let i=0;i<this.cp.length;i++){
@@ -96,7 +96,7 @@ class moves{
                     // d3.select("#annotation")
                     //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     d3.select("#amoveminus")
-                        .attr("value","A- move")
+                        .attr("value","Face-min move")
                     this.amType="";
                     // let cp_new = []
                     // for(let i=0;i<this.cp.length;i++){
@@ -166,7 +166,7 @@ class moves{
                     // d3.select("#annotation")
                     //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     d3.select("#bmoveplus")
-                        .attr("value","B+ move")
+                        .attr("value","Edge-max move")
                     this.bpType="";
                     // let cp_new = []
                     // for(let i=0;i<this.cp.length;i++){
@@ -237,7 +237,7 @@ class moves{
                     // d3.select("#annotation")
                     //     .on("click", ()=>{this.anim.drawFlag = (this.anim.drawFlag) ? false : true;});
                     d3.select("#bmoveminus")
-                        .attr("value","B- move")
+                        .attr("value","Edge-min move")
                     this.bmType="";
                     // let cp_new = []
                     // for(let i=0;i<this.cp.length;i++){
@@ -483,7 +483,7 @@ class moves{
                     this.dpeType=""
                     this.anim.edges = this.anim.findEdges(this.anim.cp);
                     d3.select("#dmoveevenplus")
-                        .attr("value","D+ Even Move");
+                        .attr("value","Vertex-max Move");
 
 
                 }
@@ -526,7 +526,7 @@ class moves{
                     this.dmeType=""
                     this.anim.edges = this.anim.findEdges(this.anim.cp);
                     d3.select("#dmoveevenminus")
-                        .attr("value","D- Even Move");
+                        .attr("value","Vertex-min Move");
 
 
                 }
