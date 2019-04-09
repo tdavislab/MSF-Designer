@@ -162,29 +162,29 @@ d3.select("#bmoveminus")
         
     })
 
-d3.select("#cmoveplus")
-    .on("click",()=>{
-        if(Moves.cpType===""){
-            Anim.drawFlag=false;
-            Moves.cpType = "max";
-            Moves.cmovePlus();
-            d3.select("#cmoveplus")
-                .attr("value","Add a max point");
-        }
+// d3.select("#cmoveplus")
+//     .on("click",()=>{
+//         if(Moves.cpType===""){
+//             Anim.drawFlag=false;
+//             Moves.cpType = "max";
+//             Moves.cmovePlus();
+//             d3.select("#cmoveplus")
+//                 .attr("value","Add a max point");
+//         }
         
-    })
+//     })
 
-d3.select("#cmoveminus")
-    .on("click",()=>{
-        if(Moves.cmType===""){
-            Anim.drawFlag=false;
-            Moves.cmType = "min";
-            Moves.cmoveMinus();
-            d3.select("#cmoveminus")
-                .attr("value","Add a min point");
-        }
+// d3.select("#cmoveminus")
+//     .on("click",()=>{
+//         if(Moves.cmType===""){
+//             Anim.drawFlag=false;
+//             Moves.cmType = "min";
+//             Moves.cmoveMinus();
+//             d3.select("#cmoveminus")
+//                 .attr("value","Add a min point");
+//         }
         
-    })
+//     })
 
 d3.select("#dmoveplus")
     .on("click",()=>{
@@ -206,30 +206,6 @@ d3.select("#dmoveminus")
             Moves.dmoveMinus();
             d3.select("#dmoveminus")
                 .attr("value","Click a min point");
-        }
-        
-    })
-
-d3.select("#dmoveevenplus")
-    .on("click",()=>{
-        if(Moves.dpeType===""){
-            Anim.drawFlag=false;
-            Moves.dpeType = "add";
-            Moves.dmoveEvenPlus();
-            d3.select("#dmoveevenplus")
-                .attr("value","Click a saddle point");
-        }
-        
-    })
-
-d3.select("#dmoveevenminus")
-    .on("click",()=>{
-        if(Moves.dmeType===""){
-            Anim.drawFlag=false;
-            Moves.dmeType = "add";
-            Moves.dmoveEvenMinus();
-            d3.select("#dmoveevenminus")
-                .attr("value","Click a saddle point");
         }
         
     })

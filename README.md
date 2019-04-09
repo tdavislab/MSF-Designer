@@ -1,5 +1,3 @@
-Edge moves are still under construction. I will upload the code for edge moves as soon as possible.
-
 ## How to run
 Exporting files requires a server, please follow the instruction to set up.
 1. Run

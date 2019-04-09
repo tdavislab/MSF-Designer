@@ -56,8 +56,8 @@ class anim{
             .attr("id","heightsgroup");
         this.frameGroup = this.svg.append("g")
             .attr("id","framegroup");
-        this.checkGroup= this.svg.append("g")
-            .attr("id", "checkgroup")
+        // this.checkGroup= this.svg.append("g")
+        //     .attr("id", "checkgroup")
         this.additionalEdge = this.svg.append("path")
             .attr("id","additionalEdge")
             .attr("stroke","red")
@@ -249,10 +249,18 @@ class anim{
                         return "\uf140"
                     }
                 })
+            .attr("id",(d)=>"cp"+d.id)
             .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", draggedText)
-                    .on("end", dragended)); 
+                    .on("end", dragended))
+            .on("mouseover",(d)=>{
+                console.log("hovering")
+                d3.select("#cp"+d.id).attr("font-size","45px")
+            })
+            .on("mouseout",(d)=>{
+                d3.select("#cp"+d.id).attr("font-size","35px")
+            }); 
         
         let labels = this.heightsGroup.selectAll("text").data(this.cp);
         labels.exit().remove();
@@ -366,7 +374,6 @@ class anim{
                 .on("mouseout",mouseout);
 
         function mouseover(d) {
-            console.log("i am here")
             d3.select(this).classed("mouseover", true);
         }
         
@@ -434,8 +441,28 @@ class anim{
             //     .attr("cy",(d)=>that.yMap(d[1]))
             //     .attr("r",10)
             //     .attr("fill","orange")
-
         }
+        let terminalNodes = this.terminalNodesGroup.selectAll("circle").data(this.edges)
+        terminalNodes.exit().remove();
+        let newTerminalNodes = terminalNodes.enter().append("circle");
+        terminalNodes = newTerminalNodes.merge(terminalNodes);
+        terminalNodes
+            .attr("cx",(d)=>{
+                if(d[0].x===d[2].x){
+                    return this.xMap(d[2].x);
+                } else {
+                    return this.xMap(d[2].x + (d[0].x-d[2].x)/Math.abs(d[0].x-d[2].x)*0.01)
+                }
+            })
+            .attr("cy",(d)=>{
+                if(d[0].y===d[2].y){
+                    return this.yMap(d[2].y);
+                } else {
+                    return this.yMap(d[2].y + (d[0].y-d[2].y)/Math.abs(d[0].y-d[2].y)*0.01)
+                }
+            })
+            .attr("r",5)
+            .attr("fill","grey")
     }
 
     initializeEdgeMapper(edge){
@@ -766,7 +793,13 @@ class anim{
                 return this.curve0(d_new);
             })
             .attr("class",(d)=>d[3]+"edge") // minedge/maxedge
-            .attr("id",(d)=>d[4])
+            .attr("id",(d,i)=>{
+                if(d[4]==="edgebound"){
+                    return d[4]+i
+                } else {
+                    return d[4]
+                }
+            })
             .style("fill", "none")
             .style("stroke", "black")
             .style("stroke-width",2)
@@ -776,6 +809,25 @@ class anim{
                 } else {return "";}
             })
             .style("opacity",0.8)
+            .on("mouseover",(d,i)=>{
+                if(d[4]==="edgebound"){
+                    d3.select("#"+d[4]+i)
+                        .style("stroke-width",5)
+                } else {
+                    d3.select("#"+d[4])
+                        .style("stroke-width",5)
+                }
+                
+            })
+            .on("mouseout",(d,i)=>{
+                if(d[4]==="edgebound"){
+                    d3.select("#"+d[4]+i)
+                        .style("stroke-width",2)
+                } else {
+                    d3.select("#"+d[4])
+                        .style("stroke-width",2)
+                }
+            })
     }
 
     findEdges(cp){
