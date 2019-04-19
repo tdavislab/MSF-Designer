@@ -81,21 +81,40 @@ class anim{
         } else {
             this.cp = cp
         }
+        this.cp_saddle = [];
+        this.cp_max = [];
+        this.cp_min = [];
+        for(let i=0;i<this.cp.length;i++){
+            if(this.cp[i].type==="saddle"){
+                this.cp_saddle.push(this.cp[i]);
+            } else if(this.cp[i].type==="max"){
+                this.cp_max.push(this.cp[i]);
+            } else if(this.cp[i].type==="min"){
+                this.cp_min.push(this.cp[i]);
+            }
+        }
+        this.minBound = [];
+        for(let i=0;i<20;i++){
+            let v = 1/20*i;
+            this.minBound.push({"x":v,"y":0,"id":"b0"+i});
+            this.minBound.push({"x":v,"y":1,"id":"b1"+i});
+            this.minBound.push({"x":0,"y":v,"id":"b2"+i});
+            this.minBound.push({"x":1,"y":v,"id":"b3"+i});
+        }
+
+        this.cp_min = this.cp_min.concat(this.minBound);
         if(edges===undefined){
             this.edges = this.findEdges(this.cp);
         } else{
             this.edges = edges
         }
         
-        // this.cp_saddle = [];
-        // for(let i=0;i<this.cp.length;i++){
-        //     if(this.cp[i].type==="saddle"){
-        //         this.cp_saddle.push(this.cp[i]);
-        //     }
-        // }
+        
+        
+        console.log(this.edges)
+        
+        console.log("this cp min",this.cp_min);
 
-
-        console.log(this.cp)
 
         
         this.connNodes = this.findConnNodes(this.edges);
@@ -291,7 +310,6 @@ class anim{
         }
               
         function draggedText(d,i) {
-            console.log("this",this)
             console.log("d3",d3.mouse(this))
             for(let j=0;j<that.edges.length;j++){
                 let ed = that.edges[j];
@@ -332,6 +350,8 @@ class anim{
               
         function dragended(d) {
             d3.select(this).classed("active", false);
+            that.drawAnnotation();
+            that.addedges();
         }
 
         // draw frames (local minimum)
@@ -447,22 +467,112 @@ class anim{
         let newTerminalNodes = terminalNodes.enter().append("circle");
         terminalNodes = newTerminalNodes.merge(terminalNodes);
         terminalNodes
+            // .style("opacity",0)
             .attr("cx",(d)=>{
-                if(d[0].x===d[2].x){
+                // if(d[0].x===d[2].x){
+                //     return this.xMap(d[2].x);
+                // } else {
+                //     return this.xMap(d[2].x + (d[0].x-d[2].x)/Math.abs(d[0].x-d[2].x)*0.015)
+                // }
+                if(d[2].y===0 || d[2].y===1 || d[0].x===d[2].x){
                     return this.xMap(d[2].x);
+                } else if(d[2].x===0){
+                    return this.xMap(d[2].x+0.005);
+                } else if(d[2].x===1){
+                    return this.xMap(d[2].x-0.005);
                 } else {
-                    return this.xMap(d[2].x + (d[0].x-d[2].x)/Math.abs(d[0].x-d[2].x)*0.01)
+                    return this.xMap(d[2].x + (d[0].x-d[2].x)/Math.abs(d[0].x-d[2].x)*0.015);
                 }
             })
             .attr("cy",(d)=>{
-                if(d[0].y===d[2].y){
+                // if(d[0].y===d[2].y){
+                if(d[2].x===0 || d[2].x===1 || d[0].y===d[2].y){
                     return this.yMap(d[2].y);
+                } else if(d[2].y===0){
+                    return this.yMap(d[2].y+0.005);
+
+                } else if(d[2].y===1){
+                    return this.yMap(d[2].y-0.005);
                 } else {
-                    return this.yMap(d[2].y + (d[0].y-d[2].y)/Math.abs(d[0].y-d[2].y)*0.01)
+                    return this.yMap(d[2].y + (d[0].y-d[2].y)/Math.abs(d[0].y-d[2].y)*0.015)
                 }
             })
+            .attr("id",(d,i)=>"terminal"+i)
             .attr("r",5)
             .attr("fill","grey")
+            .attr("stroke","black")
+            .on("mouseover",(d,i)=>{
+                d3.select("#terminal"+i)
+                    .attr("r",10)
+            })
+            .on("mouseout",(d,i)=>{
+                d3.select("#terminal"+i)
+                    .attr("r",5)
+            })
+            .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", draggedTerminal)
+                    .on("end", dragended))
+        function draggedTerminal(d,i){
+            d3.select("#terminal"+i)
+                .attr("cx",d3.mouse(this)[0])
+                .attr("cy",d3.mouse(this)[1])
+            let edgeid = d[4];
+            d3.select("#"+edgeid)
+                .attr("d",(d)=>that.curve0([d[0],d[1],{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])}]))
+            if(d[3]==="max"){
+                let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_max);
+                if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
+                    // check intersection
+                    let ifinter = false;
+                    for(let j=0;j<that.edges.length;j++){
+                        if(i!=j){
+                            let line1 = [that.edges[j][0],that.edges[j][2]];
+                            let line2 = [d[0],cpm];
+                            if(that.ifLinesIntersect(line1,line2)){
+                                ifinter=true;
+                            }
+                        }
+                    }
+                    if(!ifinter){
+                        d[2] = cpm;
+                        d[4] = "edge"+d[0].id+cpm.id;
+                        d[1] = {"x":(d[0].x+d[2].x)/2,"y":(d[0].y+d[2].y)/2};
+                        d3.select("#terminal"+i)
+                            .attr("cx",that.xMap(cpm.x))
+                            .attr("cy",that.yMap(cpm.y))
+
+                    }                      
+                }
+            } else if (d[3]==="min"){
+                let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_min);
+                if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
+                    // check intersection
+                    let ifinter = false;
+                    for(let j=0;j<that.edges.length;j++){
+                        if(i!=j){
+                            let line1 = [that.edges[j][0],that.edges[j][2]];
+                            let line2 = [d[0],cpm];
+                            if(that.ifLinesIntersect(line1,line2)){
+                                ifinter=true;
+                            }
+
+                        }
+                    }
+                    if(!ifinter){
+                        d[2] = cpm;
+                        d[4] = "edge"+d[0].id+cpm.id;
+                        d[1] = {"x":(d[0].x+d[2].x)/2,"y":(d[0].y+d[2].y)/2};
+                        d3.select("#terminal"+i)
+                            .attr("cx",that.xMap(cpm.x))
+                            .attr("cy",that.yMap(cpm.y))
+                    }
+                }
+
+            }
+            that.connNodes = that.findConnNodes(that.edges);
+            that.drawAnnotation();
+        }
     }
 
     initializeEdgeMapper(edge){
@@ -501,6 +611,10 @@ class anim{
         let pt4 = line2[1];
         let x = undefined;
         let y = undefined;
+        // if they share the same endpoint, they do not intersect
+        if((pt1.x===pt3.x && pt1.y===pt3.y)||(pt1.x===pt4.x && pt1.y===pt4.y)||(pt2.x===pt3.x && pt2.y===pt3.y)||(pt2.x===pt4.x && pt2.y===pt4.y)){
+            return false;
+        }
         if(pt1.x===pt2.x&&pt3.x===pt4.x){ // if two lines are both vertical
             if(pt1.x===pt3.x){
                 return true;
@@ -529,7 +643,7 @@ class anim{
                 y = (a1*b2-a2*b1)/(a1-a2);
             }
         }        
-        if((Math.min(pt1.x,pt2.x)<x && x<Math.max(pt1.x,pt2.x))&&(Math.min(pt1.y,pt2.y)<y && y<Math.max(pt1.y,pt2.y))&&(Math.min(pt3.x,pt4.x)<x && x<Math.max(pt3.x,pt4.x))&&(Math.min(pt3.y,pt4.y)<y && y<Math.max(pt3.y,pt4.y))){
+        if((Math.min(pt1.x,pt2.x)<=x && x<=Math.max(pt1.x,pt2.x))&&(Math.min(pt1.y,pt2.y)<=y && y<=Math.max(pt1.y,pt2.y))&&(Math.min(pt3.x,pt4.x)<=x && x<=Math.max(pt3.x,pt4.x))&&(Math.min(pt3.y,pt4.y)<=y && y<=Math.max(pt3.y,pt4.y))){
             return true;
         } else { return false;}
     
@@ -663,102 +777,6 @@ class anim{
         return [x_new, y_new];
 
     }
-    
-
-    animation(){            
-        let N = 50;
-        var dt = 0.001;
-        var X0 = [], Y0 = []; // to store initial starting locations
-        var X  = [], Y  = []; // to store current point for each curve
-
-        // array of starting positions for each curve on a uniform grid
-        for (let i = 0; i < N; i++) {
-            for (let j = 0; j < N; j++) {
-                X.push(this.xp[j]), Y.push(this.yp[i]);
-                X0.push(this.xp[j]), Y0.push(this.yp[i]);
-            }
-        }
-        function randage() {
-            // to randomize starting ages for each curve
-            return Math.round(Math.random()*100);
-        }
-
-        let g = d3.select("#animation").node().getContext("2d"); // initialize a "canvas" element
-        let that = this;
-
-        //// animation setup
-        var frameRate = 500; // ms per timestep (yeah I know it's not really a rate)
-        var M = X.length;
-        var MaxAge = 200; // # timesteps before restart
-        var age = [];
-        for (var i=0; i<M; i++) {
-            age.push(randage());
-        }
-        // let drawFlag = this.drawFlag
-        setInterval(function () {if (that.drawFlag) {draw();}}, frameRate);
-        d3.timer(function () {if (that.drawFlag) {draw();}}, frameRate);
-        // d3.select("#annotation")
-        //     .on("click", function() {that.drawFlag = (that.drawFlag) ? false : true;});
-            
-        g.globalCompositeOperation = "source-over";
-        
-        function draw() {
-            // console.log("drawing")
-            let width = document.getElementById('animation').offsetWidth;
-            let height = document.getElementById('animation').offsetHeight;
-            g.fillStyle = "rgba(255,255, 255, 0.05)";
-            // g.fillStyle = "black";
-            g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba   
-
-            
-            for (let i=0; i<M; i++) { // draw a single timestep for every curve
-
-                    // let dr = [0,0];
-                    // let X_new = that.adjustFlow(X[i],Y[i])[0];
-                    // let Y_new = that.adjustFlow(X[i],Y[i])[1];
-                    // dr = that.findV(X[i],Y[i],that.grad);
-                    
-                    
-                        // dr = that.gradF(that.cp, X[i],Y[i],0.1);
-                        
-                        // console.log(that.grad)
-                        // let result = that.chooseGrad(X[i],Y[i]);
-                        // console.log(result)
-                        // dr = that.findV(X[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][0]),Y[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][1]),that.chooseGrad(X[i],Y[i])[1])
-                    let dr = that.findV(X[i],Y[i],that.grad)[0]
-                    let pt_new = that.findV(X[i],Y[i],that.grad)[1]
-                    let X_new = pt_new[0];
-                    let Y_new = pt_new[1];
-                    let fv = that.findV(X[i],Y[i],that.grad)[2]
-
-                        
-                    
-
-                    g.setLineDash([1, 0])
-                    g.beginPath();
-                    g.moveTo(that.xMap(X_new), that.yMap(Y_new)); // the start point of the path
-                    g.lineTo(that.xMap(X_new+dr[0]*dt), that.yMap(Y_new+dr[1]*dt)); // the end point
-                    // X[i]+=dr[0]*(dt+dt*fv*5);
-                    // Y[i]+=dr[1]*(dt+dt*fv*5);
-                    // dt = dt*2
-                    X[i]+=dr[0]*dt;
-                    Y[i]+=dr[1]*dt;
-
-                    g.lineWidth = 1;
-                    // g.strokeStyle = "#FF8000";
-                    // g.strokeStyle = "rgb(141,106,184)"
-                    g.strokeStyle = "rgb(110,24,110)"
-                    // g.strokeStyle = "white"
-                    g.stroke(); // final draw command
-                    if (age[i]++ > MaxAge) {
-                        // increment age of each curve, restart if MaxAge is reached
-                        age[i] = randage();
-                        X[i] = X0[i], Y[i] = Y0[i];
-                    }
-            }
-        }
-    }
-
     calDist(loc1, loc2){
         let dist = Math.sqrt(Math.pow(loc1.x-loc2.x,2)+Math.pow(loc1.y-loc2.y,2));
         return dist;
@@ -775,6 +793,16 @@ class anim{
             }
         }
         return minPt
+    }
+
+    find2MinPt(pt,pts){
+        let pt1 = this.findMinPt(pt,pts);
+        let idx1 = pts.indexOf(pt1);
+        let pts1 = pts.slice(0,idx1);
+        let pts2 = pts.slice(idx1+1);
+        let pts_new = pts1.concat(pts2);
+        let pt2 = this.findMinPt(pt,pts_new);
+        return [pt1,pt2];
     }
 
     addedges(){
@@ -832,82 +860,144 @@ class anim{
 
     findEdges(cp){
         // initialize edges
-        console.log("finding edge")
-        let cp_new = {"max":[], "min":[], "saddle":[]};
-        for(let i=0;i<cp.length;i++){
-            // let loc = {"x":cp[i].x,"y":cp[i].y};
-            let type = cp[i].type;
-
-            if(type==="max"){
-                cp_new.max.push(cp[i]);
-            }
-            else if (type==="saddle"){
-                cp_new.saddle.push(cp[i]);
-            }
-            else if(type==="min"){
-                cp_new.min.push(cp[i]);
-            }    
-        }
         let edges = [];
-        for(let i=0;i<cp_new.saddle.length;i++){
+        for(let i=0;i<this.cp_saddle.length;i++){
             // let ex ={"saddle":cp_new.saddle[i],"max":[],"min":[]};
-            if(cp_new.max.length>0){
+            if(this.cp_max.length>0){
                 let pts = [];
-                let cp_new_max = cp_new.max.slice(0);
+                let cp_new_max = this.cp_max.slice(0);
                 if(cp_new_max.length>2){
                     // find the closest max points
-                    pts = this.find2MinPt(cp_new.saddle[i],cp_new.max);
+                    pts = this.find2MinPt(this.cp_saddle[i],this.cp_max);
                 } else { pts = cp_new_max; }
                 for(let j=0;j<pts.length;j++){
-                    let midpt = {"x":(cp_new.saddle[i].x+pts[j].x)/2, "y":(cp_new.saddle[i].y+pts[j].y)/2};
-                    edges.push([cp_new.saddle[i],midpt,pts[j],"max"])
+                    let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
+                    edges.push([this.cp_saddle[i],midpt,pts[j],"max","edge"+this.cp_saddle[i].id
+                +pts[j].id])
                 }
             }
-            let cp_new_min = cp_new.min.slice(0);
-            cp_new_min.push({"x":cp_new.saddle[i].x,"y":0});
-            cp_new_min.push({"x":cp_new.saddle[i].x,"y":1});
+            let cp_new_min = this.cp_min.slice(0);
             let pts = [];
             if(cp_new_min.length>2){
                 // find the closest min points
-                pts = this.find2MinPt(cp_new.saddle[i],cp_new_min);
+                pts = this.find2MinPt(this.cp_saddle[i],cp_new_min);
             } else { pts = cp_new_min;}
             for(let j=0;j<pts.length;j++){
-                // let ifinter = false;
-                // for(let k=0;k<edges.length;k++){
-                //     let line1 = [edges[k][0],edges[k][2]]
-                //     let line2 = [cp_new.saddle[i],pts[j]]
-                //     if(this.ifLinesIntersect(line1,line2)){
-                //         ifinter=true;
-                //         break;
-                //     }
-                // }
-                // if(ifinter){
-                //     let minpt = {"x":cp_new.saddle[i].x,"y":1};
-                //     let midpt = {"x":(cp_new.saddle[i].x+minpt.x)/2, "y":(cp_new.saddle[i].y+minpt.y)/2};
-                //     edges.push([cp_new.saddle[i],midpt,minpt,"min"])
-
-                // } else {
-                let midpt = {"x":(cp_new.saddle[i].x+pts[j].x)/2, "y":(cp_new.saddle[i].y+pts[j].y)/2};
-                edges.push([cp_new.saddle[i],midpt,pts[j],"min"]);
-                // }
-                
+                let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
+                edges.push([this.cp_saddle[i],midpt,pts[j],"min","edge"+this.cp_saddle[i].id+pts[j].id]);                
             }
         }
-        for(let i=0;i<edges.length;i++){
-            let ed = edges[i];
-            if(ed[2].id!=undefined){
-                let id = "edge"+ed[0].id.toString()+ed[2].id.toString();
-                ed.push(id);
-            }
-            else{
-                ed.push("edgebound")
-            }
-            
-        }
-        console.log(edges)
         return edges;
     }
 
+
+
+
+
+
+    
+
+    animation(){            
+        let N = 50;
+        let dt = 0.001;
+        let X0 = [], Y0 = []; // to store initial starting locations
+        let X  = [], Y  = []; // to store current point for each curve
+
+        // array of starting positions for each curve on a uniform grid
+        for (let i = 0; i < N; i++) {
+            for (let j = 0; j < N; j++) {
+                X.push(this.xp[j]), Y.push(this.yp[i]);
+                X0.push(this.xp[j]), Y0.push(this.yp[i]);
+            }
+        }
+        function randage() {
+            // to randomize starting ages for each curve
+            return Math.round(Math.random()*100);
+        }
+
+        let g = d3.select("#animation").node().getContext("2d"); // initialize a "canvas" element
+        let that = this;
+
+        //// animation setup
+        let frameRate = 500; // ms per timestep (yeah I know it's not really a rate)
+        let M = X.length;
+        let MaxAge = 200; // # timesteps before restart
+        var age = [];
+        for (var i=0; i<M; i++) {
+            age.push(randage());
+        }
+        // let drawFlag = this.drawFlag
+        setInterval(function () {if (that.drawFlag) {draw();}}, frameRate);
+        d3.timer(function () {if (that.drawFlag) {draw();}}, frameRate);
+        // d3.select("#annotation")
+        //     .on("click", function() {that.drawFlag = (that.drawFlag) ? false : true;});
+            
+        g.globalCompositeOperation = "source-over";
+        
+        function draw() {
+            // console.log("drawing")
+            let width = document.getElementById('animation').offsetWidth;
+            let height = document.getElementById('animation').offsetHeight;
+            g.fillStyle = "rgba(255,255, 255, 0.05)";
+            // g.fillStyle = "black";
+            g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba   
+
+            
+            for (let i=0; i<M; i++) { // draw a single timestep for every curve
+
+                    // let dr = [0,0];
+                    // let X_new = that.adjustFlow(X[i],Y[i])[0];
+                    // let Y_new = that.adjustFlow(X[i],Y[i])[1];
+                    // dr = that.findV(X[i],Y[i],that.grad);
+                    
+                    
+                        // dr = that.gradF(that.cp, X[i],Y[i],0.1);
+                        
+                        // console.log(that.grad)
+                        // let result = that.chooseGrad(X[i],Y[i]);
+                        // console.log(result)
+                        // dr = that.findV(X[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][0]),Y[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][1]),that.chooseGrad(X[i],Y[i])[1])
+                    let dr = that.findV(X[i],Y[i],that.grad)[0]
+                    let pt_new = that.findV(X[i],Y[i],that.grad)[1]
+                    let X_new = pt_new[0];
+                    let Y_new = pt_new[1];
+                    // let fv = that.findV(X[i],Y[i],that.grad)[2]
+
+                        
+                    
+
+                    g.setLineDash([1, 0])
+                    g.beginPath();
+                    g.moveTo(that.xMap(X_new), that.yMap(Y_new)); // the start point of the path
+                    g.lineTo(that.xMap(X_new+dr[0]*dt), that.yMap(Y_new+dr[1]*dt)); // the end point
+                    // X[i]+=dr[0]*(dt+dt*fv*5);
+                    // Y[i]+=dr[1]*(dt+dt*fv*5);
+                    // dt = dt*2
+                    X[i]+=dr[0]*dt;
+                    Y[i]+=dr[1]*dt;
+
+                    g.lineWidth = 1;
+                    // g.strokeStyle = "#FF8000";
+                    // g.strokeStyle = "rgb(141,106,184)"
+                    g.strokeStyle = "rgb(110,24,110)"
+                    // g.strokeStyle = "white"
+                    g.stroke(); // final draw command
+                    if (age[i]++ > MaxAge) {
+                        // increment age of each curve, restart if MaxAge is reached
+                        age[i] = randage();
+                        X[i] = X0[i], Y[i] = Y0[i];
+                    }
+            }
+        }
+    }
+
+   
+
+    
+
+    
+
+    
     findConnNodes(edges){
         // find the location of control nodes on each edge
         console.log("finding conn")
@@ -928,23 +1018,7 @@ class anim{
         return connNodes;
     }
 
-    findTerminalNodes(edges){
-        console.log("terminal",edges)
-        for(let i=0;i<edges.length;i++){
-            
-        }
-
-    }
-
-    find2MinPt(pt,pts){
-        let pt1 = this.findMinPt(pt,pts);
-        let idx1 = pts.indexOf(pt1);
-        let pts1 = pts.slice(0,idx1);
-        let pts2 = pts.slice(idx1+1);
-        let pts_new = pts1.concat(pts2);
-        let pt2 = this.findMinPt(pt,pts_new);
-        return [pt1,pt2];
-    }
+    
 
     adjustMesh(sigma){
 
