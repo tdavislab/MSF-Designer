@@ -103,26 +103,23 @@ class anim{
         }
 
         this.cp_min = this.cp_min.concat(this.minBound);
+        // edge id: edge+start_point_id+end_point_id
         if(edges===undefined){
             this.edges = this.findEdges(this.cp);
         } else{
             this.edges = edges
         }
         
-        
-        
         console.log(this.edges)
-        
-        console.log("this cp min",this.cp_min);
-
 
         
         this.connNodes = this.findConnNodes(this.edges);
         this.edgeMapper = {};
         for(let i=0;i<this.edges.length;i++){
-            this.edgeMapper["p"+i] = this.initializeEdgeMapper(this.edges[i]);
+            this.edgeMapper[this.edges[i][4]] = this.initializeEdgeMapper(this.edges[i]);
         }
-        // this.findTerminalNodes(this.edges);
+        console.log(this.edgeMapper)
+
 
         // console.log(this.edges)
         // console.log(this.edgeMapper)
@@ -274,7 +271,6 @@ class anim{
                     .on("drag", draggedText)
                     .on("end", dragended))
             .on("mouseover",(d)=>{
-                console.log("hovering")
                 d3.select("#cp"+d.id).attr("font-size","45px")
             })
             .on("mouseout",(d)=>{
@@ -288,20 +284,9 @@ class anim{
         labels
             .attr("x",(d)=>this.xMap(d.x)-20)
             .attr("y",(d)=>this.yMap(d.y)-20)
-            // .text((d)=>{
-            //     if(d[2]===1&&d[3]===1){
-            //         return this.fmax(1,0,0,this.sigma);
-            //     } else if(d[2]*d[3]===-1){
-            //         return this.fmax(1,-0.25,0,this.sigma);
-            //     }
-            // })
             .text((d,i)=>i+1)
             .attr("class",(d)=>"label "+d.type)
             .style("font-weight","bold")
-            
-            // this.fmax(1,-0.25,0,this.sigma)
-
-
 
         let that=this;
 
@@ -364,26 +349,17 @@ class anim{
             .attr("y2",(d)=>this.yMap(d[3]))
             .attr("class","frame")
         
-        let nodes = this.connNodesGroup.selectAll("circle").data(this.connNodes);
+        // let nodes = this.connNodesGroup.selectAll("circle").data(this.connNodes);
+        let nodes = this.connNodesGroup.selectAll("circle").data(this.edges);
         nodes.exit().remove();
         let newnodes = nodes.enter().append("circle");
         nodes = newnodes.merge(nodes);
         nodes
             .attr("cx",(d)=>{
-                if(d[0].x===0){
-                    return this.xMap(d[0].x)+6;
-                }
-                else if(d[0].x===1){
-                    return this.xMap(d[0].x)-6;
-                } else{ return this.xMap(d[0].x);}
+                return this.xMap(d[1].x);
             })
             .attr("cy",(d)=>{
-                if(d[0].y===0){
-                    return this.yMap(d[0].y)+6;
-                }
-                else if(d[0].y===1){
-                    return this.yMap(d[0].y)-6;
-                } else{ return this.yMap(d[0].y);}
+                return this.yMap(d[1].y);
             })
             .attr("class","connNode")
             .call(d3.drag()
@@ -402,10 +378,9 @@ class anim{
         }
         function draggedNode(d,i){
             // **** need boundary control ****
-            console.log("d3",d3.event)
-            let pathid = "p"+d[1];
-            let ed = that.edges[d[1]];
-            let ed_new = [ed[0],{"x":that.xMapReverse(d3.event.x),"y":that.yMapReverse(d3.event.y)}, ed[2]];
+            // console.log("d3",d3.event)
+            let ed_new = [d[0],{"x":that.xMapReverse(d3.event.x),"y":that.yMapReverse(d3.event.y)}, d[2]];
+            console.log(ed_new)
             d3.select("#additionalEdge")
                 .attr("d",(d)=>that.curve0(ed_new))
                 .style("opacity",0)
@@ -414,41 +389,26 @@ class anim{
             let newPoints = [];
             for(let i=0;i<that.numSeg;i++){
                 let pt = d3.select("#additionalEdge").node().getPointAtLength(i*stepLength)
-                if((ed[0].x>ed[2].x)||(ed[0].y>ed[2].y)){
+                if((d[0].x>d[2].x)||(d[0].y>d[2].y)){
                     pt = d3.select("#additionalEdge").node().getPointAtLength((that.numSeg-i)*stepLength)
                 }
                 newPoints.push({"x":that.xMapReverse(pt.x), "y":that.yMapReverse(pt.y)});
             }
-            if(that.ifCurvesIntersect(pathid, newPoints)===false){
-                that.mapEdges(pathid, newPoints);
-                // console.log("that mapper",that.edgeMapper)
-                if([0,1].indexOf(d[0].x)!=-1){
-                    // node on vertical frame
-                    d3.select(this).attr("cy", d[0].y = that.yMapReverse(d3.event.y));
-                    that.edges[d[1]][2].y = that.yMapReverse(d3.event.y);
-                }
-                else if([0,1].indexOf(d[0].y)!=-1){
-                    // node on horizontal frame
-                    d3.select(this).attr("cx", d[0].x = that.xMapReverse(d3.event.x));
-                    that.edges[d[1]][2].x = that.xMapReverse(d3.event.x);
-                    // that.edges[d[1]][1].x = (that.edges[d[1]][2].x+that.edges[d[1]][0].x)/2;
-                }
-                else {
-                    // node not on the frame
-                    d3.select(this).attr("cx", d[0].x = that.xMapReverse(d3.event.x)).attr("cy", d[0].y = that.yMapReverse(d3.event.y));
-                    that.edges[d[1]][1] = {"x":that.xMapReverse(d3.event.x), "y":that.yMapReverse(d3.event.y)}
-                    that.connNodes[i][0] = {"x":that.xMapReverse(d3.event.x), "y":that.yMapReverse(d3.event.y)};
-                } 
+            console.log(newPoints)
+            // **** need to check intersection!!
+            // if(that.ifCurvesIntersect(pathid, newPoints)===false){
+                that.mapEdges(d[4], newPoints);
+                d3.select(this).attr("cx", d[1].x = that.xMapReverse(d3.event.x)).attr("cy", d[1].y = that.yMapReverse(d3.event.y));
                 if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
                     that.grad = that.constructMesh(that.sigma);
                 }
                 
-            } else {
-                ed_new = [ed[0], {"x":(ed[0].x+ed[2].x)/2,"y":(ed[0].y+ed[2].y)/2}, ed[2]]
-                d3.select("#additionalEdge")
-                    .attr("d",that.curve0(ed_new))
-                    .style("opacity",0)
-            }
+            // } else {
+                // ed_new = [ed[0], {"x":(ed[0].x+ed[2].x)/2,"y":(ed[0].y+ed[2].y)/2}, ed[2]]
+                // d3.select("#additionalEdge")
+                    // .attr("d",that.curve0(ed_new))
+                    // .style("opacity",0)
+            // }
             that.drawAnnotation();
             that.addedges();
 
@@ -536,7 +496,11 @@ class anim{
                     }
                     if(!ifinter){
                         d[2] = cpm;
-                        d[4] = "edge"+d[0].id+cpm.id;
+                        let originId = d[4];
+                        delete that.edgeMapper[originId];
+                        let newId = "edge"+d[0].id+cpm.id;
+                        d[4] = newId;
+                        that.edgeMapper[newId] = that.initializeEdgeMapper(d);
                         d[1] = {"x":(d[0].x+d[2].x)/2,"y":(d[0].y+d[2].y)/2};
                         d3.select("#terminal"+i)
                             .attr("cx",that.xMap(cpm.x))
@@ -561,7 +525,11 @@ class anim{
                     }
                     if(!ifinter){
                         d[2] = cpm;
-                        d[4] = "edge"+d[0].id+cpm.id;
+                        let originId = d[4];
+                        delete that.edgeMapper[originId];
+                        let newId = "edge"+d[0].id+cpm.id;
+                        d[4] = newId;
+                        that.edgeMapper[newId] = that.initializeEdgeMapper(d);
                         d[1] = {"x":(d[0].x+d[2].x)/2,"y":(d[0].y+d[2].y)/2};
                         d3.select("#terminal"+i)
                             .attr("cx",that.xMap(cpm.x))
@@ -570,7 +538,8 @@ class anim{
                 }
 
             }
-            that.connNodes = that.findConnNodes(that.edges);
+            // that.connNodes = that.findConnNodes(that.edges);
+            // console.log(that.connNodes);
             that.drawAnnotation();
         }
     }
@@ -890,13 +859,6 @@ class anim{
         return edges;
     }
 
-
-
-
-
-
-    
-
     animation(){            
         let N = 50;
         let dt = 0.001;
@@ -992,12 +954,6 @@ class anim{
     }
 
    
-
-    
-
-    
-
-    
     findConnNodes(edges){
         // find the location of control nodes on each edge
         console.log("finding conn")
