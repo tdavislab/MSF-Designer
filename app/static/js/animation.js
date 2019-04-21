@@ -113,7 +113,6 @@ class anim{
         console.log(this.edges)
 
         
-        this.connNodes = this.findConnNodes(this.edges);
         this.edgeMapper = {};
         for(let i=0;i<this.edges.length;i++){
             this.edgeMapper[this.edges[i][4]] = this.initializeEdgeMapper(this.edges[i]);
@@ -323,7 +322,6 @@ class anim{
             //     .attr("y", d3.mouse(this)[1]);
             that.cp[i].x = that.xMap.invert(d3.mouse(this)[0]);
             that.cp[i].y = that.yMap.invert(d3.mouse(this)[1]);        
-            that.connNodes = that.findConnNodes(that.edges);
             if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
                 that.grad = that.constructMesh(that.sigma);
 
@@ -538,9 +536,20 @@ class anim{
                 }
 
             }
-            // that.connNodes = that.findConnNodes(that.edges);
-            // console.log(that.connNodes);
             that.drawAnnotation();
+            let iftemp = false;
+            // check if there is any terminal node that does not connect to a max/min
+            for(let j=0;j<that.edges.length;j++){
+                if(["temp1","temp2","temp3","temp4"].indexOf(that.edges[j][4])!=-1){
+                    iftemp = true;
+                }
+            }
+            if(!iftemp){
+                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                    that.grad = that.constructMesh(that.sigma);
+                    that.drawFlag=true;
+                }
+            }
         }
     }
 
@@ -642,7 +651,6 @@ class anim{
         // one edge is the current line being moved, how to find another edge?
     }
 
-    
     adjustFlow(x,y){
         // map the original point to a new location when the boundary geometry is changed
         let x_new = x;
@@ -652,7 +660,7 @@ class anim{
         // now only deal with vertical lines
         for(let i=0;i<this.edges.length;i++){
             let ed = this.edges[i];
-            let edMap = this.edgeMapper["p"+i];
+            // let edMap = this.edgeMapper["p"+i];
             let xRange = Math.abs(ed[2].x-ed[0].x);
             let yRange = Math.abs(ed[2].y-ed[0].y);
             if(xRange!=0 && yRange!=0){
@@ -691,13 +699,16 @@ class anim{
 
 
 
-            // if(xRange===0){
-            if(a===1){
+            if(xRange===0){
+            // if(a===1){
                 // now only deal with vertical lines
                 if(Math.min(ed[0].y,ed[2].y)<=y&&y<=Math.max(ed[0].y,ed[2].y)){ // only these points need to change
-                    let edMap = this.edgeMapper["p"+i];
+                    let edMap = this.edgeMapper[ed[4]];
+                    // console.log("edmap",edMap)
                     let ySeg = Math.abs(ed[2].y-ed[0].y)/this.numSeg;
                     let pIdx = Math.floor((y-Math.min(ed[0].y,ed[2].y))/ySeg);
+                    // console.log(edMap)
+                    // console.log(pIdx)
                     let pt0 = edMap[pIdx];
                     let pt1 = edMap[Math.min(pIdx+1,edMap.length-1)];
                     let xOrigin = ed[0].x; //the x value before change curve
@@ -720,7 +731,7 @@ class anim{
             // if(a===1){
                 // horizontal lines
                 if(Math.min(ed[0].x,ed[2].x)<=x&&x<=Math.max(ed[0].x,ed[2].x)){
-                    let edMap = this.edgeMapper["p"+i];
+                    let edMap = this.edgeMapper[ed[4]];
                     let xSeg = Math.abs(ed[2].x-ed[0].x)/this.numSeg;
                     let pIdx = Math.floor((x-Math.min(ed[0].x,ed[2].x))/xSeg);
                     let pt0 = edMap[pIdx];
@@ -746,6 +757,7 @@ class anim{
         return [x_new, y_new];
 
     }
+
     calDist(loc1, loc2){
         let dist = Math.sqrt(Math.pow(loc1.x-loc2.x,2)+Math.pow(loc1.y-loc2.y,2));
         return dist;
@@ -859,6 +871,50 @@ class anim{
         return edges;
     }
 
+    initializeMesh(sigma){
+        // initialize the triangulation
+        let grad_new = [];
+        let cp_max = [];
+        for(let i=0;i<this.cp.length;i++){
+            if(this.cp[i].type==="max"){
+                cp_max.push(this.cp[i]);
+            }
+        }
+        for(let x=0;x<=1;x+=this.step){
+            for(let y=0;y<=1;y+=this.step){
+                let cpt = this.findMinPt({"x":x,"y":y},this.cp);
+                let idx = [];
+                let x_new = x - cpt.x;
+                let y_new = y - cpt.y;
+                if(cpt.type === "max"){
+                    idx=[1,1];
+                } else if(cpt.type==="saddle"){
+                    idx=[-1,1];
+                } else if(cpt.type==="min"){
+                    idx=[-1,-1];
+                }
+                let dx = idx[0]*(1/sigma) * x_new * Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
+                let dy = idx[1]*(1/sigma) * y_new * (Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma));
+                if(cpt.type==="saddle"){
+                    // flow rotation
+                    let pts = this.find2MinPt(cpt,cp_max);
+                    let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
+                    let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+                    let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+                    dx = dx_new;
+                    dy = dy_new;
+                }
+                let fv = this.calFV(x,y,cpt);
+                let pt_new = [x,y];
+                grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1],fv])
+            }
+        }
+        grad_new.sort(function(x,y){
+            return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
+        })
+        return grad_new;
+    }
+
     animation(){            
         let N = 50;
         let dt = 0.001;
@@ -953,78 +1009,11 @@ class anim{
         }
     }
 
-   
-    findConnNodes(edges){
-        // find the location of control nodes on each edge
-        console.log("finding conn")
-        let connNodes = [];
-        // console.log(edges)
-        for(let i=0;i<edges.length;i++){
-            // edge[i]: [saddle, mid point, max/min, "max"/"min"]
-            // if(edges[i][3]==="min"){
-            //     if(([0,1].indexOf(edges[i][2].x)!=-1)||([0,1].indexOf(edges[i][2].y)!=-1)){
-            //         // if the edge is between a saddle and a min point on the frame
-            //         connNodes.push([edges[i][2],i]);
-            //         // node: [position, corresponding index in edges]
-            //     } 
-            // }
-            connNodes.push([edges[i][1],i]);
-        }
-        // console.log(connNodes)
-        return connNodes;
-    }
-
     
 
-    adjustMesh(sigma){
+    // adjustMesh(sigma){
 
-    }
-
-    initializeMesh(sigma){
-        // initialize the triangulation
-        let grad_new = [];
-        let cp_max = [];
-        for(let i=0;i<this.cp.length;i++){
-            if(this.cp[i].type==="max"){
-                cp_max.push(this.cp[i]);
-            }
-        }
-        for(let x=0;x<=1;x+=this.step){
-            for(let y=0;y<=1;y+=this.step){
-                let cpt = this.findMinPt({"x":x,"y":y},this.cp);
-                let idx = [];
-                let x_new = x - cpt.x;
-                let y_new = y - cpt.y;
-                if(cpt.type === "max"){
-                    idx=[1,1];
-                } else if(cpt.type==="saddle"){
-                    idx=[-1,1];
-                } else if(cpt.type==="min"){
-                    idx=[-1,-1];
-                }
-                let dx = idx[0]*(1/sigma) * x_new * Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-                let dy = idx[1]*(1/sigma) * y_new * (Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma));
-                if(cpt.type==="saddle"){
-                    // flow rotation
-                    let pts = this.find2MinPt(cpt,cp_max);
-                    let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
-                    let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-                    let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-                    dx = dx_new;
-                    dy = dy_new;
-                }
-                let fv = this.calFV(x,y,cpt);
-                let pt_new = [x,y];
-                grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1],fv])
-            }
-        }
-        grad_new.sort(function(x,y){
-            return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
-        })
-        return grad_new;
-
-
-    }
+    // }
 
     constructMesh(sigma){
         console.log("constucting")

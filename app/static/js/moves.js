@@ -34,9 +34,9 @@ class moves{
                     let pt_saddle = new criticalPoint(id+1,(x+mincp.x)/2,(y+mincp.y)/2,"saddle");
                     this.anim.cp.push(pt_saddle);
                     this.anim.cp_saddle.push(pt_saddle);
-                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                        this.anim.drawFlag=true;
-                    }
+                    // if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        // this.anim.drawFlag=true;
+                    // }
                     d3.select("#amoveplus")
                         .attr("value","Face-max move")
                     this.apType="";
