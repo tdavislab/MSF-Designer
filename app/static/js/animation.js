@@ -149,8 +149,12 @@ class anim{
 
         this.animation();
        
-        this.grad = this.initializeMesh(this.sigma)
-        // console.log(this.grad)
+        this.grad = this.initializeMesh();
+        this.assignEdge();
+        this.constructMesh(this.sigma);
+        
+
+        console.log(this.grad)
         this.findNearestPoint();
         this.findRange();
         this.drawAnnotation();
@@ -321,9 +325,16 @@ class anim{
             //     .attr("x",d3.mouse(this)[0])
             //     .attr("y", d3.mouse(this)[1]);
             that.cp[i].x = that.xMap.invert(d3.mouse(this)[0]);
-            that.cp[i].y = that.yMap.invert(d3.mouse(this)[1]);        
+            that.cp[i].y = that.yMap.invert(d3.mouse(this)[1]);  
+            if(d.type==="saddle"){
+                console.log("this is a saddle")
+            } else if(d.type==="max"){
+                let edgeid = "edge"+d.np[0].id+d.id;
+                console.log("edgeid",edgeid)
+            }
             if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                that.grad = that.constructMesh(that.sigma);
+                that.assignEdge();
+                that.constructMesh(that.sigma);
 
             }
             // console.log("cp",that.cp)
@@ -546,7 +557,9 @@ class anim{
             }
             if(!iftemp){
                 if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                    that.grad = that.constructMesh(that.sigma);
+                    that.assignEdge();
+                    that.constructMesh(that.sigma);
+                    console.log("that grad",that.grad)
                     that.drawFlag=true;
                 }
             }
@@ -871,9 +884,45 @@ class anim{
         return edges;
     }
 
-    initializeMesh(sigma){
-        // initialize the triangulation
+    initializeMesh(){
         let grad_new = [];
+        for(let x=0;x<=1;x+=this.step){
+            for(let y=0;y<=1;y+=this.step){
+                // grad_new.push([x,y])
+                grad_new.push({"x":x,"y":y});
+            }
+        }
+        return grad_new
+
+    }
+
+    assignEdge(){
+        console.log("assigning edge points")
+        let edgepoints = [];
+        for(let key in this.edgeMapper){
+            let ed = this.edgeMapper[key];
+            ed.forEach(e=>{
+                edgepoints.push({"x":e.x_new,"y":e.y_new,"edgeid":key})
+            })
+
+        }
+        
+        console.log(edgepoints)
+        for(let x=0;x<=1;x+=this.step){
+            for(let y=0;y<=1;y+=this.step){
+                let gradid = Math.round(x/this.step*100+y/this.step);
+                let edpoint = this.findMinPt({"x":x,"y":y},edgepoints);
+                this.grad[gradid]["ed"] = edpoint;
+
+
+            }
+        }
+
+    }
+
+    constructMesh(sigma){
+        // initialize the triangulation
+        // let grad_new = [];
         let cp_max = [];
         for(let i=0;i<this.cp.length;i++){
             if(this.cp[i].type==="max"){
@@ -895,25 +944,163 @@ class anim{
                 }
                 let dx = idx[0]*(1/sigma) * x_new * Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
                 let dy = idx[1]*(1/sigma) * y_new * (Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma));
-                if(cpt.type==="saddle"){
-                    // flow rotation
-                    let pts = this.find2MinPt(cpt,cp_max);
-                    let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
-                    let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-                    let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-                    dx = dx_new;
-                    dy = dy_new;
-                }
+                // if(cpt.type==="saddle"){
+                //     // flow rotation
+                //     let pts = this.find2MinPt(cpt,cp_max);
+                //     let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
+                //     let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+                //     let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+                //     dx = dx_new;
+                //     dy = dy_new;
+                //     // let gradid = Math.round(x/this.step*100+y/this.step);
+                //     // let edp = this.edgeMapper[this.grad[gradid].ed.edgeid];
+                //     // let theta1 = Math.atan2(edp[9].y-edp[0].y,edp[9].x-edp[0].x)*2;
+                //     // // console.log(theta1)
+                //     // let dx_new1 = Math.cos(theta1)*dx-Math.sin(theta1)*dy;
+                //     // let dy_new1 = Math.sin(theta1)*dx+Math.cos(theta1)*dy;
+                //     // dx = dx_new1;
+                //     // dy = dy_new1;
+
+                // }
+                
                 let fv = this.calFV(x,y,cpt);
                 let pt_new = [x,y];
-                grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1],fv])
+                let gradid = Math.round(x/this.step*100+y/this.step);
+                let edp = this.edgeMapper[this.grad[gradid].ed.edgeid];
+                // console.log(edp)
+                if(edp[9].x!=edp[0].x){
+                    let theta1 = 2*Math.PI-Math.atan2(edp[9].y-edp[0].y,edp[9].x-edp[0].x)*2;
+                    // console.log(theta1)
+                    let dx_new1 = Math.cos(theta1)*dx-Math.sin(theta1)*dy;
+                    let dy_new1 = Math.sin(theta1)*dx+Math.cos(theta1)*dy;
+                    dx = dx_new1;
+                    dy = dy_new1;
+
+                }
+                
+                this.grad[gradid]["dx"] = dx;
+                this.grad[gradid]["dy"] = dy;
+                this.grad[gradid]["x_new"] = pt_new[0];
+                this.grad[gradid]["y_new"] = pt_new[1];
+                this.grad[gradid]["fv"] = fv;
+                // this.grad[gradid] = this.grad[gradid].concat([dx,dy,pt_new[0],pt_new[1],fv])
+                // this.grad[gradid]
+                // grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1],fv])
             }
         }
-        grad_new.sort(function(x,y){
-            return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
+        this.grad.sort(function(a,b){
+            return d3.ascending(a.x,b.x) || d3.ascending(a.y,b.y);
         })
-        return grad_new;
+        // return grad_new;
     }
+
+    // constructMesh(sigma){
+    //     console.log("constucting")
+    //     let grad_new = [];
+    //     let cp_max = [];
+    //     for(let i=0;i<this.cp.length;i++){
+    //         if(this.cp[i].type==="max"){
+    //             cp_max.push(this.cp[i]);
+    //         }
+    //     }
+    //     for(let x=0;x<=1;x+=this.step){
+    //         for(let y=0;y<=1;y+=this.step){
+    //             let cpt = this.findMinPt({"x":x,"y":y},this.cp);
+    //             // if(this.cp.length===3){
+    //             //     if(x>0.35 && x<0.65){
+    //             //         cpt = this.cp[1];
+    //             //     } else if (x <= 0.35){
+    //             //         cpt = this.cp[0];
+    //             //     } else {
+    //             //         cpt = this.cp[2];
+    //             //     }
+
+    //             // }
+                
+    //             let idx = [];
+    //             let x_new = x - cpt.x;
+    //             let y_new = y - cpt.y;
+    //             if(cpt.type === "max"){
+    //                 idx=[1,1];
+    //             } else if(cpt.type==="saddle"){
+    //                 idx=[-1,1];
+    //             } else if(cpt.type==="min"){
+    //                 idx=[-1,-1];
+    //             }
+    //             // console.log(idx)
+    //             let dx = idx[0]*(1/sigma) * x_new * Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
+    //             let dy = idx[1]*(1/sigma) * y_new * (Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma));
+    //             // let dx = x_new;
+    //             // let dy = y_new;
+    //             // if(idx[0]*idx[1]<0){
+                    
+    //             // }
+    //             // console.log(dx,dy)
+    //             // if(cpt.type === "max"){
+    //             //     let ed = this.edges[cpt.edges];
+    //             //     if(ed[0].x-ed[2].x!=0 && ed[0].y-ed[2].y!=0){
+    //             //         let theta = Math.atan2(ed[0].y-ed[2].y,ed[0].x-ed[2].x)*2;
+    //             //         if(x>0.5 && x<0.75){
+    //             //             let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+    //             //             let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+    //             //             dx = dx_new;
+    //             //             dy = dy_new;  
+    
+    //             //         }
+    //             //     }
+                    
+
+
+    //             // }
+
+    //             if(cpt.type==="saddle"){
+    //                 // for(let i=0;i<cpt.edges.length;i++){
+    //                 //     let ed = this.edges[cpt.edges[i]];
+    //                 //     if(ed[0].x-ed[2].x!=0 && ed[0].y-ed[2].y!=0){
+    //                 //         let theta = Math.atan2(ed[0].y-ed[2].y,ed[0].x-ed[2].x)*2;
+    //                 //         // if(this.calDist({"x":x,"y":y},ed[1])<0.05){
+    //                 //         if(x>0.5 && (y>0.25 && y < 0.75)){
+    //                 //             let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+    //                 //             let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+    //                 //             dx = dx_new;
+    //                 //             dy = dy_new;  
+
+    //                 //         }
+
+    //                 //     }
+                        
+                                              
+    //                 // }
+    //                 // dx = -x_new;
+    //                 // dy = y_new;
+    //                 // dx = -(1/sigma)*x_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
+    //                 // dy = (1/sigma)*y_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
+    //                 // flow rotation
+    //                 // if([cpt.x,cpt.y].join!=[0.5,0.5].join()){
+    //                 //     let pts = this.find2MinPt(cpt,cp_max);
+    //                 //     let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
+    //                 //     let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
+    //                 //     let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
+    //                 //     dx = dx_new;
+    //                 //     dy = dy_new;
+
+    //                 // }
+                    
+                    
+    //             }
+    //             let pt_new = this.adjustFlow(x,y);
+    //             let fv = this.calFV(x,y,cpt);
+    //             // let pt_new = [x,y];
+    //             grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1],fv]);
+    //             // grad_new.push([x,y,dx,dy]);
+    //         }
+    //     }
+    //     grad_new.sort(function(x,y){
+    //         return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
+    //     })
+    //     console.log("*** grad_new",grad_new)
+    //     return grad_new;
+    // }
 
     animation(){            
         let N = 50;
@@ -1015,113 +1202,7 @@ class anim{
 
     // }
 
-    constructMesh(sigma){
-        console.log("constucting")
-        let grad_new = [];
-        let cp_max = [];
-        for(let i=0;i<this.cp.length;i++){
-            if(this.cp[i].type==="max"){
-                cp_max.push(this.cp[i]);
-            }
-        }
-        for(let x=0;x<=1;x+=this.step){
-            for(let y=0;y<=1;y+=this.step){
-                let cpt = this.findMinPt({"x":x,"y":y},this.cp);
-                // if(this.cp.length===3){
-                //     if(x>0.35 && x<0.65){
-                //         cpt = this.cp[1];
-                //     } else if (x <= 0.35){
-                //         cpt = this.cp[0];
-                //     } else {
-                //         cpt = this.cp[2];
-                //     }
-
-                // }
-                
-                let idx = [];
-                let x_new = x - cpt.x;
-                let y_new = y - cpt.y;
-                if(cpt.type === "max"){
-                    idx=[1,1];
-                } else if(cpt.type==="saddle"){
-                    idx=[-1,1];
-                } else if(cpt.type==="min"){
-                    idx=[-1,-1];
-                }
-                // console.log(idx)
-                let dx = idx[0]*(1/sigma) * x_new * Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-                let dy = idx[1]*(1/sigma) * y_new * (Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma));
-                // let dx = x_new;
-                // let dy = y_new;
-                // if(idx[0]*idx[1]<0){
-                    
-                // }
-                // console.log(dx,dy)
-                // if(cpt.type === "max"){
-                //     let ed = this.edges[cpt.edges];
-                //     if(ed[0].x-ed[2].x!=0 && ed[0].y-ed[2].y!=0){
-                //         let theta = Math.atan2(ed[0].y-ed[2].y,ed[0].x-ed[2].x)*2;
-                //         if(x>0.5 && x<0.75){
-                //             let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-                //             let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-                //             dx = dx_new;
-                //             dy = dy_new;  
     
-                //         }
-                //     }
-                    
-
-
-                // }
-
-                if(cpt.type==="saddle"){
-                    // for(let i=0;i<cpt.edges.length;i++){
-                    //     let ed = this.edges[cpt.edges[i]];
-                    //     if(ed[0].x-ed[2].x!=0 && ed[0].y-ed[2].y!=0){
-                    //         let theta = Math.atan2(ed[0].y-ed[2].y,ed[0].x-ed[2].x)*2;
-                    //         // if(this.calDist({"x":x,"y":y},ed[1])<0.05){
-                    //         if(x>0.5 && (y>0.25 && y < 0.75)){
-                    //             let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-                    //             let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-                    //             dx = dx_new;
-                    //             dy = dy_new;  
-
-                    //         }
-
-                    //     }
-                        
-                                              
-                    // }
-                    // dx = -x_new;
-                    // dy = y_new;
-                    // dx = -(1/sigma)*x_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
-                    // dy = (1/sigma)*y_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
-                    // flow rotation
-                    // if([cpt.x,cpt.y].join!=[0.5,0.5].join()){
-                    //     let pts = this.find2MinPt(cpt,cp_max);
-                    //     let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
-                    //     let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-                    //     let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-                    //     dx = dx_new;
-                    //     dy = dy_new;
-
-                    // }
-                    
-                    
-                }
-                let pt_new = this.adjustFlow(x,y);
-                let fv = this.calFV(x,y,cpt);
-                // let pt_new = [x,y];
-                grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1],fv]);
-                // grad_new.push([x,y,dx,dy]);
-            }
-        }
-        grad_new.sort(function(x,y){
-            return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
-        })
-        console.log("*** grad_new",grad_new)
-        return grad_new;
-    }
 
     calFV(x,y,cp){
         let w = 1;
@@ -1162,15 +1243,15 @@ class anim{
         let ex_v = [0,0]
         for(let i=0;i<3;i++){
             if(typeof triang[i]!="undefined"){
-                ex_v[0] += 1/3*triang[i][2]
-                ex_v[1] += 1/3*triang[i][3]
+                ex_v[0] += 1/3*triang[i].dx
+                ex_v[1] += 1/3*triang[i].dy
             }
         }
 
-        let x_new = ((triang[1][0]-x)*triang[0][4]+(x-triang[0][0])*triang[1][4])/(triang[1][0]-triang[0][0]);
-        let y_new = ((triang[2][1]-y)*triang[1][5]+(y-triang[1][1])*triang[2][5])/(triang[2][1]-triang[1][1]);
+        let x_new = ((triang[1].x-x)*triang[0].x_new+(x-triang[0].x)*triang[1].x_new)/(triang[1].x-triang[0].x);
+        let y_new = ((triang[2].y-y)*triang[1].y_new+(y-triang[1].y)*triang[2].y_new)/(triang[2].y-triang[1].y);
         let pt_new = [x_new,y_new]
-        let fv = (triang[0][6] + triang[1][6] + triang[2][6])/3
+        let fv = (triang[0].fv + triang[1].fv + triang[2].fv)/3
         return [ex_v,pt_new,fv];
         // return ex_v;
     }
