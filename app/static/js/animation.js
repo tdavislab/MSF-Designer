@@ -987,24 +987,24 @@ class anim{
                 }
                 let dx1 = idx[0]*(1/sigma) * x_new * Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
                 let dy1 = idx[1]*(1/sigma) * y_new * (Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma));
-                // if(cpt.type==="saddle"){
-                //     // flow rotation
-                //     let pts = this.find2MinPt(cpt,cp_max);
-                //     let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
-                //     let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-                //     let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-                //     dx = dx_new;
-                //     dy = dy_new;
-                //     // let gradid = Math.round(x/this.step*100+y/this.step);
-                //     // let edp = this.edgeMapper[this.grad[gradid].ed.edgeid];
-                //     // let theta1 = Math.atan2(edp[9].y-edp[0].y,edp[9].x-edp[0].x)*2;
-                //     // // console.log(theta1)
-                //     // let dx_new1 = Math.cos(theta1)*dx-Math.sin(theta1)*dy;
-                //     // let dy_new1 = Math.sin(theta1)*dx+Math.cos(theta1)*dy;
-                //     // dx = dx_new1;
-                //     // dy = dy_new1;
+                if(cpt.type==="saddle"){
+                    // flow rotation
+                    let pts = this.find2MinPt(cpt,cp_max);
+                    let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
+                    let dx_new = Math.cos(theta)*dx1-Math.sin(theta)*dy1;
+                    let dy_new = Math.sin(theta)*dx1+Math.cos(theta)*dy1;
+                    dx1 = dx_new;
+                    dy1 = dy_new;
+                    // let gradid = Math.round(x/this.step*100+y/this.step);
+                    // let edp = this.edgeMapper[this.grad[gradid].ed.edgeid];
+                    // let theta1 = Math.atan2(edp[9].y-edp[0].y,edp[9].x-edp[0].x)*2;
+                    // // console.log(theta1)
+                    // let dx_new1 = Math.cos(theta1)*dx-Math.sin(theta1)*dy;
+                    // let dy_new1 = Math.sin(theta1)*dx+Math.cos(theta1)*dy;
+                    // dx = dx_new1;
+                    // dy = dy_new1;
 
-                // }
+                }
                 
                 let fv = this.calFV(x,y,cpt);
                 let pt_new = [x,y];
