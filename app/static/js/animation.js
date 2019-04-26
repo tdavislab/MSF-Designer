@@ -114,9 +114,12 @@ class anim{
 
         
         this.edgeMapper = {};
-        for(let i=0;i<this.edges.length;i++){
-            this.edgeMapper[this.edges[i][4]] = this.initializeEdgeMapper(this.edges[i]);
+        for(let eid in this.edges){
+            this.edgeMapper[eid] = this.initializeEdgeMapper(this.edges[eid]);
         }
+        // for(let i=0;i<this.edges.length;i++){
+        //     this.edgeMapper[this.edges[i][4]] = this.initializeEdgeMapper(this.edges[i]);
+        // }
         console.log(this.edgeMapper)
 
 
@@ -229,6 +232,7 @@ class anim{
     }
 
     drawAnnotation(){
+        let edgelist = d3.entries(this.edges);
         // draw critical points
         let circles = this.pointsGroup.selectAll("circle").data(this.cp);
         circles.exit().remove();
@@ -299,16 +303,16 @@ class anim{
               
         function draggedText(d,i) {
             console.log("d3",d3.mouse(this))
-            for(let j=0;j<that.edges.length;j++){
-                let ed = that.edges[j];
-                console.log("ed",that.edges[j])
-                if([that.edges[j][0].x,that.edges[j][0].y].join()===[that.cp[i].x,that.cp[i].y].join()) {
-                    that.edges[j][0] = {"x":that.xMapReverse(d3.mouse(this)[0]),"y":that.yMapReverse(d3.mouse(this)[1])};
-                } else if ([that.edges[j][2].x,that.edges[j][2].y].join()===[that.cp[i].x,that.cp[i].y].join()) {
-                    that.edges[j][2] = {"x":that.xMapReverse(d3.mouse(this)[0]),"y":that.yMapReverse(d3.mouse(this)[1])};
-                }
-                // that.edges[j][1] = {"x":(that.edges[j][0].x+that.edges[j][2].x)/2,"y":(that.edges[j][0].y+that.edges[j][2].y)/2};
-            }
+            // for(let j=0;j<that.edges.length;j++){
+            //     let ed = that.edges[j];
+            //     console.log("ed",that.edges[j])
+            //     if([that.edges[j][0].x,that.edges[j][0].y].join()===[that.cp[i].x,that.cp[i].y].join()) {
+            //         that.edges[j][0] = {"x":that.xMapReverse(d3.mouse(this)[0]),"y":that.yMapReverse(d3.mouse(this)[1])};
+            //     } else if ([that.edges[j][2].x,that.edges[j][2].y].join()===[that.cp[i].x,that.cp[i].y].join()) {
+            //         that.edges[j][2] = {"x":that.xMapReverse(d3.mouse(this)[0]),"y":that.yMapReverse(d3.mouse(this)[1])};
+            //     }
+            //     // that.edges[j][1] = {"x":(that.edges[j][0].x+that.edges[j][2].x)/2,"y":(that.edges[j][0].y+that.edges[j][2].y)/2};
+            // }
             //     // let totalLength = d3.select("#p"+j).node().getTotalLength();
             //     // let stepLength = totalLength/that.numSeg;
             //     // let newPoints = [];
@@ -325,18 +329,33 @@ class anim{
             //     .attr("x",d3.mouse(this)[0])
             //     .attr("y", d3.mouse(this)[1]);
             that.cp[i].x = that.xMap.invert(d3.mouse(this)[0]);
-            that.cp[i].y = that.yMap.invert(d3.mouse(this)[1]);  
+            that.cp[i].y = that.yMap.invert(d3.mouse(this)[1]);  // edge node will change automatically
             if(d.type==="saddle"){
                 console.log("this is a saddle")
             } else if(d.type==="max"){
                 let edgeid = "edge"+d.np[0].id+d.id;
-                console.log("edgeid",edgeid)
+                let totalLength = d3.select("#"+edgeid).node().getTotalLength();
+                let stepLength = totalLength/that.numSeg;
+                let newPoints = [];
+                for(let i=0;i<that.numSeg;i++){
+                    let pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength)
+                    if((d.x>d.np.x)||(d.y>d.np.y)){
+                        pt = d3.select("#additionalEdge").node().getPointAtLength((that.numSeg-i)*stepLength)
+                    }
+                    newPoints.push({"x":that.xMapReverse(pt.x), "y":that.yMapReverse(pt.y)});
+
+                }
+                that.mapEdges(edgeid, newPoints);
+                console.log("mapedge",that.edgeMapper);
+                // that.mathEdges(edgeid,) //**** new points???
+                // console.log("edge length",totalLength)
             }
             if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
                 that.assignEdge();
                 that.constructMesh(that.sigma);
 
             }
+            console.log("edgeee",that.edges)
             // console.log("cp",that.cp)
             that.drawAnnotation();
             that.addedges();
@@ -344,8 +363,8 @@ class anim{
               
         function dragended(d) {
             d3.select(this).classed("active", false);
-            that.drawAnnotation();
-            that.addedges();
+            // that.drawAnnotation();
+            // that.addedges();
         }
 
         // draw frames (local minimum)
@@ -359,16 +378,16 @@ class anim{
             .attr("class","frame")
         
         // let nodes = this.connNodesGroup.selectAll("circle").data(this.connNodes);
-        let nodes = this.connNodesGroup.selectAll("circle").data(this.edges);
+        let nodes = this.connNodesGroup.selectAll("circle").data(edgelist);
         nodes.exit().remove();
         let newnodes = nodes.enter().append("circle");
         nodes = newnodes.merge(nodes);
         nodes
             .attr("cx",(d)=>{
-                return this.xMap(d[1].x);
+                return this.xMap(d.value[1].x);
             })
             .attr("cy",(d)=>{
-                return this.yMap(d[1].y);
+                return this.yMap(d.value[1].y);
             })
             .attr("class","connNode")
             .call(d3.drag()
@@ -388,28 +407,30 @@ class anim{
         function draggedNode(d,i){
             // **** need boundary control ****
             // console.log("d3",d3.event)
-            let ed_new = [d[0],{"x":that.xMapReverse(d3.event.x),"y":that.yMapReverse(d3.event.y)}, d[2]];
-            console.log(ed_new)
-            d3.select("#additionalEdge")
-                .attr("d",(d)=>that.curve0(ed_new))
-                .style("opacity",0)
-            let totalLength = d3.select("#additionalEdge").node().getTotalLength();
+            let ed_new = [d.value[0],{"x":that.xMapReverse(d3.event.x),"y":that.yMapReverse(d3.event.y)}, d.value[2]];
+            // console.log(ed_new)
+            // d3.select("#"+d.key)
+                // .attr("d",that.curve0(ed_new))
+                // .style("opacity",0)
+            let totalLength = d3.select("#"+d.key).node().getTotalLength();
             let stepLength = totalLength/that.numSeg;
             let newPoints = [];
             for(let i=0;i<that.numSeg;i++){
-                let pt = d3.select("#additionalEdge").node().getPointAtLength(i*stepLength)
-                if((d[0].x>d[2].x)||(d[0].y>d[2].y)){
-                    pt = d3.select("#additionalEdge").node().getPointAtLength((that.numSeg-i)*stepLength)
+                let pt = d3.select("#"+d.key).node().getPointAtLength(i*stepLength)
+                if((d.value[0].x>d.value[2].x)||(d.value[0].y>d.value[2].y)){
+                    pt = d3.select("#"+d.key).node().getPointAtLength((that.numSeg-i)*stepLength)
                 }
                 newPoints.push({"x":that.xMapReverse(pt.x), "y":that.yMapReverse(pt.y)});
             }
-            console.log(newPoints)
+            that.mapEdges(d.key, newPoints);
+            console.log(that.edgeMapper)
             // **** need to check intersection!!
             // if(that.ifCurvesIntersect(pathid, newPoints)===false){
-                that.mapEdges(d[4], newPoints);
-                d3.select(this).attr("cx", d[1].x = that.xMapReverse(d3.event.x)).attr("cy", d[1].y = that.yMapReverse(d3.event.y));
+                that.mapEdges(d.key, newPoints);
+                d3.select(this).attr("cx", d.value[1].x = that.xMapReverse(d3.event.x)).attr("cy", d.value[1].y = that.yMapReverse(d3.event.y));
                 if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                    that.grad = that.constructMesh(that.sigma);
+                    that.assignEdge();
+                    that.constructMesh(that.sigma);
                 }
                 
             // } else {
@@ -431,7 +452,7 @@ class anim{
             //     .attr("r",10)
             //     .attr("fill","orange")
         }
-        let terminalNodes = this.terminalNodesGroup.selectAll("circle").data(this.edges)
+        let terminalNodes = this.terminalNodesGroup.selectAll("circle").data(edgelist)
         terminalNodes.exit().remove();
         let newTerminalNodes = terminalNodes.enter().append("circle");
         terminalNodes = newTerminalNodes.merge(terminalNodes);
@@ -443,27 +464,27 @@ class anim{
                 // } else {
                 //     return this.xMap(d[2].x + (d[0].x-d[2].x)/Math.abs(d[0].x-d[2].x)*0.015)
                 // }
-                if(d[2].y===0 || d[2].y===1 || d[0].x===d[2].x){
-                    return this.xMap(d[2].x);
-                } else if(d[2].x===0){
-                    return this.xMap(d[2].x+0.005);
-                } else if(d[2].x===1){
-                    return this.xMap(d[2].x-0.005);
+                if(d.value[2].y===0 || d.value[2].y===1 || d.value[0].x===d.value[2].x){
+                    return this.xMap(d.value[2].x);
+                } else if(d.value[2].x===0){
+                    return this.xMap(d.value[2].x+0.005);
+                } else if(d.value[2].x===1){
+                    return this.xMap(d.value[2].x-0.005);
                 } else {
-                    return this.xMap(d[2].x + (d[0].x-d[2].x)/Math.abs(d[0].x-d[2].x)*0.015);
+                    return this.xMap(d.value[2].x + (d.value[0].x-d.value[2].x)/Math.abs(d.value[0].x-d.value[2].x)*0.015);
                 }
             })
             .attr("cy",(d)=>{
                 // if(d[0].y===d[2].y){
-                if(d[2].x===0 || d[2].x===1 || d[0].y===d[2].y){
-                    return this.yMap(d[2].y);
-                } else if(d[2].y===0){
-                    return this.yMap(d[2].y+0.005);
+                if(d.value[2].x===0 || d.value[2].x===1 || d.value[0].y===d.value[2].y){
+                    return this.yMap(d.value[2].y);
+                } else if(d.value[2].y===0){
+                    return this.yMap(d.value[2].y+0.005);
 
-                } else if(d[2].y===1){
-                    return this.yMap(d[2].y-0.005);
+                } else if(d.value[2].y===1){
+                    return this.yMap(d.value[2].y-0.005);
                 } else {
-                    return this.yMap(d[2].y + (d[0].y-d[2].y)/Math.abs(d[0].y-d[2].y)*0.015)
+                    return this.yMap(d.value[2].y + (d.value[0].y-d.value[2].y)/Math.abs(d.value[0].y-d.value[2].y)*0.015)
                 }
             })
             .attr("id",(d,i)=>"terminal"+i)
@@ -488,44 +509,49 @@ class anim{
                 .attr("cy",d3.mouse(this)[1])
             let edgeid = d[4];
             d3.select("#"+edgeid)
-                .attr("d",(d)=>that.curve0([d[0],d[1],{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])}]))
-            if(d[3]==="max"){
+                .attr("d",(d)=>that.curve0([d.value[0],d.value[1],{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])}]))
+            if(d.value[3]==="max"){
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_max);
                 if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
                     // check intersection
                     let ifinter = false;
-                    for(let j=0;j<that.edges.length;j++){
-                        if(i!=j){
-                            let line1 = [that.edges[j][0],that.edges[j][2]];
-                            let line2 = [d[0],cpm];
+                    for(let k in that.edges){
+
+                    // for(let j=0;j<that.edges.length;j++){
+                        if(k!=d.key){
+                            let line1 = [that.edges[k][0],that.edges[k][2]];
+                            let line2 = [d.value[0],cpm];
                             if(that.ifLinesIntersect(line1,line2)){
                                 ifinter=true;
                             }
                         }
                     }
                     if(!ifinter){
-                        d[2] = cpm;
-                        let originId = d[4];
+                        d.value[2] = cpm;
+                        let originId = d.key;
                         delete that.edgeMapper[originId];
-                        let newId = "edge"+d[0].id+cpm.id;
-                        d[4] = newId;
-                        that.edgeMapper[newId] = that.initializeEdgeMapper(d);
-                        d[1] = {"x":(d[0].x+d[2].x)/2,"y":(d[0].y+d[2].y)/2};
+                        delete that.edges[originId];
+                        let newId = "edge"+d.value[0].id+cpm.id;
+                        d.key = newId;
+                        that.edgeMapper[newId] = that.initializeEdgeMapper(d.value);
+                        d.value[1] = {"x":(d.value[0].x+d.value[2].x)/2,"y":(d.value[0].y+d.value[2].y)/2};
+                        that.edges[newId] = d.value;
                         d3.select("#terminal"+i)
                             .attr("cx",that.xMap(cpm.x))
                             .attr("cy",that.yMap(cpm.y))
 
                     }                      
                 }
-            } else if (d[3]==="min"){
+            } else if (d.value[3]==="min"){
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_min);
                 if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
                     // check intersection
                     let ifinter = false;
-                    for(let j=0;j<that.edges.length;j++){
-                        if(i!=j){
-                            let line1 = [that.edges[j][0],that.edges[j][2]];
-                            let line2 = [d[0],cpm];
+                    for(let k in that.edges){
+                    // for(let j=0;j<that.edges.length;j++){
+                        if(k!=d.key){
+                            let line1 = [that.edges[k][0],that.edges[k][2]];
+                            let line2 = [d.value[0],cpm];
                             if(that.ifLinesIntersect(line1,line2)){
                                 ifinter=true;
                             }
@@ -533,13 +559,15 @@ class anim{
                         }
                     }
                     if(!ifinter){
-                        d[2] = cpm;
-                        let originId = d[4];
+                        d.value[2] = cpm;
+                        let originId = d.key;
                         delete that.edgeMapper[originId];
-                        let newId = "edge"+d[0].id+cpm.id;
-                        d[4] = newId;
-                        that.edgeMapper[newId] = that.initializeEdgeMapper(d);
-                        d[1] = {"x":(d[0].x+d[2].x)/2,"y":(d[0].y+d[2].y)/2};
+                        delete that.edges[originId];
+                        let newId = "edge"+d.value[0].id+cpm.id;
+                        d.key = newId;
+                        that.edgeMapper[newId] = that.initializeEdgeMapper(d.value);
+                        d.value[1] = {"x":(d.value[0].x+d.value[2].x)/2,"y":(d.value[0].y+d.value[2].y)/2};
+                        that.edges[newId] = d.value;
                         d3.select("#terminal"+i)
                             .attr("cx",that.xMap(cpm.x))
                             .attr("cy",that.yMap(cpm.y))
@@ -547,11 +575,11 @@ class anim{
                 }
 
             }
-            that.drawAnnotation();
+            
             let iftemp = false;
             // check if there is any terminal node that does not connect to a max/min
-            for(let j=0;j<that.edges.length;j++){
-                if(["temp1","temp2","temp3","temp4"].indexOf(that.edges[j][4])!=-1){
+            for(let k in that.edges){
+                if(["temp1","temp2","temp3","temp4"].indexOf(k)!=-1){
                     iftemp = true;
                 }
             }
@@ -559,10 +587,12 @@ class anim{
                 if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
                     that.assignEdge();
                     that.constructMesh(that.sigma);
-                    console.log("that grad",that.grad)
+                    // console.log("that grad",that.grad)
                     that.drawFlag=true;
                 }
             }
+            that.drawAnnotation();
+            that.addedges();
         }
     }
 
@@ -577,10 +607,36 @@ class anim{
         for(let j=0;j<this.numSeg;j++){
             em.push({"x":ed[0].x+j*xRange/this.numSeg, "y":ed[0].y+j*yRange/this.numSeg, "x_new":ed[0].x+j*xRange/this.numSeg, "y_new":ed[0].y+j*yRange/this.numSeg});
         }
+        if(edge[2].type==="max"){
+            if((edge[2].x>edge[0].x)||(edge[2].y>edge[0].y)){
+                em[0]["direction"] = "in";
+                em[this.numSeg-1]["direction"] = "out";
+            } else {
+                em[0]["direction"] = "out";
+                em[this.numSeg-1]["direction"] = "in";
+            }
+        } else { // min
+            if((edge[2].x>edge[0].x)||(edge[2].y>edge[0].y)){
+                em[0]["direction"] = "out";
+                em[this.numSeg-1]["direction"] = "in";
+            } else {
+                em[0]["direction"] = "in";
+                em[this.numSeg-1]["direction"] = "out";
+            }
+        }
         return em;
     }
 
     mapEdges(edgeid, newPoints){
+        newPoints.sort(function(a,b){
+            return d3.ascending(a.x,b.x) || d3.ascending(a.y,b.y);
+        })
+        // **** need to fix
+        if(edgeid==="edge1b010" || edgeid ==="edge1b110"){
+            newPoints.sort(function(a,b){
+                return d3.ascending(a.y,b.y) || d3.ascending(a.x,b.x);
+            })
+        }
         for(let i=0;i<this.numSeg;i++){
             // let pt = this.findMinPt([this.edgeMapper[edgeid][i].x, this.edgeMapper[edgeid][i].y], newPoints);
             let pt = newPoints[i]
@@ -804,57 +860,41 @@ class anim{
             .x(d=>this.xMap(d.x))
             .y(d=>this.yMap(d.y))
             .curve(d3.curveCardinal.tension(0));
-        let edges = this.edgeGroup.selectAll("path").data(this.edges);
+        let edgelist = d3.entries(this.edges);
+        let edges = this.edgeGroup.selectAll("path").data(edgelist);
         edges.exit().remove();
         let newedges = edges.enter().append("path");
         edges = newedges.merge(edges);
         edges
             .attr("d",(d)=>{
-                let d_new = d.slice(0,3);
+                let d_new = d.value.slice(0,3);
                 // console.log(this.curve0(d_new))
                 return this.curve0(d_new);
             })
-            .attr("class",(d)=>d[3]+"edge") // minedge/maxedge
-            .attr("id",(d,i)=>{
-                if(d[4]==="edgebound"){
-                    return d[4]+i
-                } else {
-                    return d[4]
-                }
-            })
+            .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
+            .attr("id",(d)=>d.key)
             .style("fill", "none")
             .style("stroke", "black")
             .style("stroke-width",2)
             .style("stroke-dasharray",(d)=>{
-                if(d[3]==="max"){
+                if(d.value[3]==="max"){
                     return "5,5";
                 } else {return "";}
             })
             .style("opacity",0.8)
             .on("mouseover",(d,i)=>{
-                if(d[4]==="edgebound"){
-                    d3.select("#"+d[4]+i)
-                        .style("stroke-width",5)
-                } else {
-                    d3.select("#"+d[4])
-                        .style("stroke-width",5)
-                }
-                
+                d3.select("#"+d.key)
+                    .style("stroke-width",5)
             })
             .on("mouseout",(d,i)=>{
-                if(d[4]==="edgebound"){
-                    d3.select("#"+d[4]+i)
-                        .style("stroke-width",2)
-                } else {
-                    d3.select("#"+d[4])
-                        .style("stroke-width",2)
-                }
+                d3.select("#"+d.key)
+                    .style("stroke-width",2)
             })
     }
 
     findEdges(cp){
         // initialize edges
-        let edges = [];
+        let edges = {};
         for(let i=0;i<this.cp_saddle.length;i++){
             // let ex ={"saddle":cp_new.saddle[i],"max":[],"min":[]};
             if(this.cp_max.length>0){
@@ -866,8 +906,9 @@ class anim{
                 } else { pts = cp_new_max; }
                 for(let j=0;j<pts.length;j++){
                     let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
-                    edges.push([this.cp_saddle[i],midpt,pts[j],"max","edge"+this.cp_saddle[i].id
-                +pts[j].id])
+                    let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
+                    edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"max"]
+                    // edges.push([this.cp_saddle[i],midpt,pts[j],"max","edge"+this.cp_saddle[i].id+pts[j].id])
                 }
             }
             let cp_new_min = this.cp_min.slice(0);
@@ -878,7 +919,9 @@ class anim{
             } else { pts = cp_new_min;}
             for(let j=0;j<pts.length;j++){
                 let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
-                edges.push([this.cp_saddle[i],midpt,pts[j],"min","edge"+this.cp_saddle[i].id+pts[j].id]);                
+                let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
+                edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"min"]
+                // edges.push([this.cp_saddle[i],midpt,pts[j],"min","edge"+this.cp_saddle[i].id+pts[j].id]);                
             }
         }
         return edges;
@@ -897,17 +940,16 @@ class anim{
     }
 
     assignEdge(){
-        console.log("assigning edge points")
+        // console.log("assigning edge points")
         let edgepoints = [];
         for(let key in this.edgeMapper){
             let ed = this.edgeMapper[key];
-            ed.forEach(e=>{
-                edgepoints.push({"x":e.x_new,"y":e.y_new,"edgeid":key})
-            })
-
+            for(let i=0;i<ed.length;i++){
+                edgepoints.push({"x":ed[i].x_new,"y":ed[i].y_new,"edgeid":key,"inedgeid":i})
+            }
         }
         
-        console.log(edgepoints)
+        // console.log(edgepoints)
         for(let x=0;x<=1;x+=this.step){
             for(let y=0;y<=1;y+=this.step){
                 let gradid = Math.round(x/this.step*100+y/this.step);
@@ -921,6 +963,7 @@ class anim{
     }
 
     constructMesh(sigma){
+        console.log("constucting")
         // initialize the triangulation
         // let grad_new = [];
         let cp_max = [];
@@ -942,8 +985,8 @@ class anim{
                 } else if(cpt.type==="min"){
                     idx=[-1,-1];
                 }
-                let dx = idx[0]*(1/sigma) * x_new * Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-                let dy = idx[1]*(1/sigma) * y_new * (Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma));
+                let dx1 = idx[0]*(1/sigma) * x_new * Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
+                let dy1 = idx[1]*(1/sigma) * y_new * (Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma));
                 // if(cpt.type==="saddle"){
                 //     // flow rotation
                 //     let pts = this.find2MinPt(cpt,cp_max);
@@ -967,16 +1010,53 @@ class anim{
                 let pt_new = [x,y];
                 let gradid = Math.round(x/this.step*100+y/this.step);
                 let edp = this.edgeMapper[this.grad[gradid].ed.edgeid];
+                let edgedist = this.calDist({"x":x,"y":y},this.grad[gradid].ed)
+                let dx2 = 0;
+                let dy2 = 0;
                 // console.log(edp)
-                if(edp[9].x!=edp[0].x){
-                    let theta1 = 2*Math.PI-Math.atan2(edp[9].y-edp[0].y,edp[9].x-edp[0].x)*2;
+                // if(edgedist<0.05){
+                    if(edp[0].direction==="in"){
+                        if(this.grad[gradid].ed.inedgeid>0){
+                            let idx = this.grad[gradid].ed.inedgeid;
+                            dx2 = (edp[idx-1].x_new - edp[idx].x_new)*10;
+                            dy2 = (edp[idx-1].y_new - edp[idx].y_new)*10;
+                        }
+                    } else {
+                        // console.log("i am here")
+                        // console.log(edp[0].direction)
+                        if(this.grad[gradid].ed.inedgeid>0){
+                            let idx = this.grad[gradid].ed.inedgeid;
+                            dx2 = (edp[idx].x_new - edp[idx-1].x_new)*10;
+                            dy2 = (edp[idx].y_new - edp[idx-1].y_new)*10;
+                        }
+                    }
+                    // if(this.grad[gradid].ed.edgeid==="edge10"){
+                    //     console.log(edp[0],edp[0].direction)
+                    // }
+                    
+                // }
+                // console.log("eeeee",edgedist,dx1,dx2,dy1,dy2)
+                let dx = (edgedist/0.4*dx1 + (1-edgedist/0.4)*dx2)*1.5;
+                let dy = (edgedist/0.4*dy1 + (1-edgedist/0.4)*dy2)*1.5;
+                // if(x<=Math.max(edp[0].x_new,edp[9].x_new) && x>=Math.min(edp[0].x_new,edp[9].x_new) && y<=Math.max(edp[0].y_new,edp[9].y_new)+0.05 && y>=Math.min(edp[0].y_new,edp[9].y_new)-0.05){
+                //     if(edp[9].x!=edp[0].x){
+                    
+                //         // console.log("i am here")
+                //         // console.log(edp)
+                //         dx = (edp[0].x_new - edp[9].x_new)*2
+                //         dy = (edp[0].y_new - edp[9].y_new)*2
+                //     } else {
+                //         // dx = 
+                //     }
+                    // let theta1 = Math.atan2(edp[9].y-edp[0].y,edp[9].x-edp[0].x)*2;
                     // console.log(theta1)
-                    let dx_new1 = Math.cos(theta1)*dx-Math.sin(theta1)*dy;
-                    let dy_new1 = Math.sin(theta1)*dx+Math.cos(theta1)*dy;
-                    dx = dx_new1;
-                    dy = dy_new1;
+                    // let dx_new1 = Math.cos(theta1)*dx-Math.sin(theta1)*dy;
+                    // let dy_new1 = Math.sin(theta1)*dx+Math.cos(theta1)*dy;
+                    // dx = dx_new1;
+                    // dy = dy_new1;
+                    
 
-                }
+                // }
                 
                 this.grad[gradid]["dx"] = dx;
                 this.grad[gradid]["dy"] = dy;
