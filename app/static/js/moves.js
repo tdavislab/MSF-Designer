@@ -72,16 +72,6 @@ class moves{
                     let pt_min = new criticalPoint(id+1,(x+mincp.x)/2,(y+mincp.y)/2,"min");
                     this.anim.cp.push(pt_min)
                     this.anim.cp_min.push(pt_min);
-
-                    // let pt_min = new criticalPoint(id,x,y,"min");
-                    // this.anim.cp.push(pt_min)
-                    // this.anim.cp_min.push(pt_min);
-                    // let pt_saddle = new criticalPoint(id+1,(x+mincp.x)/2,(y+mincp.y)/2,"saddle");
-                    // this.anim.cp.push(pt_saddle);
-                    // this.anim.cp_saddle.push(pt_saddle);
-                    // if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                    //     this.anim.drawFlag=true;
-                    // }
                     d3.select("#amoveminus")
                         .attr("value","Face-min move")
                     this.amType="";
@@ -105,7 +95,6 @@ class moves{
     bmovePlus(){
         d3.select("#edgegroup").selectAll("path")
             .on("click", (d)=>{
-                console.log(d)
                 if(d.value[3]==="max"){
                     let x = d.value[1].x;
                     let y = d.value[1].y;
@@ -117,19 +106,14 @@ class moves{
                         let pt_saddle = new criticalPoint(id+1,(x+d.value[2].x)/2,(y+d.value[2].y)/2,"saddle");
                         this.anim.cp.push(pt_saddle);
                         this.anim.cp_saddle.push(pt_saddle);
-                        // if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                        //     this.anim.drawFlag=true;
-                        // }
                         d3.select("#bmoveplus")
                             .attr("value","Edge-max move")
                         this.bpType="";
-                        delete this.anim.edges[d.key];
-                        this.anim.edges["edge"+pt_saddle.id+d.value[2].id] = [pt_saddle,{"x":(pt_saddle.x+d.value[2].x)/2,"y":(pt_saddle.y+d.value[2].y)/2},d.value[2],"max"]; // new max edge 1
-                        this.anim.edgeMapper["edge"+pt_saddle.id+d.value[2].id] = this.anim.initializeEdgeMapper(this.anim.edges["edge"+pt_saddle.id+d.value[2].id])
-                        this.anim.edges["edge"+pt_saddle.id+pt_max.id] = [pt_saddle,{"x":(pt_saddle.x+pt_max.x)/2,"y":(pt_saddle.y+pt_max.y)/2},pt_max,"max"]; // new max edge 2
-                        this.anim.edgeMapper["edge"+pt_saddle.id+pt_max.id] = this.anim.initializeEdgeMapper(this.anim.edges["edge"+pt_saddle.id+pt_max.id])
-                        this.anim.edges["edge"+d.value[0].id+pt_max.id] = [d.value[0],{"x":(d.value[0].x+pt_max.x)/2,"y":(d.value[0].y+pt_max.y)/2},pt_max,"max"]; //new max edge 3
-                        this.anim.edgeMapper["edge"+d.value[0].id+pt_max.id] = this.anim.initializeEdgeMapper(this.anim.edges["edge"+d.value[0].id+pt_max.id]);
+                        // fix edges
+                        this.anim.deleteOldEdge(d.value[0],d.value[2],d.key);
+                        this.anim.addNewEdge(pt_saddle,d.value[2],"max");
+                        this.anim.addNewEdge(pt_saddle,pt_max,"max");
+                        this.anim.addNewEdge(d.value[0],pt_max,"max");
                         this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"]; // new min edge 1
                         this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"]; // new min edge 2
                     }
@@ -145,27 +129,30 @@ class moves{
     bmoveMinus(){
         d3.select("#edgegroup").selectAll("path")
             .on("click",(d)=>{
-                if(d[3]==="min"){
-                    let x = d[1].x;
-                    let y = d[1].y;
+                if(d.value[3]==="min"){
+                    let x = d.value[1].x;
+                    let y = d.value[1].y;
                     if(this.bmType === "min"){
                         let id = this.anim.cp.length;
-                        this.anim.cp.push(new criticalPoint(id,x,y,"min"))
-                        this.anim.cp.push(new criticalPoint(id+1,(x+d[2].x)/2,(y+d[2].y)/2,"saddle"))
-                        if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                            this.anim.drawFlag=true;
-                        }
+                        let pt_min = new criticalPoint(id,x,y,"min");
+                        this.anim.cp.push(pt_min);
+                        this.anim.cp_min.push(pt_min);
+                        let pt_saddle = new criticalPoint(id+1,(x+d.value[2].x)/2,(y+d.value[2].y)/2,"saddle");
+                        this.anim.cp.push(pt_saddle);
+                        this.anim.cp_saddle.push(pt_saddle);
                         d3.select("#bmoveminus")
                             .attr("value","Edge-min move")
                         this.bmType="";
-                        this.anim.edges = this.anim.findEdges(this.anim.cp);
-                        for(let i=0;i<this.anim.edges.length;i++){
-                            if(Object.keys(this.anim.edgeMapper).indexOf("p"+i)===-1){
-                                this.anim.edgeMapper["p"+i] = this.anim.initializeEdgeMapper(this.anim.edges[i]);
-                            }
-                        }
-                        // this.anim.connNodes = this.anim.findConnNodes(this.anim.edges);
-                        this.anim.grad = this.anim.constructMesh(this.anim.sigma);
+                        // fix edges
+                        delete this.anim.edges[d.key];
+                        this.anim.edges["edge"+pt_saddle.id+d.value[2].id] = [pt_saddle,{"x":(pt_saddle.x+d.value[2].x)/2,"y":(pt_saddle.y+d.value[2].y)/2},d.value[2],"min"]; // new min edge 1
+                        this.anim.edgeMapper["edge"+pt_saddle.id+d.value[2].id] = this.anim.initializeEdgeMapper(this.anim.edges["edge"+pt_saddle.id+d.value[2].id]);
+                        this.anim.edges["edge"+pt_saddle.id+pt_min.id] = [pt_saddle,{"x":(pt_saddle.x+pt_min.x)/2,"y":(pt_saddle.y+pt_min.y)/2},pt_min,"min"]; // new min edge 2
+                        this.anim.edgeMapper["edge"+pt_saddle.id+pt_min.id] = this.anim.initializeEdgeMapper(this.anim.edges["edge"+pt_saddle.id+pt_min.id]);
+                        this.anim.edges["edge"+d.value[0].id+pt_min.id] = [d.value[0],{"x":(d.value[0].x+pt_min.x)/2,"y":(d.value[0].y+pt_min.y)/2},pt_min,"min"]; // new min edge 3
+                        this.anim.edgeMapper["edge"+d.value[0].id+pt_min.id] = this.anim.initializeEdgeMapper(this.anim.edges["edge"+d.value[0].id+pt_min.id])
+                        this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"max"]; // new max edge 1
+                        this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"max"]; // new max edge 2
                     }
                     this.anim.drawAnnotation();
                     this.anim.addedges();
@@ -178,31 +165,30 @@ class moves{
         
     dmovePlus(){
         d3.select("#pointgroup").selectAll("text")
-            .on("click",(d)=>{
-                //****  need to check whether it is a max point !!****
-                if(this.dpType="add"){
+            .on("click",(d)=>{ // d is a critical point, not an edge
+                if(this.dpType==="add" && d.type==="max"){
                     let x=d.x;
                     let y=d.y
                     let id = this.anim.cp.length;
-                    this.anim.cp.push(new criticalPoint(id,x,y,"saddle"))
-                    this.anim.cp.push(new criticalPoint(id+1,x+0.05,y-0.05,"max"))
-                    d.x = d.x - 0.05;
-                    d.y = d.y + 0.05;
-                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                        this.anim.drawFlag=true;
-                    }                    
-                    this.dpType=""
-                    this.anim.edges = this.anim.findEdges(this.anim.cp);
+                    let pt_saddle = new criticalPoint(id,x,y,"saddle");
+                    this.anim.cp.push(pt_saddle);
+                    this.anim.cp_saddle.push(pt_saddle);
+                    let pt_max = new criticalPoint(id+1,x-0.05,y+0.05,"max");
+                    this.anim.cp.push(pt_max);
+                    this.anim.cp_max.push(pt_max);
+                    d.x = d.x + 0.05;
+                    d.y = d.y - 0.05;    
                     d3.select("#dmoveplus")
-                        .attr("value","Vertex-max Move");
+                        .attr("value","Vertex-max Move");                
+                    this.dpType=""
+
+                    this.anim.edges["edge"+pt_saddle.id+d.id] = [pt_saddle,{"x":(pt_saddle.x+d.x)/2,"y":(pt_saddle.y+d.y)/2},d,"max"]; // new max edge 1
+                    this.anim.edgeMapper["edge"+pt_saddle.id+d.id] = this.anim.initializeEdgeMapper(this.anim.edges["edge"+pt_saddle.id+d.id]);
+                    this.anim.edges["edge"+pt_saddle.id+pt_max.id] = [pt_saddle,{"x":(pt_saddle.x+pt_max.x)/2,"y":(pt_saddle.y+pt_max.y)/2},pt_max,"max"]; // new max edge 2
+                    this.anim.edgeMapper["edge"+pt_saddle.id+pt_max.id] = this.anim.initializeEdgeMapper(this.anim.edges["edge"+pt_saddle.id+pt_max.id]);
+                    this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"]; // new min edge 1
+                    this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"]; // new min edge 2                    
                 }
-                for(let i=0;i<this.anim.edges.length;i++){
-                    if(Object.keys(this.anim.edgeMapper).indexOf("p"+i)===-1){
-                        this.anim.edgeMapper["p"+i] = this.anim.initializeEdgeMapper(this.anim.edges[i]);
-                    }
-                }
-                // this.anim.connNodes = this.anim.findConnNodes(this.anim.edges);
-                this.anim.grad = this.anim.constructMesh(this.anim.sigma);
                 this.anim.drawAnnotation();
                 this.anim.addedges();
                 this.sliders.addSlider();

@@ -1,14 +1,14 @@
 // **** : to do list
 
 class criticalPoint{
-    constructor(id,x,y,type,edges){
+    constructor(id,x,y,type){
         this.id = id;
         this.x = x;
         this.y = y;
         this.type = type;
         this.fv = this.f(x,y,type); // function value
         this.fv_perb = this.fv + Math.random();
-        this.edges = edges;
+        this.edges = {};
         if(type === "saddle"){ // initialize nearest points
             this.np = {"max":[],"min":[]}; // np: nearest points
         } else {
@@ -73,9 +73,9 @@ class anim{
         this.sigma = 0.1;
         if(cp===undefined){
             this.cp = [];
-            this.cp.push(new criticalPoint(0,0.25,0.5,"max",0));
-            this.cp.push(new criticalPoint(1,0.5,0.5,"saddle",[0,1,2,3]));
-            this.cp.push(new criticalPoint(2,0.75,0.5,"max",1));
+            this.cp.push(new criticalPoint(0,0.25,0.5,"max"));
+            this.cp.push(new criticalPoint(1,0.5,0.5,"saddle"));
+            this.cp.push(new criticalPoint(2,0.75,0.5,"max"));
         } else {
             this.cp = cp
         }
@@ -101,20 +101,27 @@ class anim{
         }
 
         this.cp_min = this.cp_min.concat(this.minBound);
+        this.edges = {};
+        this.edgeMapper = {};
         // edge id: edge+start_point_id+end_point_id
         if(edges===undefined){
-            this.edges = this.findEdges(this.cp);
+            this.addNewEdge(this.cp[1],this.cp[0],"max");
+            this.addNewEdge(this.cp[1],this.cp[2],"max");
+            this.addNewEdge(this.cp[1],{"x":0.5,"y":0,"id":"b0"+10},"min");
+            this.addNewEdge(this.cp[1],{"x":0.5,"y":1,"id":"b1"+10},"min")
+            // this.edges = this.findEdges(this.cp);
         } else{
             this.edges = edges
         }
         
         console.log(this.edges)
+        console.log(this.edgeMapper)
 
         
-        this.edgeMapper = {};
-        for(let eid in this.edges){
-            this.edgeMapper[eid] = this.initializeEdgeMapper(this.edges[eid]);
-        }
+        
+        // for(let eid in this.edges){
+        //     this.edgeMapper[eid] = this.initializeEdgeMapper(this.edges[eid]);
+        // }
         // for(let i=0;i<this.edges.length;i++){
         //     this.edgeMapper[this.edges[i][4]] = this.initializeEdgeMapper(this.edges[i]);
         // }
@@ -229,6 +236,34 @@ class anim{
         }
     }
 
+    addNewEdge(startpoint, endpoint, type){
+        let edgeid = "edge"+startpoint.id+endpoint.id;
+        // add to this.edges
+        this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2, "y":(startpoint.y+endpoint.y)/2},endpoint,type];
+        // add this edge to corresponding critical points
+        // startpoint is always a saddle point
+        console.log(startpoint,this.cp[startpoint.id])
+        this.cp[startpoint.id].edges[edgeid] = this.edges[edgeid]
+        if(this.cp[endpoint.id]!=undefined){
+            this.cp[endpoint.id].edges[edgeid] = this.edges[edgeid]
+        }
+        // add this edge to this.edgeMapper
+        this.edgeMapper[edgeid] = this.initializeEdgeMapper(this.edges[edgeid])
+    }
+
+    deleteOldEdge(startpoint, endpoint, oldId){
+        // let edgeid = "edge"+startpoint.id+endpoint.id;
+        // delete edge
+        delete this.edges[oldId];
+        // delete cp[edge]
+        delete this.cp[startpoint.id].edges[oldId];
+        if(this.cp[endpoint.id]!=undefined){
+            delete this.cp[endpoint.id].edges[oldId];
+        }
+        // delete edgemapper
+        delete this.edgeMapper[oldId];
+    }
+
     drawAnnotation(){
         let edgelist = d3.entries(this.edges);
         // draw critical points
@@ -330,7 +365,7 @@ class anim{
             that.cp[i].y = that.yMap.invert(d3.mouse(this)[1]);  // edge node will change automatically
             if(d.type==="saddle"){
                 console.log("this is a saddle")
-            } else if(d.type==="max"){
+            } else if(d.type==="max"){ // **** need fix here
                 let np_saddle = that.findMinPt(d,that.cp_saddle);
                 let edgeid = "edge"+np_saddle.id+d.id;
                 let totalLength = d3.select("#"+edgeid).node().getTotalLength();
@@ -354,7 +389,7 @@ class anim{
                 that.constructMesh(that.sigma);
 
             }
-            console.log("edgeee",that.edges)
+            // console.log("edgeee",that.edges)
             // console.log("cp",that.cp)
             that.drawAnnotation();
             that.addedges();
@@ -505,8 +540,6 @@ class anim{
                     // check intersection
                     let ifinter = false;
                     for(let k in that.edges){
-
-                    // for(let j=0;j<that.edges.length;j++){
                         if(k!=d.key){
                             let line1 = [that.edges[k][0],that.edges[k][2]];
                             let line2 = [d.value[0],cpm];
@@ -516,18 +549,11 @@ class anim{
                         }
                     }
                     if(!ifinter){
-                        d.value[2] = cpm;
-                        let originId = d.key;
-                        delete that.edgeMapper[originId];
-                        delete that.edges[originId];
-                        let newId = "edge"+d.value[0].id+cpm.id;
-                        d.key = newId;
-                        that.edgeMapper[newId] = that.initializeEdgeMapper(d.value);
-                        d.value[1] = {"x":(d.value[0].x+d.value[2].x)/2,"y":(d.value[0].y+d.value[2].y)/2};
-                        that.edges[newId] = d.value;
+                        that.deleteOldEdge(d.value[0],d.value[1],d.key);
+                        that.addNewEdge(d.value[0],cpm,"max");
                         d3.select("#terminal"+i)
                             .attr("cx",that.xMap(cpm.x))
-                            .attr("cy",that.yMap(cpm.y))
+                            .attr("cy",that.yMap(cpm.y));
 
                     }                      
                 }
@@ -537,7 +563,6 @@ class anim{
                     // check intersection
                     let ifinter = false;
                     for(let k in that.edges){
-                    // for(let j=0;j<that.edges.length;j++){
                         if(k!=d.key){
                             let line1 = [that.edges[k][0],that.edges[k][2]];
                             let line2 = [d.value[0],cpm];
@@ -548,15 +573,8 @@ class anim{
                         }
                     }
                     if(!ifinter){
-                        d.value[2] = cpm;
-                        let originId = d.key;
-                        delete that.edgeMapper[originId];
-                        delete that.edges[originId];
-                        let newId = "edge"+d.value[0].id+cpm.id;
-                        d.key = newId;
-                        that.edgeMapper[newId] = that.initializeEdgeMapper(d.value);
-                        d.value[1] = {"x":(d.value[0].x+d.value[2].x)/2,"y":(d.value[0].y+d.value[2].y)/2};
-                        that.edges[newId] = d.value;
+                        that.deleteOldEdge(d.value[0],d.value[1],d.key);
+                        that.addNewEdge(d.value[0],cpm,"min");
                         d3.select("#terminal"+i)
                             .attr("cx",that.xMap(cpm.x))
                             .attr("cy",that.yMap(cpm.y))
