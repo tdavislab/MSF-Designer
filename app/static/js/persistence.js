@@ -16,7 +16,7 @@ class persistence{
         this.xAxisGroup = this.svg.append('g')
             .attr('id','xAxis');
         this.persistenceBarGroup = this.svg.append('g')
-            .attr("id","persistencebargroup")
+            .attr("id","persistencebargroup");
         // this.arrowMarker = this.svg.append("marker")
         //     .attr("id","arrowmarker")
         //     .attr("markerUnits","strokeWidth")

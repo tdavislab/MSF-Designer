@@ -6,6 +6,7 @@ let Anim = new anim();
 let Sliders = new sliders(Anim);
 let Persistence = new persistence(barcode,Anim);
 let Moves = new moves(Anim,Sliders,Persistence);
+let Records = new records(Anim);
 
 
 function init(){
