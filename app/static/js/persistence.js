@@ -99,7 +99,7 @@ class persistence{
             // console.log(birthID)
 
             let birth_cp = this.findCP(birth_fv,birthID);
-            console.log(birth_fv,birth_cp)
+            // console.log(birth_fv,birth_cp)
 
             birthID.push(birth_cp.id);
             let death_cp = undefined;

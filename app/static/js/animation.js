@@ -125,7 +125,6 @@ class anim{
         // for(let i=0;i<this.edges.length;i++){
         //     this.edgeMapper[this.edges[i][4]] = this.initializeEdgeMapper(this.edges[i]);
         // }
-        console.log(this.edgeMapper)
 
 
         // console.log(this.edges)
@@ -242,7 +241,7 @@ class anim{
         this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2, "y":(startpoint.y+endpoint.y)/2},endpoint,type];
         // add this edge to corresponding critical points
         // startpoint is always a saddle point
-        console.log(startpoint,this.cp[startpoint.id])
+        // console.log(startpoint,this.cp[startpoint.id])
         this.cp[startpoint.id].edges[edgeid] = this.edges[edgeid]
         if(this.cp[endpoint.id]!=undefined){
             this.cp[endpoint.id].edges[edgeid] = this.edges[edgeid]
@@ -251,17 +250,22 @@ class anim{
         this.edgeMapper[edgeid] = this.initializeEdgeMapper(this.edges[edgeid])
     }
 
-    deleteOldEdge(startpoint, endpoint, oldId){
-        // let edgeid = "edge"+startpoint.id+endpoint.id;
-        // delete edge
-        delete this.edges[oldId];
-        // delete cp[edge]
-        delete this.cp[startpoint.id].edges[oldId];
-        if(this.cp[endpoint.id]!=undefined){
-            delete this.cp[endpoint.id].edges[oldId];
+    deleteOldEdge(edgeid){
+        if(this.edges[edgeid]!=undefined){
+            let startpoint = this.edges[edgeid][0];
+            let endpoint = this.edges[edgeid][2];
+            // delete edge
+            delete this.edges[edgeid];
+            // delete cp[edge]
+            delete this.cp[startpoint.id].edges[edgeid];
+            if(this.cp[endpoint.id]!=undefined){
+                delete this.cp[endpoint.id].edges[edgeid];
+            }
+            // delete edgemapper
+            delete this.edgeMapper[edgeid];
+
         }
-        // delete edgemapper
-        delete this.edgeMapper[oldId];
+        
     }
 
     drawAnnotation(){
@@ -535,6 +539,7 @@ class anim{
             d3.select("#"+edgeid)
                 .attr("d",(d)=>that.curve0([d.value[0],d.value[1],{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])}]))
             if(d.value[3]==="max"){
+                // **** need to limit the # points to be 1!!!
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_max);
                 if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
                     // check intersection
@@ -549,7 +554,7 @@ class anim{
                         }
                     }
                     if(!ifinter){
-                        that.deleteOldEdge(d.value[0],d.value[1],d.key);
+                        that.deleteOldEdge(d.key);
                         that.addNewEdge(d.value[0],cpm,"max");
                         d3.select("#terminal"+i)
                             .attr("cx",that.xMap(cpm.x))
@@ -573,7 +578,7 @@ class anim{
                         }
                     }
                     if(!ifinter){
-                        that.deleteOldEdge(d.value[0],d.value[1],d.key);
+                        that.deleteOldEdge(d.key);
                         that.addNewEdge(d.value[0],cpm,"min");
                         d3.select("#terminal"+i)
                             .attr("cx",that.xMap(cpm.x))
