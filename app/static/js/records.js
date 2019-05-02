@@ -29,6 +29,7 @@ class records{
         this.stepRecorder = [];
         this.figureIdx = 1;
         this.addStep();
+        // this.addStep();
         console.log(this.stepRecorder)
 
         this.xMap = d3.scaleLinear()
@@ -47,7 +48,7 @@ class records{
             .attr("y",this.margin.top)
             .attr("width",this.frameWidth)
             .attr("height",this.frameHeight)
-            .attr("stroke","rgb(44,123,246)")
+            .attr("stroke","white")
             .attr("fill", "none");
         
         this.recordgroup2.append("rect")
@@ -55,7 +56,7 @@ class records{
             .attr("y",this.margin.top)
             .attr("width",this.frameWidth)
             .attr("height",this.frameHeight)
-            .attr("stroke","rgb(44,123,246)")
+            .attr("stroke","white")
             .attr("fill", "none");
         
         this.recordgroup3.append("rect")
@@ -63,10 +64,10 @@ class records{
             .attr("y",this.margin.top)
             .attr("width",this.frameWidth)
             .attr("height",this.frameHeight)
-            .attr("stroke","rgb(44,123,246)")
+            .attr("stroke","white")
             .attr("fill", "none");
         
-        this.drawStep(this.stepRecorder[0])
+        this.drawStep()
             
 
 
@@ -78,65 +79,66 @@ class records{
 
     }
 
-    drawStep(step){
-        let edgelist = d3.entries(step.edges);
-        if(this.figureIdx===1){
-            // select recordgroup1
+    drawStep(){
+        for(let j=1;j<=3;j++){
+            console.log(j)
+            if(this.stepRecorder[j-1]!=undefined){
+                d3.select("#record"+j).select("rect")
+                    .attr("stroke","rgb(44,123,246)")
+                let step = this.stepRecorder[j-1]
+                let edgelist = d3.entries(step.edges);
+                console.log(d3.select("#record"+j))
+                let edges = d3.select("#record"+j).selectAll("path").data(edgelist);
+                edges.exit().remove();
+                let newedges = edges.enter().append("path");
+                edges = newedges.merge(edges);
+                edges
+                    .attr("d",(d)=>{
+                        let d_new = d.value.slice(0,3);
+                        return this.curveMap(d_new);
+                    })
+                    .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
+                    .attr("transform","translate("+(this.margin.left+(j-1)*this.frameWidth + (j-1)*this.margin.betweenstep)+","+this.margin.top+")")
+                    // .attr("id",(d)=>d.key)
+                    .style("fill", "none")
+                    .style("stroke", "black")
+                    .style("stroke-width",2)
+                    .style("stroke-dasharray",(d)=>{
+                        if(d.value[3]==="max"){
+                            return "5,5";
+                        } else {return "";}
+                    })
 
+                let circles = d3.select("#record"+j).selectAll("circle").data(step.cp);
+                circles.exit().remove();
+                let newcircles = circles.enter().append("circle");
+                circles = newcircles.merge(circles);
+                circles
+                    .attr("cx",(d)=>this.xMap(d.x)+this.margin.left+(j-1)*this.frameWidth + (j-1)*this.margin.betweenstep)
+                    .attr("cy",(d)=>this.yMap(d.y)+this.margin.top)
+                    .attr("r",15)
+                    .attr("fill","white");
             
-            // drawing order matters
-            
-            let edges = this.recordgroup1.selectAll("path").data(edgelist);
-            edges.exit().remove();
-            let newedges = edges.enter().append("path");
-            edges = newedges.merge(edges);
-            edges
-                .attr("d",(d)=>{
-                    let d_new = d.value.slice(0,3);
-                    return this.curveMap(d_new);
-                })
-                .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
-                .attr("transform","translate("+this.margin.left+","+this.margin.top+")")
-                // .attr("id",(d)=>d.key)
-                .style("fill", "none")
-                .style("stroke", "black")
-                .style("stroke-width",2)
-                .style("stroke-dasharray",(d)=>{
-                    if(d.value[3]==="max"){
-                        return "5,5";
-                    } else {return "";}
-                })
-
-            let circles = this.recordgroup1.selectAll("circle").data(step.cp);
-            circles.exit().remove();
-            let newcircles = circles.enter().append("circle");
-            circles = newcircles.merge(circles);
-            circles
-                .attr("cx",(d)=>this.xMap(d.x)+this.margin.left)
-                .attr("cy",(d)=>this.yMap(d.y)+this.margin.top)
-                .attr("r",15)
-                .attr("fill","white");
-            
-            let circletext = this.recordgroup1.selectAll("text").data(step.cp);
-            circletext.exit().remove();
-            let newcircletext = circletext.enter().append("text");
-            circletext = newcircletext.merge(circletext);
-            circletext
-                .attr('text-anchor', 'middle')
-                .attr('dominant-baseline', 'central')
-                .attr('font-size', '35px')
-                .attr("x",(d)=>this.xMap(d.x)+this.margin.left)
-                .attr("y",(d)=>this.yMap(d.y)+this.margin.top)
-                .attr("class",(d)=>{
-                    if(d.type==="max"){
-                        return "far max"
-                    } else if (d.type==="saddle"){
-                        return "far saddle"
-                    } else if (d.type==="min"){
-                        return "fas min"
-                    }
-                })
-                .text((d)=>{
+                let circletext = d3.select("#record"+j).selectAll("text").data(step.cp);
+                circletext.exit().remove();
+                let newcircletext = circletext.enter().append("text");
+                circletext = newcircletext.merge(circletext);
+                circletext
+                    .attr('text-anchor', 'middle')
+                    .attr('dominant-baseline', 'central')
+                    .attr('font-size', '35px')
+                    .attr("x",(d)=>this.xMap(d.x)+this.margin.left+(j-1)*this.frameWidth + (j-1)*this.margin.betweenstep)
+                    .attr("y",(d)=>this.yMap(d.y)+this.margin.top)
+                    .attr("class",(d)=>{
+                        if(d.type==="max"){
+                            return "far max"
+                        } else if (d.type==="saddle"){
+                            return "far saddle"
+                        } else if (d.type==="min"){
+                            return "fas min"
+                        }
+                    })
+                    .text((d)=>{
                         if(d.type==="max"){
                             return "\uf192"
                         } else if (d.type==="saddle"){
@@ -144,19 +146,11 @@ class records{
                         } else if (d.type==="min"){
                             return "\uf140"
                         }
-                })
+                    })
 
-            
-            
 
-            this.figureIdx = 2;
-        } else if (this.figureIdx === 2){
-            // select recordgroup2
-            this.figureIdx = 3;
-        } else if (this.figureIdx === 3){
-            // select recordgroup3
+            }
         }
-
     }
 
     undoStep(){
