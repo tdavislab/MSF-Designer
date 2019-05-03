@@ -601,6 +601,7 @@ class anim{
                     that.constructMesh(that.sigma);
                     // console.log("that grad",that.grad)
                     that.drawFlag=true;
+                    
                 }
             }
             that.drawAnnotation();

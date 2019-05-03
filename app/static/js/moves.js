@@ -1,8 +1,9 @@
 class moves{
-    constructor(anim, sliders, persistence){
+    constructor(anim, sliders, persistence, records){
         this.anim = anim;
         this.sliders = sliders;
         this.persistence = persistence;
+        this.records = records;
 
         this.apType = "";
         this.amType = "";
@@ -48,12 +49,15 @@ class moves{
                     // this.anim.edges.push([pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min","temp3"]);
                     this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
                     // this.anim.edges.push([pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min","temp4"]);
+                    this.anim.drawAnnotation();
+                    this.anim.addedges();
+                    this.sliders.addSlider();
+                    this.anim.findNearestPoint();
+                    this.anim.findRange();
+                    this.records.addStep();
+                    this.records.drawStep();
                 }
-                this.anim.drawAnnotation();
-                this.anim.addedges();
-                this.sliders.addSlider();
-                this.anim.findNearestPoint();
-                this.anim.findRange();
+                
             })
     }
 

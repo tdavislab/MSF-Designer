@@ -5,11 +5,30 @@ let barcode = [{"birth":0,"death":5},{"birth":0,"death":-1}]
 let Anim = new anim();
 let Sliders = new sliders(Anim);
 let Persistence = new persistence(barcode,Anim);
-let Moves = new moves(Anim,Sliders,Persistence);
 let Records = new records(Anim);
+let Moves = new moves(Anim,Sliders,Persistence, Records);
 
 
 function init(){
+    d3.select("#undobutton")
+        .on("click",()=>{
+            if(Records.stepRecorder.length>1){
+                Records.stepRecorder.pop();
+            }
+            let currentStep = Records.stepRecorder[Records.stepRecorder.length-1];
+            Anim.cp = currentStep.cp.slice()
+            Anim.edges = {...currentStep.edges};
+            Anim.edgeMapper = {...currentStep.edgeMapper};
+            console.log(Anim.cp,Anim.edges,Anim.edgeMapper)
+            Anim.assignEdge();
+            Anim.constructMesh(Anim.sigma);
+            Anim.drawAnnotation();
+            Anim.addedges();
+            Records.drawStep();
+            
+
+
+        })
     d3.select("#ifskeleton")
         .on("click",()=>{
             if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){

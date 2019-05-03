@@ -74,7 +74,10 @@ class records{
     }
     
     addStep(){
-        let step = new editStep(this.anim.cp, this.anim.edges, this.anim.edgeMapper);
+        let cp = this.anim.cp.slice();
+        let edges = {...this.anim.edges};
+        let edgeMapper = {...this.anim.edgeMapper};
+        let step = new editStep(cp, edges, edgeMapper);
         this.stepRecorder.push(step);
 
     }
@@ -83,6 +86,8 @@ class records{
         for(let j=1;j<=3;j++){
             console.log(j)
             if(this.stepRecorder[j-1]!=undefined){
+                d3.select("#record"+j)
+                    .style("visibility","visible");
                 d3.select("#record"+j).select("rect")
                     .attr("stroke","rgb(44,123,246)")
                 let step = this.stepRecorder[j-1]
@@ -149,11 +154,17 @@ class records{
                     })
 
 
+            }else{
+                d3.select("#record"+j)
+                    .style("visibility","hidden");
+                
             }
+
         }
     }
 
-    undoStep(){
+    clearStep(){
+
 
     }
 }

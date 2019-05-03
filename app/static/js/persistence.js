@@ -81,8 +81,8 @@ class persistence{
                                 }
                                 console.log(that.anim.cp)
                                 that.anim.edges = that.anim.findEdges(that.anim.cp)
-                                that.anim.connNodes = that.anim.findConnNodes(that.anim.edges);
-                                that.anim.grad = that.anim.initializeMesh(that.anim.sigma)
+                                // that.anim.connNodes = that.anim.findConnNodes(that.anim.edges);
+                                that.anim.grad = that.anim.constructMesh(that.anim.sigma)
                                 that.anim.drawAnnotation();
                                 that.anim.addedges();
                                 d3.event.stopPropagation();
