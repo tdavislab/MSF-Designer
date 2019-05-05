@@ -235,12 +235,13 @@ class anim{
     drawStep(){
         for(let j=1;j<=3;j++){
             // console.log(j)
-            if(this.stepRecorder[j-1]!=undefined){
+            let idx = this.stepRecorder.length-j;
+            if(this.stepRecorder[idx]!=undefined){
                 d3.select("#record"+j)
                     .style("visibility","visible");
                 d3.select("#record"+j).select("rect")
                     .attr("stroke","rgb(44,123,246)")
-                let step = this.stepRecorder[j-1]
+                let step = this.stepRecorder[idx]
                 let edgelist = d3.entries(step.edges);
                 // console.log(d3.select("#record"+j))
                 let edges = d3.select("#record"+j).selectAll("path").data(edgelist);
