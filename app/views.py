@@ -59,7 +59,7 @@ def importFile():
 @app.route('/grad', methods=['POST','GET'])
 def exportGrad():
     jsdata = request.form.get('grad_data')
-    print(jsdata)
+    # print(jsdata)
     jsdata1 = json.loads(jsdata)
     jsdata1 = pd.DataFrame(jsdata1)
     filename = path.join(APP_STATIC,"assets/grad.csv")
@@ -67,7 +67,8 @@ def exportGrad():
 
     grad = pd.read_csv(filename)
     grad = grad.iloc[:,1:]
-    grad = grad.iloc[:,[0,1,6]]
+    grad = grad.loc[:,["x_new","y_new","fv"]]
+    print(grad.iloc[0:5,:])
 
     sp = constructSp(grad)
     with open(path.join(APP_STATIC,"assets/grad.txt"),"w") as f:

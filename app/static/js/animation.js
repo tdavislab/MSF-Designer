@@ -1077,40 +1077,40 @@ class anim{
             })
     }
 
-    findEdges(cp){
-        // initialize edges
-        let edges = {};
-        for(let i=0;i<this.cp_saddle.length;i++){
-            // let ex ={"saddle":cp_new.saddle[i],"max":[],"min":[]};
-            if(this.cp_max.length>0){
-                let pts = [];
-                let cp_new_max = this.cp_max.slice(0);
-                if(cp_new_max.length>2){
-                    // find the closest max points
-                    pts = this.find2MinPt(this.cp_saddle[i],this.cp_max);
-                } else { pts = cp_new_max; }
-                for(let j=0;j<pts.length;j++){
-                    let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
-                    let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
-                    edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"max"]
-                    // edges.push([this.cp_saddle[i],midpt,pts[j],"max","edge"+this.cp_saddle[i].id+pts[j].id])
-                }
-            }
-            let cp_new_min = this.cp_min.slice(0);
-            let pts = [];
-            if(cp_new_min.length>2){
-                // find the closest min points
-                pts = this.find2MinPt(this.cp_saddle[i],cp_new_min);
-            } else { pts = cp_new_min;}
-            for(let j=0;j<pts.length;j++){
-                let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
-                let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
-                edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"min"]
-                // edges.push([this.cp_saddle[i],midpt,pts[j],"min","edge"+this.cp_saddle[i].id+pts[j].id]);                
-            }
-        }
-        return edges;
-    }
+    // findEdges(cp){
+    //     // initialize edges
+    //     let edges = {};
+    //     for(let i=0;i<this.cp_saddle.length;i++){
+    //         // let ex ={"saddle":cp_new.saddle[i],"max":[],"min":[]};
+    //         if(this.cp_max.length>0){
+    //             let pts = [];
+    //             let cp_new_max = this.cp_max.slice(0);
+    //             if(cp_new_max.length>2){
+    //                 // find the closest max points
+    //                 pts = this.find2MinPt(this.cp_saddle[i],this.cp_max);
+    //             } else { pts = cp_new_max; }
+    //             for(let j=0;j<pts.length;j++){
+    //                 let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
+    //                 let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
+    //                 edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"max"]
+    //                 // edges.push([this.cp_saddle[i],midpt,pts[j],"max","edge"+this.cp_saddle[i].id+pts[j].id])
+    //             }
+    //         }
+    //         let cp_new_min = this.cp_min.slice(0);
+    //         let pts = [];
+    //         if(cp_new_min.length>2){
+    //             // find the closest min points
+    //             pts = this.find2MinPt(this.cp_saddle[i],cp_new_min);
+    //         } else { pts = cp_new_min;}
+    //         for(let j=0;j<pts.length;j++){
+    //             let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
+    //             let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
+    //             edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"min"]
+    //             // edges.push([this.cp_saddle[i],midpt,pts[j],"min","edge"+this.cp_saddle[i].id+pts[j].id]);                
+    //         }
+    //     }
+    //     return edges;
+    // }
 
     initializeMesh(){
         let grad_new = [];
@@ -1126,24 +1126,38 @@ class anim{
 
     assignEdge(){
         // console.log("assigning edge points")
-        let edgepoints = [];
-        for(let key in this.edgeMapper){
-            let ed = this.edgeMapper[key];
-            for(let i=0;i<ed.length;i++){
-                edgepoints.push({"x":ed[i].x_new,"y":ed[i].y_new,"edgeid":key,"inedgeid":i})
+        if(Object.keys(this.edges).length>0){
+            let edgepoints = [];
+            for(let key in this.edgeMapper){
+                let ed = this.edgeMapper[key];
+                for(let i=0;i<ed.length;i++){
+                    edgepoints.push({"x":ed[i].x_new,"y":ed[i].y_new,"edgeid":key,"inedgeid":i})
+                }
             }
-        }
         
         // console.log(edgepoints)
-        for(let x=0;x<=1;x+=this.step){
-            for(let y=0;y<=1;y+=this.step){
-                let gradid = Math.round(x/this.step*100+y/this.step);
-                let edpoint = this.findMinPt({"x":x,"y":y},edgepoints);
-                this.grad[gradid]["ed"] = edpoint;
+            for(let x=0;x<=1;x+=this.step){
+                for(let y=0;y<=1;y+=this.step){
+                    let gradid = Math.round(x/this.step*100+y/this.step);
+                    let edpoint = this.findMinPt({"x":x,"y":y},edgepoints);
+                    this.grad[gradid]["ed"] = edpoint;
 
 
+                }
             }
+
+        } else {
+            for(let x=0;x<=1;x+=this.step){
+                for(let y=0;y<=1;y+=this.step){
+                    let gradid = Math.round(x/this.step*100+y/this.step);
+                    this.grad[gradid]["ed"] = undefined;
+
+
+                }
+            }
+
         }
+        
 
     }
 
@@ -1151,6 +1165,7 @@ class anim{
         console.log("constucting")
         // initialize the triangulation
         // let grad_new = [];
+        console.log(this.cp)
         let cp_max = [];
         for(let i=0;i<this.cp.length;i++){
             if(this.cp[i].type==="max"){
@@ -1194,10 +1209,13 @@ class anim{
                 let fv = this.calFV(x,y,cpt);
                 let pt_new = [x,y];
                 let gradid = Math.round(x/this.step*100+y/this.step);
-                let edp = this.edgeMapper[this.grad[gradid].ed.edgeid];
-                let edgedist = this.calDist({"x":x,"y":y},this.grad[gradid].ed)
-                let dx2 = 0;
-                let dy2 = 0;
+                let dx=dx1;
+                let dy=dy1;
+                if(this.grad[gradid].ed!=undefined){
+                    let edp = this.edgeMapper[this.grad[gradid].ed.edgeid];
+                    let edgedist = this.calDist({"x":x,"y":y},this.grad[gradid].ed)
+                    let dx2 = 0;
+                    let dy2 = 0;
                 // console.log(edp)
                 // if(edgedist<0.05){
                     if(edp[0].direction==="in"){
@@ -1215,14 +1233,18 @@ class anim{
                             dy2 = (edp[idx].y_new - edp[idx-1].y_new)*10;
                         }
                     }
+                    dx = (edgedist/0.4*dx1 + (1-edgedist/0.4)*dx2)*1.5;
+                    dy = (edgedist/0.4*dy1 + (1-edgedist/0.4)*dy2)*1.5;
+
+                }
+                
                     // if(this.grad[gradid].ed.edgeid==="edge10"){
                     //     console.log(edp[0],edp[0].direction)
                     // }
                     
                 // }
                 // console.log("eeeee",edgedist,dx1,dx2,dy1,dy2)
-                let dx = (edgedist/0.4*dx1 + (1-edgedist/0.4)*dx2)*1.5;
-                let dy = (edgedist/0.4*dy1 + (1-edgedist/0.4)*dy2)*1.5;
+                
                 // if(x<=Math.max(edp[0].x_new,edp[9].x_new) && x>=Math.min(edp[0].x_new,edp[9].x_new) && y<=Math.max(edp[0].y_new,edp[9].y_new)+0.05 && y>=Math.min(edp[0].y_new,edp[9].y_new)-0.05){
                 //     if(edp[9].x!=edp[0].x){
                     
@@ -1256,6 +1278,7 @@ class anim{
         this.grad.sort(function(a,b){
             return d3.ascending(a.x,b.x) || d3.ascending(a.y,b.y);
         })
+        console.log(this.grad)
         // return grad_new;
     }
 

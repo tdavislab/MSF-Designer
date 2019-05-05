@@ -106,8 +106,6 @@ function init(){
     })
 
     $("#computeBarcode").click(function(){
-        // **** need to be modified!!!!
-        // alert("Please allow a few seconds for computing.")
         d3.select("#loadergroup").classed("loader",true)
         d3.select("#persistencegroup").select("svg").style("visibility","hidden")
         $.post( "/grad", {

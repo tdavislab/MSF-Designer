@@ -1,7 +1,6 @@
 class persistence{
     constructor(barcode, anim){
         this.anim = anim;
-        // this.cp = anim.cp;
         this.local_max = 10;
         this.local_min = 0;
         this.barcode = barcode;
@@ -17,19 +16,7 @@ class persistence{
             .attr('id','xAxis');
         this.persistenceBarGroup = this.svg.append('g')
             .attr("id","persistencebargroup");
-        // this.arrowMarker = this.svg.append("marker")
-        //     .attr("id","arrowmarker")
-        //     .attr("markerUnits","strokeWidth")
-        //     .attr("markerWidth",12)
-        //     .attr("markerHeight",12)
-        //     .attr("viewBox","10 10 12 12")
-        //     .attr("refX",20)
-        //     .attr("refY",20)
-        //     .attr("orient","auto")
 
-
-        // console.log(this.cp)
-        // this.calPersistence();
         // this.recoverCP();
         // this.birthID = [];
         this.drawPersistence();
@@ -47,6 +34,7 @@ class persistence{
         console.log(this.barcode)
         this.recoverEdge();
         this.recoverPersisitence();
+        this.recoverEdge1();
         
     }
     recoverPersisitence(){
@@ -70,19 +58,35 @@ class persistence{
                             .on("click",()=>{
                                 console.log("i am hre")
                                 console.log(that.barcode[i])
-                                let birthid = that.barcode[i].birth_cp.id
-                                let deathid = that.barcode[i].death_cp.id
-                                let cp = that.anim.cp
+                                // let birthid = that.barcode[i].birth_cp.id
+                                // let deathid = that.barcode[i].death_cp.id
+                                let birthid;
+                                let deathid;
+                                if(that.barcode[i].edge[3]==="max"){
+                                    birthid = that.barcode[i].edge[2].id;
+                                    deathid = that.barcode[i].edge[0].id;
+                                } else if(that.barcode[i].edge[3]==="min"){
+                                    birthid = that.barcode[i].edge[0].id;
+                                    deathid = that.barcode[i].edge[2].id;
+                                }
+                                let saddle_edges = that.barcode[i].edge[0].edges;
+                                for(let ed_key in saddle_edges){
+                                    that.anim.deleteOldEdge(ed_key);
+                                }
+                                let cp = that.anim.cp.slice();
                                 that.anim.cp = []
-                                for(let i=0;i<cp.length;i++){
-                                    if(i!=birthid && i!= deathid){
-                                        that.anim.cp.push(cp[i])
+                                for(let k=0;k<cp.length;k++){
+                                    if(k!=birthid && k!= deathid){
+                                        that.anim.cp.push(cp[k])
                                     }
                                 }
+                                
                                 console.log(that.anim.cp)
-                                that.anim.edges = that.anim.findEdges(that.anim.cp)
+                                console.log(that.anim.edges)
+                                // that.anim.edges = that.anim.findEdges(that.anim.cp)
                                 // that.anim.connNodes = that.anim.findConnNodes(that.anim.edges);
-                                that.anim.grad = that.anim.constructMesh(that.anim.sigma)
+                                that.anim.assignEdge();
+                                that.anim.constructMesh(that.anim.sigma)
                                 that.anim.drawAnnotation();
                                 that.anim.addedges();
                                 d3.event.stopPropagation();
@@ -109,6 +113,42 @@ class persistence{
             }
             this.barcode[i].birth_cp = birth_cp;
             this.barcode[i].death_cp = death_cp;
+        }
+    }
+
+    recoverEdge1(){
+        for(let i=0;i<this.barcode.length;i++){
+            if(this.barcode[i].death!=undefined){
+                let min_dist = 100;
+                let min_ed = undefined;
+                for(let ed_key in this.anim.edges){
+                    let ed = this.anim.edges[ed_key];
+                    if(ed[3]==="max"){ // compare the function value and period ?
+                        let b_ed = ed[2].fv;
+                        let d_ed = ed[0].fv;
+                        // let life_ed = b_ed - d_ed;
+                        let b_bar = this.local_max - this.barcode[i].birth;
+                        let d_bar = this.local_max - this.barcode[i].death;
+                        let dist = Math.abs(b_ed-b_bar)+Math.abs(d_ed-d_bar);
+                        // console.log(dist)
+                        if(dist<min_dist){
+                            min_dist = dist;
+                            min_ed = ed;
+                        }
+
+                    
+                    } else if(ed[3]==="min"){ 
+                        let b_ed = ed[0].fv;
+                        let d_ed = ed[2].fv;
+                        // let life_ed = b_ed - d_ed;
+                    }
+                
+                }
+                this.barcode[i].edge = min_ed;
+                console.log(this.barcode)
+
+            }
+
         }
     }
 
@@ -162,58 +202,7 @@ class persistence{
         }
         return cp
     }
-    // calPersistence(){
-    //     console.log("calculatings")
-    //     let cp_new = [];
-    //     for(let i=0;i<this.cp.length;i++){
-    //         // cp_new.push({"id":this.cp[i].id,"type":this.cp[i].type,"fv":this.cp[i].fv})
-    //         cp_new.push(this.cp[i])
-    //     }
-    //     // To avoid two critical points have the same function value.
-    //     let cp_fv = [this.local_min,this.local_max];
-    //     for(let i=0;i<cp_new.length;i++){
-    //         if(cp_fv.indexOf(cp_new[i].fv)!=-1){
-    //             if(cp_new[i].fv === this.local_max){
-    //                 cp_new[i].fv -= Math.random()/100;
-    //             } else {
-    //                 cp_new[i].fv += Math.random()/100;
-    //             }
-    //         }
-    //         cp_fv.push(cp_new[i].fv);
-    //         cp_new[i].fv_new = this.local_max - cp_new[i].fv;
-    //     }
-    //     // cp_new.push({"id":"local_min","fv":this.local_min,"fv_new":this.local_max-this.local_min});
-    //     // cp_new.push({"id":"local_max","fv":this.local_max,"fv_new":0});
-    //     cp_new.sort((a,b)=>d3.ascending(a.fv_new,b.fv_new))
-
-    //     this.pc = [];
-    //     let numCC = 0;
-
-        // for(let i=0;i<cp_new.length;i++){
-        //     if(cp_new[i].type === "max"){ // max is corresponding to the birth of a component
-        //         this.pc.push({"id":this.pc.length, "birth":cp_new[i].fv_new, "death":undefined,"max_id":i});
-        //         numCC += 1;
-        //     } else if(cp_new[i].type === "saddle"){ // saddle/min: corresponding to the death of a component
-        //         let candidate_max = this.anim.findMinPt(cp_new[i],cp_new[i].np.max);
-        //         for(let j=0;j<this.pc.length;j++){
-        //             if(this.pc[j].max_id===candidate_max.id){
-        //                 this.pc[j].death = cp_new[i].fv_new
-        //             }
-        //         }
-        //         numCC -= 1;
-        //     } else if (cp_new[i].type === "min"){
-        //         // **** need modification ****
-        //         // let candidata_saddle = this.anim.findMinPt(cp_new[i],cp_new[i].np);
-        //         // let candidate_max = this.anim.findMinPt(candidata_saddle,candidata_saddle.np.max);
-        //     }
-        // }
-        
-        // console.log(numCC)
-        // console.log(this.pc)
-        // console.log(Math.random()/100)
-
-        // expected output: [{"id":0,"birth":0.1,"death":inf},...]
-    // }
+    
     drawPersistence(){
         this.barcode.sort(function(a,b){
             if(a.death<0){
