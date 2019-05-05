@@ -43,6 +43,14 @@ class criticalPoint{
     }
 }
 
+class editStep{
+    constructor(cp,edges,edgeMapper){
+        this.cp = cp;
+        this.edges = edges;
+        this.edgeMapper = edgeMapper;
+    }
+}
+
 class anim{
     constructor(cp=undefined, edges=undefined) {
         this.canvasWidth = document.getElementById('animation').offsetWidth;
@@ -65,6 +73,61 @@ class anim{
         this.terminalNodesGroup = this.svg.append("g")
             .attr("id","terminalNodesGroup");
         this.frames = [[0,0,0,1],[0,1,1,1],[0,0,1,0],[1,0,1,1,]]; //used for drawing frames
+
+        // initialize step legend
+        this.margin = {"top":20,"bottom":20,"left":20,"right":20,"betweenstep":50};
+        this.step_svgWidth = 1500;
+        this.step_svgHeight = 350;
+        this.step_frameWidth = 300;
+        this.step_frameHeight = 300;
+        this.step_svg = d3.select("#undogroup").append("svg")
+            .attr("id","undoSVG")
+            .attr("width", this.step_svgWidth)
+            .attr("height", this.step_svgHeight);
+        this.recordgroup1 = this.step_svg.append("g")
+            .attr("id","record1");
+        this.recordgroup2 = this.step_svg.append("g")
+            .attr("id","record2");
+        this.recordgroup3 = this.step_svg.append("g")
+            .attr("id","record3");
+        
+        this.step_xMap = d3.scaleLinear()
+            .domain([0, 1])
+            .range([0, this.step_frameWidth]);
+        this.step_yMap = d3.scaleLinear()
+            .domain([0, 1])
+            .range([0, this.step_frameHeight]);
+
+        this.step_curveMap = d3.line()
+            .x(d=>this.step_xMap(d.x))
+            .y(d=>this.step_yMap(d.y))
+            .curve(d3.curveCardinal.tension(0));
+        
+        this.recordgroup1.append("rect")
+            .attr("x",this.margin.left)
+            .attr("y",this.margin.top)
+            .attr("width",this.step_frameWidth)
+            .attr("height",this.step_frameHeight)
+            .attr("stroke","white")
+            .attr("fill", "none");
+        
+        this.recordgroup2.append("rect")
+            .attr("x",this.margin.left+this.step_frameWidth+this.margin.betweenstep)
+            .attr("y",this.margin.top)
+            .attr("width",this.step_frameWidth)
+            .attr("height",this.step_frameHeight)
+            .attr("stroke","white")
+            .attr("fill", "none");
+        
+        this.recordgroup3.append("rect")
+            .attr("x",this.margin.left+2*this.step_frameWidth+2*this.margin.betweenstep)
+            .attr("y",this.margin.top)
+            .attr("width",this.step_frameWidth)
+            .attr("height",this.step_frameHeight)
+            .attr("stroke","white")
+            .attr("fill", "none");
+        
+
         
         this.drawFlag = true;
         this.step = 0.01;
@@ -117,21 +180,11 @@ class anim{
         console.log(this.edges)
         console.log(this.edgeMapper)
 
-        
-        
-        // for(let eid in this.edges){
-        //     this.edgeMapper[eid] = this.initializeEdgeMapper(this.edges[eid]);
-        // }
-        // for(let i=0;i<this.edges.length;i++){
-        //     this.edgeMapper[this.edges[i][4]] = this.initializeEdgeMapper(this.edges[i]);
-        // }
+        this.stepRecorder = [];
+        this.addStep();
 
-
-        // console.log(this.edges)
-        // console.log(this.edgeMapper)
-
-        let N = 50;
         // discretize the vfield coords
+        let N = 50;
         this.xp = d3.range(N).map(
                 function (i) {
                     return i/N;
@@ -154,18 +207,110 @@ class anim{
             .domain([0, this.canvasHeight])
             .range([0, 1]);
 
-        this.animation();
        
         this.grad = this.initializeMesh();
         this.assignEdge();
         this.constructMesh(this.sigma);
-        
+        this.animation();
 
-        console.log(this.grad)
+
+        // console.log(this.grad)
         this.findNearestPoint();
         this.findRange();
         this.drawAnnotation();
         this.addedges();
+        this.drawStep();
+
+    }
+
+    addStep(){
+        let cp = this.cp.slice();
+        let edges = {...this.edges};
+        let edgeMapper = {...this.edgeMapper};
+        let step = new editStep(cp, edges, edgeMapper);
+        this.stepRecorder.push(step);
+
+    }
+
+    drawStep(){
+        for(let j=1;j<=3;j++){
+            // console.log(j)
+            if(this.stepRecorder[j-1]!=undefined){
+                d3.select("#record"+j)
+                    .style("visibility","visible");
+                d3.select("#record"+j).select("rect")
+                    .attr("stroke","rgb(44,123,246)")
+                let step = this.stepRecorder[j-1]
+                let edgelist = d3.entries(step.edges);
+                // console.log(d3.select("#record"+j))
+                let edges = d3.select("#record"+j).selectAll("path").data(edgelist);
+                edges.exit().remove();
+                let newedges = edges.enter().append("path");
+                edges = newedges.merge(edges);
+                edges
+                    .attr("d",(d)=>{
+                        let d_new = d.value.slice(0,3);
+                        return this.step_curveMap(d_new);
+                    })
+                    .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
+                    .attr("transform","translate("+(this.margin.left+(j-1)*this.step_frameWidth + (j-1)*this.margin.betweenstep)+","+this.margin.top+")")
+                    // .attr("id",(d)=>d.key)
+                    .style("fill", "none")
+                    .style("stroke", "black")
+                    .style("stroke-width",2)
+                    .style("stroke-dasharray",(d)=>{
+                        if(d.value[3]==="max"){
+                            return "5,5";
+                        } else {return "";}
+                    })
+
+                let circles = d3.select("#record"+j).selectAll("circle").data(step.cp);
+                circles.exit().remove();
+                let newcircles = circles.enter().append("circle");
+                circles = newcircles.merge(circles);
+                circles
+                    .attr("cx",(d)=>this.step_xMap(d.x)+this.margin.left+(j-1)*this.step_frameWidth + (j-1)*this.margin.betweenstep)
+                    .attr("cy",(d)=>this.step_yMap(d.y)+this.margin.top)
+                    .attr("r",15)
+                    .attr("fill","white");
+            
+                let circletext = d3.select("#record"+j).selectAll("text").data(step.cp);
+                circletext.exit().remove();
+                let newcircletext = circletext.enter().append("text");
+                circletext = newcircletext.merge(circletext);
+                circletext
+                    .attr('text-anchor', 'middle')
+                    .attr('dominant-baseline', 'central')
+                    .attr('font-size', '35px')
+                    .attr("x",(d)=>this.step_xMap(d.x)+this.margin.left+(j-1)*this.step_frameWidth + (j-1)*this.margin.betweenstep)
+                    .attr("y",(d)=>this.step_yMap(d.y)+this.margin.top)
+                    .attr("class",(d)=>{
+                        if(d.type==="max"){
+                            return "far max"
+                        } else if (d.type==="saddle"){
+                            return "far saddle"
+                        } else if (d.type==="min"){
+                            return "fas min"
+                        }
+                    })
+                    .text((d)=>{
+                        if(d.type==="max"){
+                            return "\uf192"
+                        } else if (d.type==="saddle"){
+                            return "\uf057"
+                        } else if (d.type==="min"){
+                            return "\uf140"
+                        }
+                    })
+
+
+            }else{
+                d3.select("#record"+j)
+                    .style("visibility","hidden");
+                
+            }
+
+        }
     }
 
     findNearestPoint(){
@@ -530,7 +675,7 @@ class anim{
             .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", draggedTerminal)
-                    .on("end", dragended))
+                    .on("end", dragendedTerminal))
         function draggedTerminal(d,i){
             d3.select("#terminal"+i)
                 .attr("cx",d3.mouse(this)[0])
@@ -588,8 +733,32 @@ class anim{
 
             }
             
+            // let iftemp = false;
+            // // check if there is any terminal node that does not connect to a max/min
+            // for(let k in that.edges){
+            //     if(["temp1","temp2","temp3","temp4"].indexOf(k)!=-1){
+            //         iftemp = true;
+            //     }
+            // }
+            // if(!iftemp){
+            //     if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+            //         that.assignEdge();
+            //         that.constructMesh(that.sigma);
+            //         // console.log("that grad",that.grad)
+            //         that.drawFlag=true;
+                    
+                    
+            //     }
+                
+            //     // console.log(that.stepRecorder)
+
+            // }
+           
+        }
+
+        function dragendedTerminal(d) {
+            d3.select(this).classed("active", false);
             let iftemp = false;
-            // check if there is any terminal node that does not connect to a max/min
             for(let k in that.edges){
                 if(["temp1","temp2","temp3","temp4"].indexOf(k)!=-1){
                     iftemp = true;
@@ -599,15 +768,17 @@ class anim{
                 if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
                     that.assignEdge();
                     that.constructMesh(that.sigma);
-                    // console.log("that grad",that.grad)
                     that.drawFlag=true;
-                    
                 }
+                that.addStep();
+                that.drawStep();
             }
             that.drawAnnotation();
             that.addedges();
         }
+
     }
+    
 
     initializeEdgeMapper(edge){
         let em = [];
