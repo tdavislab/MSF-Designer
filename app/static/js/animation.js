@@ -631,13 +631,7 @@ class anim{
         let newTerminalNodes = terminalNodes.enter().append("circle");
         terminalNodes = newTerminalNodes.merge(terminalNodes);
         terminalNodes
-            // .style("opacity",0)
             .attr("cx",(d)=>{
-                // if(d[0].x===d[2].x){
-                //     return this.xMap(d[2].x);
-                // } else {
-                //     return this.xMap(d[2].x + (d[0].x-d[2].x)/Math.abs(d[0].x-d[2].x)*0.015)
-                // }
                 if(d.value[2].y===0 || d.value[2].y===1 || d.value[0].x===d.value[2].x){
                     return this.xMap(d.value[2].x);
                 } else if(d.value[2].x===0){
@@ -677,15 +671,19 @@ class anim{
                     .on("start", dragstarted)
                     .on("drag", draggedTerminal)
                     .on("end", dragendedTerminal))
+
         function draggedTerminal(d,i){
             d3.select("#terminal"+i)
                 .attr("cx",d3.mouse(this)[0])
                 .attr("cy",d3.mouse(this)[1])
-            let edgeid = d[4];
+            let edgeid = d.key;
             d3.select("#"+edgeid)
                 .attr("d",(d)=>that.curve0([d.value[0],d.value[1],{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])}]))
+        }
+
+        function dragendedTerminal(d,i) {
+            d3.select(this).classed("active", false);
             if(d.value[3]==="max"){
-                // **** need to limit the # points to be 1!!!
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_max);
                 if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
                     // check intersection
@@ -720,7 +718,6 @@ class anim{
                             if(that.ifLinesIntersect(line1,line2)){
                                 ifinter=true;
                             }
-
                         }
                     }
                     if(!ifinter){
@@ -731,34 +728,7 @@ class anim{
                             .attr("cy",that.yMap(cpm.y))
                     }
                 }
-
             }
-            
-            // let iftemp = false;
-            // // check if there is any terminal node that does not connect to a max/min
-            // for(let k in that.edges){
-            //     if(["temp1","temp2","temp3","temp4"].indexOf(k)!=-1){
-            //         iftemp = true;
-            //     }
-            // }
-            // if(!iftemp){
-            //     if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-            //         that.assignEdge();
-            //         that.constructMesh(that.sigma);
-            //         // console.log("that grad",that.grad)
-            //         that.drawFlag=true;
-                    
-                    
-            //     }
-                
-            //     // console.log(that.stepRecorder)
-
-            // }
-           
-        }
-
-        function dragendedTerminal(d) {
-            d3.select(this).classed("active", false);
             let iftemp = false;
             for(let k in that.edges){
                 if(["temp1","temp2","temp3","temp4"].indexOf(k)!=-1){
