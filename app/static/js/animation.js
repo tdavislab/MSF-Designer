@@ -459,7 +459,7 @@ class anim{
             .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", draggedText)
-                    .on("end", dragended))
+                    .on("end", dragendedText))
             .on("mouseover",(d)=>{
                 d3.select("#cp"+d.id).attr("font-size","45px")
             })
@@ -511,44 +511,91 @@ class anim{
             // d3.select(this)
             //     .attr("x",d3.mouse(this)[0])
             //     .attr("y", d3.mouse(this)[1]);
-            that.cp[i].x = that.xMap.invert(d3.mouse(this)[0]);
-            that.cp[i].y = that.yMap.invert(d3.mouse(this)[1]);  // edge node will change automatically
-            if(d.type==="saddle"){
-                console.log("this is a saddle")
-            } else if(d.type==="max"){ // **** need fix here
-                let np_saddle = that.findMinPt(d,that.cp_saddle);
-                let edgeid = "edge"+np_saddle.id+d.id;
-                let totalLength = d3.select("#"+edgeid).node().getTotalLength();
-                let stepLength = totalLength/that.numSeg;
-                let newPoints = [];
-                for(let i=0;i<that.numSeg;i++){
-                    let pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength)
-                    if((d.x>d.np.x)||(d.y>d.np.y)){
-                        pt = d3.select("#additionalEdge").node().getPointAtLength((that.numSeg-i)*stepLength)
-                    }
-                    newPoints.push({"x":that.xMapReverse(pt.x), "y":that.yMapReverse(pt.y)});
-
-                }
-                that.mapEdges(edgeid, newPoints);
-                console.log("mapedge",that.edgeMapper);
-                // that.mathEdges(edgeid,) //**** new points???
-                // console.log("edge length",totalLength)
+            d3.select("#cp"+d.id)
+                .attr("x",(d)=>{
+                    d.x = that.xMap.invert(d3.mouse(this)[0])
+                    return that.xMap(d.x)})
+                .attr("y",(d)=>{
+                    d.y = that.yMap.invert(d3.mouse(this)[1])
+                    return that.yMap(d.y)});
+            for(let eid in d.edges){
+                that.mapEdges(eid);
             }
-            if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                that.assignEdge();
-                that.constructMesh(that.sigma);
+            that.addedges();
+            that.drawAnnotation();
 
-            }
+            // d.x = that.xMap.invert(d3.mouse(this)[0]);
+            // d.y = that.yMap.invert(d3.mouse(this)[1]);  // edge node will change automatically
+            // for(let eid in d.edges){
+            //     if(d.type==="saddle"){
+            //         // that.addNewEdge(d, d.edges[eid][2],d.edges[eid][3]);
+            //         d3.select("#"+eid)
+            //             .attr("d",(d)=>{
+            //                 console.log(d)
+            //                 return that.curve0({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},d.value[1],d.value[2])})
+            //     } else if(d.type==="max" || d.type === "min"){
+            //         // that.addNewEdge(d.edges[eid][0], d, d.edges[eid][3]);
+            //         // console.log(d.edges[eid])
+            //         d3.select("#"+eid)
+            //             .attr("d",(d)=>that.curve0(d.value[0],d.value[1],{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])}))
+            //     }
+            // }
+            // if(d.type==="saddle"){
+            //     console.log("this is a saddle")
+            // } else if(d.type==="max"){ // **** need fix here
+            //     let np_saddle = that.findMinPt(d,that.cp_saddle);
+            //     let edgeid = "edge"+np_saddle.id+d.id;
+            //     let totalLength = d3.select("#"+edgeid).node().getTotalLength();
+            //     let stepLength = totalLength/that.numSeg;
+            //     let newPoints = [];
+            //     for(let i=0;i<that.numSeg;i++){
+            //         let pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength)
+            //         if((d.x>d.np.x)||(d.y>d.np.y)){
+            //             pt = d3.select("#additionalEdge").node().getPointAtLength((that.numSeg-i)*stepLength)
+            //         }
+            //         newPoints.push({"x":that.xMapReverse(pt.x), "y":that.yMapReverse(pt.y)});
+
+            //     }
+            //     that.mapEdges(edgeid, newPoints);
+            //     console.log("mapedge",that.edgeMapper);
+            //     // that.mathEdges(edgeid,) //**** new points???
+            //     // console.log("edge length",totalLength)
+            // }
+            
             // console.log("edgeee",that.edges)
             // console.log("cp",that.cp)
-            that.drawAnnotation();
-            that.addedges();
+            
         }
-              
-        function dragended(d) {
+
+        function dragendedText(d) {
             d3.select(this).classed("active", false);
-            // that.drawAnnotation();
-            // that.addedges();
+            // check edge intersection
+            let ifInter = false;
+            for(let eid1 in that.edges){
+                for(let eid2 in that.edges){
+                    if(eid1 != eid2){
+                        if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
+                            d3.select("#"+eid1)
+                                .style("stroke", "red")
+                            d3.select("#"+eid2)
+                                .style("stroke", "red")
+                            ifInter = true;
+                        }
+                    }
+                }
+            }
+            if(!ifInter){
+                that.drawAnnotation();
+                that.addedges();
+                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                    that.assignEdge();
+                    that.constructMesh(that.sigma);
+                    that.drawFlag = true;
+                }
+            } else {
+                that.drawFlag = false;
+            }
+            
         }
 
         // draw frames (local minimum)
@@ -577,9 +624,9 @@ class anim{
             .call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", draggedNode)
-                .on("end", dragended))
-                .on("mouseover",mouseover)
-                .on("mouseout",mouseout);
+                .on("end", dragendedNode))
+            .on("mouseover",mouseover)
+            .on("mouseout",mouseout);
 
         function mouseover(d) {
             d3.select(this).classed("mouseover", true);
@@ -588,34 +635,32 @@ class anim{
         function mouseout(d){
             d3.select(this).classed("mouseover", false);
         }
+
         function draggedNode(d,i){
             // **** need boundary control ****
             // console.log("d3",d3.event)
-            let ed_new = [d.value[0],{"x":that.xMapReverse(d3.event.x),"y":that.yMapReverse(d3.event.y)}, d.value[2]];
+            // let ed_new = [d.value[0],{"x":that.xMapReverse(d3.event.x),"y":that.yMapReverse(d3.event.y)}, d.value[2]];
             // console.log(ed_new)
             // d3.select("#"+d.key)
                 // .attr("d",that.curve0(ed_new))
                 // .style("opacity",0)
-            let totalLength = d3.select("#"+d.key).node().getTotalLength();
-            let stepLength = totalLength/that.numSeg;
-            let newPoints = [];
-            for(let i=0;i<that.numSeg;i++){
-                let pt = d3.select("#"+d.key).node().getPointAtLength(i*stepLength)
-                if((d.value[0].x>d.value[2].x)||(d.value[0].y>d.value[2].y)){
-                    pt = d3.select("#"+d.key).node().getPointAtLength((that.numSeg-i)*stepLength)
-                }
-                newPoints.push({"x":that.xMapReverse(pt.x), "y":that.yMapReverse(pt.y)});
-            }
-            that.mapEdges(d.key, newPoints);
-            console.log(that.edgeMapper)
+            // let totalLength = d3.select("#"+d.key).node().getTotalLength();
+            // let stepLength = totalLength/that.numSeg;
+            // let newPoints = [];
+            // for(let i=0;i<that.numSeg;i++){
+            //     let pt = d3.select("#"+d.key).node().getPointAtLength(i*stepLength)
+            //     if((d.value[0].x>d.value[2].x)||(d.value[0].y>d.value[2].y)){
+            //         pt = d3.select("#"+d.key).node().getPointAtLength((that.numSeg-i)*stepLength)
+            //     }
+            //     newPoints.push({"x":that.xMapReverse(pt.x), "y":that.yMapReverse(pt.y)});
+            // }
+            that.mapEdges(d.key);
+            // console.log(that.edgeMapper)
             // **** need to check intersection!!
             // if(that.ifCurvesIntersect(pathid, newPoints)===false){
-                that.mapEdges(d.key, newPoints);
-                d3.select(this).attr("cx", d.value[1].x = that.xMapReverse(d3.event.x)).attr("cy", d.value[1].y = that.yMapReverse(d3.event.y));
-                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                    that.assignEdge();
-                    that.constructMesh(that.sigma);
-                }
+                // that.mapEdges(d.key, newPoints);
+            d3.select(this).attr("cx", d.value[1].x = that.xMapReverse(d3.event.x)).attr("cy", d.value[1].y = that.yMapReverse(d3.event.y));
+                
                 
             // } else {
                 // ed_new = [ed[0], {"x":(ed[0].x+ed[2].x)/2,"y":(ed[0].y+ed[2].y)/2}, ed[2]]
@@ -626,6 +671,35 @@ class anim{
             that.drawAnnotation();
             that.addedges();
         }
+
+        function dragendedNode(d) {
+            let ifInter = false;
+            for(let eid in that.edges){
+                if(eid!=d.key){
+                    if(that.ifCurvesIntersect(that.edgeMapper[eid], that.edgeMapper[d.key])){
+                        d3.select("#"+eid)
+                            .style("stroke", "red")
+                        d3.select("#"+d.key)
+                            .style("stroke", "red")
+                        ifInter = true;
+                    }
+                }
+            }
+            if(!ifInter){
+                d3.select(this).classed("active", false);
+                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                    that.assignEdge();
+                    that.constructMesh(that.sigma);
+                    that.drawFlag = true;
+                }
+                that.drawAnnotation();
+                that.addedges();
+            } else {
+                that.drawFlag = false;
+            }
+            
+        }
+
         let terminalNodes = this.terminalNodesGroup.selectAll("circle").data(edgelist)
         terminalNodes.exit().remove();
         let newTerminalNodes = terminalNodes.enter().append("circle");
@@ -643,7 +717,6 @@ class anim{
                 }
             })
             .attr("cy",(d)=>{
-                // if(d[0].y===d[2].y){
                 if(d.value[2].x===0 || d.value[2].x===1 || d.value[0].y===d.value[2].y){
                     return this.yMap(d.value[2].y);
                 } else if(d.value[2].y===0){
@@ -782,7 +855,18 @@ class anim{
         return em;
     }
 
-    mapEdges(edgeid, newPoints){
+    mapEdges(edgeid){
+        let ed = this.edges[edgeid];
+        let totalLength = d3.select("#"+edgeid).node().getTotalLength();
+        let stepLength = totalLength/this.numSeg;
+        let newPoints = [];
+        for(let i=0;i<this.numSeg;i++){
+            let pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength)
+            if((ed[0].x>ed[2].x)||(ed[0].y>ed[2].y)){
+                pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength)
+            }
+            newPoints.push({"x":this.xMap.invert(pt.x), "y":this.yMap.invert(pt.y)});
+        }
         newPoints.sort(function(a,b){
             return d3.ascending(a.x,b.x) || d3.ascending(a.y,b.y);
         })
@@ -851,29 +935,53 @@ class anim{
     
     }
 
-    ifCurvesIntersect(pathid, newpoints){
-        for(let i=0;i<Object.keys(this.edgeMapper).length;i++){
-            if(Object.keys(this.edgeMapper)[i]!=pathid){
-                // console.log("sp",Object.keys(this.edgeMapper)[i],pathid)
-                let ed = this.edgeMapper[Object.keys(this.edgeMapper)[i]];
-                // console.log(ed,newpoints)
-                for(let j=1;j<ed.length;j++){
-                    for(let k=1;k<newpoints.length;k++){
-                        let sp1 = [{"x":ed[j-1].x_new+0.0001,"y":ed[j-1].y_new+0.0001},{"x":ed[j].x_new-0.0001,"y":ed[j].y_new-0.0001}];
-                        let sp2 = [{"x":newpoints[k-1].x+0.0001, "y":newpoints[k-1].y+0.0001},{"x":newpoints[k].x-0.0001, "y":newpoints[k].y-0.0001}];
-                        // console.log(sp1,sp2)
-                        if(this.ifLinesIntersect(sp1,sp2)){
-                            console.log("return true")
-                            return true;
-                        }
-                    }
+    ifCurvesIntersect(curve1, curve2){
+        for(let i=1; i<curve1.length; i++){
+            for(let j=1; j<curve2.length; j++){
+                let line1 = [{"x":curve1[i-1].x_new,"y":curve1[i-1].y_new}, {"x":curve1[i].x_new,"y":curve1[i].y_new}];
+                let line2 = [{"x":curve2[j-1].x_new,"y":curve2[j-1].y_new}, {"x":curve2[j].x_new,"y":curve2[j].y_new}];
+                if(this.ifLinesIntersect(line1,line2)){
+
+                    console.log(line1,line2)
+
+                    return true;
                 }
+
             }
         }
-        console.log("return false")
         return false;
-        // one edge is the current line being moved, how to find another edge?
     }
+
+    // ifCurvesIntersect(pathid, newpoints){
+    //     // for(let eid in this.edgeMapper){
+    //     //     let ed = this.edgeMapper[eid];
+    //     //     for(let i=0;i<ed.length;i++){
+    //     //         for(let )
+    //     //     }
+    //     // }
+
+    //     for(let i=0;i<Object.keys(this.edgeMapper).length;i++){
+    //         if(Object.keys(this.edgeMapper)[i]!=pathid){
+    //             // console.log("sp",Object.keys(this.edgeMapper)[i],pathid)
+    //             let ed = this.edgeMapper[Object.keys(this.edgeMapper)[i]];
+    //             // console.log(ed,newpoints)
+    //             for(let j=1;j<ed.length;j++){
+    //                 for(let k=1;k<newpoints.length;k++){
+    //                     let sp1 = [{"x":ed[j-1].x_new+0.0001,"y":ed[j-1].y_new+0.0001},{"x":ed[j].x_new-0.0001,"y":ed[j].y_new-0.0001}];
+    //                     let sp2 = [{"x":newpoints[k-1].x+0.0001, "y":newpoints[k-1].y+0.0001},{"x":newpoints[k].x-0.0001, "y":newpoints[k].y-0.0001}];
+    //                     // console.log(sp1,sp2)
+    //                     if(this.ifLinesIntersect(sp1,sp2)){
+    //                         console.log("return true")
+    //                         return true;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     console.log("return false")
+    //     return false;
+    //     // one edge is the current line being moved, how to find another edge?
+    // }
 
     adjustFlow(x,y){
         // map the original point to a new location when the boundary geometry is changed
