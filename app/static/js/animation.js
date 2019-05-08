@@ -869,7 +869,11 @@ class anim{
         }
         if(pt1.x===pt2.x&&pt3.x===pt4.x){ // if two lines are both vertical
             if(pt1.x===pt3.x){
-                return true;
+                if((pt3.y<=Math.max(pt1.y,pt2.y) && pt3.y>=Math.min(pt1.y,pt2.y))||(pt4.y<=Math.max(pt1.y,pt2.y) && pt4.y>=Math.min(pt1.y,pt2.y))){
+                    return true;
+                } else{
+                    return false;
+                }
             } else {
                 return false;
             }
@@ -916,144 +920,6 @@ class anim{
             }
         }
         return false;
-    }
-
-    // ifCurvesIntersect(pathid, newpoints){
-    //     // for(let eid in this.edgeMapper){
-    //     //     let ed = this.edgeMapper[eid];
-    //     //     for(let i=0;i<ed.length;i++){
-    //     //         for(let )
-    //     //     }
-    //     // }
-
-    //     for(let i=0;i<Object.keys(this.edgeMapper).length;i++){
-    //         if(Object.keys(this.edgeMapper)[i]!=pathid){
-    //             // console.log("sp",Object.keys(this.edgeMapper)[i],pathid)
-    //             let ed = this.edgeMapper[Object.keys(this.edgeMapper)[i]];
-    //             // console.log(ed,newpoints)
-    //             for(let j=1;j<ed.length;j++){
-    //                 for(let k=1;k<newpoints.length;k++){
-    //                     let sp1 = [{"x":ed[j-1].x_new+0.0001,"y":ed[j-1].y_new+0.0001},{"x":ed[j].x_new-0.0001,"y":ed[j].y_new-0.0001}];
-    //                     let sp2 = [{"x":newpoints[k-1].x+0.0001, "y":newpoints[k-1].y+0.0001},{"x":newpoints[k].x-0.0001, "y":newpoints[k].y-0.0001}];
-    //                     // console.log(sp1,sp2)
-    //                     if(this.ifLinesIntersect(sp1,sp2)){
-    //                         console.log("return true")
-    //                         return true;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     console.log("return false")
-    //     return false;
-    //     // one edge is the current line being moved, how to find another edge?
-    // }
-
-    adjustFlow(x,y){
-        // map the original point to a new location when the boundary geometry is changed
-        let x_new = x;
-        let y_new = y;
-        // console.log("adjusting flow")
-
-        // now only deal with vertical lines
-        for(let i=0;i<this.edges.length;i++){
-            let ed = this.edges[i];
-            // let edMap = this.edgeMapper["p"+i];
-            let xRange = Math.abs(ed[2].x-ed[0].x);
-            let yRange = Math.abs(ed[2].y-ed[0].y);
-            if(xRange!=0 && yRange!=0){
-                // console.log("i am here")
-            }
-            // if((Math.min(ed[0][1],ed[2][1])<=y&&y<=Math.max(ed[0][1],ed[2][1]))||(Math.min(ed[0][0],ed[2][0])<=x&&x<=Math.max(ed[0][0],ed[2][0])))
-            // let edMap = this.edgeMapper["p"+i];
-            // let xSeg = Math.abs(ed[2][0]-ed[0][0])/this.numSeg;
-            // let ySeg = Math.abs(ed[2][1]-ed[0][1])/this.numSeg;
-            // let edMapPts = [];
-            // edMap.forEach(p=>edMapPts.push([p.x,p.y,p.x_new,p.y_new]))
-            // let pt0 = this.findMinPt([x,y],edMapPts);
-            // let edMapPts1 = [];
-            // for(let j=0;j<edMapPts.length;j++){
-            //     if(edMapPts[j].join()!=pt0.join()){
-            //         edMapPts1.push(edMapPts[j]);
-            //     }
-            // }
-            // let pt1 = this.findMinPt([x,y],edMapPts1);
-            // let x_line_old = pt0[0];
-            // let x_line_new = pt0[2];
-            // if(pt1[3]!=pt0[3]){
-            //     x_line_new = (pt1[3]-y)/(pt1[3]-pt0[3])*pt0[2]+(y-pt0[3])/(pt1[3]-pt0[3])*pt1[2];
-            // }
-            // if(x<=pt0[0]){
-            //     // points on left
-            //     x_new = x * x_line_new / x_line_old;
-            // } else { 
-            //     x_new = 1-(1-x)/(1-x_line_old)*(1-x_line_new);
-            // } 
-
-            // console.log(x_line_old,x_line_new)
-
-            // console.log(pt0)
-            let a = 1
-
-
-
-            if(xRange===0){
-            // if(a===1){
-                // now only deal with vertical lines
-                if(Math.min(ed[0].y,ed[2].y)<=y&&y<=Math.max(ed[0].y,ed[2].y)){ // only these points need to change
-                    let edMap = this.edgeMapper[ed[4]];
-                    // console.log("edmap",edMap)
-                    let ySeg = Math.abs(ed[2].y-ed[0].y)/this.numSeg;
-                    let pIdx = Math.floor((y-Math.min(ed[0].y,ed[2].y))/ySeg);
-                    // console.log(edMap)
-                    // console.log(pIdx)
-                    let pt0 = edMap[pIdx];
-                    let pt1 = edMap[Math.min(pIdx+1,edMap.length-1)];
-                    let xOrigin = ed[0].x; //the x value before change curve
-                    let x_line_old = xOrigin;
-                    // console.log("y",pt0.y_new, pt1.y_new)
-                    let x_line_new = pt1.x_new;
-                    if(pt1.y_new!=pt0.y_new){
-                        x_line_new = (pt1.y_new-y)/(pt1.y_new-pt0.y_new)*pt0.x_new+(y-pt0.y_new)/(pt1.y_new-pt0.y_new)*pt1.x_new;
-                    }
-                    if(x<=xOrigin){
-                        // points on left
-                        x_new = x * x_line_new / x_line_old;
-
-                    } else { 
-                        x_new = 1-(1-x)/(1-x_line_old)*(1-x_line_new);
-                    } 
-                }
-            }
-            if(yRange===0){
-            // if(a===1){
-                // horizontal lines
-                if(Math.min(ed[0].x,ed[2].x)<=x&&x<=Math.max(ed[0].x,ed[2].x)){
-                    let edMap = this.edgeMapper[ed[4]];
-                    let xSeg = Math.abs(ed[2].x-ed[0].x)/this.numSeg;
-                    let pIdx = Math.floor((x-Math.min(ed[0].x,ed[2].x))/xSeg);
-                    let pt0 = edMap[pIdx];
-                    let pt1 = edMap[Math.min(pIdx+1,edMap.length-1)];
-                    let yOrigin = ed[0].y; //the y value before change curve
-                    let y_line_old = yOrigin;
-                    // console.log("y",pt0.y_new, pt1.y_new)
-                    let y_line_new = pt1.y_new;
-                    if(pt1.x_new!=pt0.x_new){
-                        y_line_new = (pt1.x_new-x)/(pt1.x_new-pt0.x_new)*pt0.y_new+(x-pt0.x_new)/(pt1.x_new-pt0.x_new)*pt1.y_new;
-                    }
-                    if(y<=yOrigin){
-                        // points on left
-                        y_new = y * y_line_new / y_line_old;
-
-                    } else { 
-                        y_new = 1-(1-y)/(1-y_line_old)*(1-y_line_new);
-                    } 
-                }
-
-            } 
-        }
-        return [x_new, y_new];
-
     }
 
     calDist(loc1, loc2){
@@ -1121,40 +987,6 @@ class anim{
             })
     }
 
-    // findEdges(cp){
-    //     // initialize edges
-    //     let edges = {};
-    //     for(let i=0;i<this.cp_saddle.length;i++){
-    //         // let ex ={"saddle":cp_new.saddle[i],"max":[],"min":[]};
-    //         if(this.cp_max.length>0){
-    //             let pts = [];
-    //             let cp_new_max = this.cp_max.slice(0);
-    //             if(cp_new_max.length>2){
-    //                 // find the closest max points
-    //                 pts = this.find2MinPt(this.cp_saddle[i],this.cp_max);
-    //             } else { pts = cp_new_max; }
-    //             for(let j=0;j<pts.length;j++){
-    //                 let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
-    //                 let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
-    //                 edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"max"]
-    //                 // edges.push([this.cp_saddle[i],midpt,pts[j],"max","edge"+this.cp_saddle[i].id+pts[j].id])
-    //             }
-    //         }
-    //         let cp_new_min = this.cp_min.slice(0);
-    //         let pts = [];
-    //         if(cp_new_min.length>2){
-    //             // find the closest min points
-    //             pts = this.find2MinPt(this.cp_saddle[i],cp_new_min);
-    //         } else { pts = cp_new_min;}
-    //         for(let j=0;j<pts.length;j++){
-    //             let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
-    //             let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
-    //             edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"min"]
-    //             // edges.push([this.cp_saddle[i],midpt,pts[j],"min","edge"+this.cp_saddle[i].id+pts[j].id]);                
-    //         }
-    //     }
-    //     return edges;
-    // }
 
     initializeMesh(){
         let grad_new = [];
@@ -1326,114 +1158,6 @@ class anim{
         // return grad_new;
     }
 
-    // constructMesh(sigma){
-    //     console.log("constucting")
-    //     let grad_new = [];
-    //     let cp_max = [];
-    //     for(let i=0;i<this.cp.length;i++){
-    //         if(this.cp[i].type==="max"){
-    //             cp_max.push(this.cp[i]);
-    //         }
-    //     }
-    //     for(let x=0;x<=1;x+=this.step){
-    //         for(let y=0;y<=1;y+=this.step){
-    //             let cpt = this.findMinPt({"x":x,"y":y},this.cp);
-    //             // if(this.cp.length===3){
-    //             //     if(x>0.35 && x<0.65){
-    //             //         cpt = this.cp[1];
-    //             //     } else if (x <= 0.35){
-    //             //         cpt = this.cp[0];
-    //             //     } else {
-    //             //         cpt = this.cp[2];
-    //             //     }
-
-    //             // }
-                
-    //             let idx = [];
-    //             let x_new = x - cpt.x;
-    //             let y_new = y - cpt.y;
-    //             if(cpt.type === "max"){
-    //                 idx=[1,1];
-    //             } else if(cpt.type==="saddle"){
-    //                 idx=[-1,1];
-    //             } else if(cpt.type==="min"){
-    //                 idx=[-1,-1];
-    //             }
-    //             // console.log(idx)
-    //             let dx = idx[0]*(1/sigma) * x_new * Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-    //             let dy = idx[1]*(1/sigma) * y_new * (Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma));
-    //             // let dx = x_new;
-    //             // let dy = y_new;
-    //             // if(idx[0]*idx[1]<0){
-                    
-    //             // }
-    //             // console.log(dx,dy)
-    //             // if(cpt.type === "max"){
-    //             //     let ed = this.edges[cpt.edges];
-    //             //     if(ed[0].x-ed[2].x!=0 && ed[0].y-ed[2].y!=0){
-    //             //         let theta = Math.atan2(ed[0].y-ed[2].y,ed[0].x-ed[2].x)*2;
-    //             //         if(x>0.5 && x<0.75){
-    //             //             let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-    //             //             let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-    //             //             dx = dx_new;
-    //             //             dy = dy_new;  
-    
-    //             //         }
-    //             //     }
-                    
-
-
-    //             // }
-
-    //             if(cpt.type==="saddle"){
-    //                 // for(let i=0;i<cpt.edges.length;i++){
-    //                 //     let ed = this.edges[cpt.edges[i]];
-    //                 //     if(ed[0].x-ed[2].x!=0 && ed[0].y-ed[2].y!=0){
-    //                 //         let theta = Math.atan2(ed[0].y-ed[2].y,ed[0].x-ed[2].x)*2;
-    //                 //         // if(this.calDist({"x":x,"y":y},ed[1])<0.05){
-    //                 //         if(x>0.5 && (y>0.25 && y < 0.75)){
-    //                 //             let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-    //                 //             let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-    //                 //             dx = dx_new;
-    //                 //             dy = dy_new;  
-
-    //                 //         }
-
-    //                 //     }
-                        
-                                              
-    //                 // }
-    //                 // dx = -x_new;
-    //                 // dy = y_new;
-    //                 // dx = -(1/sigma)*x_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
-    //                 // dy = (1/sigma)*y_new*Math.exp(-(Math.pow(y,2)+Math.pow(x,2))/sigma);
-    //                 // flow rotation
-    //                 // if([cpt.x,cpt.y].join!=[0.5,0.5].join()){
-    //                 //     let pts = this.find2MinPt(cpt,cp_max);
-    //                 //     let theta = Math.atan2(pts[1].y-pts[0].y,pts[1].x-pts[0].x)*2;
-    //                 //     let dx_new = Math.cos(theta)*dx-Math.sin(theta)*dy;
-    //                 //     let dy_new = Math.sin(theta)*dx+Math.cos(theta)*dy;
-    //                 //     dx = dx_new;
-    //                 //     dy = dy_new;
-
-    //                 // }
-                    
-                    
-    //             }
-    //             let pt_new = this.adjustFlow(x,y);
-    //             let fv = this.calFV(x,y,cpt);
-    //             // let pt_new = [x,y];
-    //             grad_new.push([x,y,dx,dy,pt_new[0],pt_new[1],fv]);
-    //             // grad_new.push([x,y,dx,dy]);
-    //         }
-    //     }
-    //     grad_new.sort(function(x,y){
-    //         return d3.ascending(x[0],y[0]) || d3.ascending(x[1],y[1]);
-    //     })
-    //     console.log("*** grad_new",grad_new)
-    //     return grad_new;
-    // }
-
     animation(){            
         let N = 50;
         let dt = 0.001;
@@ -1527,13 +1251,6 @@ class anim{
             }
         }
     }
-
-    
-
-    // adjustMesh(sigma){
-
-    // }
-
     
 
     calFV(x,y,cp){
@@ -1587,10 +1304,6 @@ class anim{
         return [ex_v,pt_new,fv];
         // return ex_v;
     }
-
-    // fmax(w,x,y,sigma){
-    //     return w*Math.exp(-(Math.pow(x,2)+Math.pow(y,2))/sigma)
-    // }
 
     clearCanvas(){
         // clear both canvas and svg

@@ -218,19 +218,20 @@ class persistence{
 
             function mouseover(d){
                 d3.select(this).classed("phactive",true);
-                console.log(d.edgeID)
-                d3.select("#"+d.edgeID)
-                    .style("stroke","red")
-                    .style("stroke-width","10")
-                // d3.select("#p0").style("stroke","red");
+                if(d.edge!=undefined){
+                    d3.select("#"+d.edge.key)
+                        .style("stroke","red")
+                        .style("stroke-width","10");
+                }                
             }
 
             function mouseout(d){
                 d3.select(this).classed("phactive",false);
-                d3.select("#"+d.edgeID)
-                    .style("stroke","black")
-                    .style("stroke-width","2")
-                // d3.select("#p0").style("stroke","black");
+                if(d.edge!=undefined){
+                    d3.select("#"+d.edge.key)
+                        .style("stroke","black")
+                        .style("stroke-width","2");
+                }
             }
 
 
