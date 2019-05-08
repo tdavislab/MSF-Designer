@@ -52,7 +52,7 @@ class moves{
                     this.anim.drawAnnotation();
                     this.anim.addedges();
                     this.sliders.addSlider();
-                    this.anim.findNearestPoint();
+                    // this.anim.findNearestPoint();
                     this.anim.findRange();
                     // this.anim.addStep();
                     // this.anim.drawStep();

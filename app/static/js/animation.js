@@ -9,11 +9,11 @@ class criticalPoint{
         this.fv = this.f(x,y,type); // function value
         this.fv_perb = this.fv + Math.random();
         this.edges = {};
-        if(type === "saddle"){ // initialize nearest points
-            this.np = {"max":[],"min":[]}; // np: nearest points
-        } else {
-            this.np = [] // max/min only connects to saddle
-        }
+        // if(type === "saddle"){ // initialize nearest points
+        //     this.np = {"max":[],"min":[]}; // np: nearest points
+        // } else {
+        //     this.np = [] // max/min only connects to saddle
+        // }
         this.lvalue = 0;
         this.uvalue = 10;
     }
@@ -127,8 +127,6 @@ class anim{
             .attr("stroke","white")
             .attr("fill", "none");
         
-
-        
         this.drawFlag = true;
         this.step = 0.01;
         // this.step = 0.05;
@@ -215,7 +213,7 @@ class anim{
 
 
         // console.log(this.grad)
-        this.findNearestPoint();
+        // this.findNearestPoint();
         this.findRange();
         this.drawAnnotation();
         this.addedges();
@@ -314,70 +312,38 @@ class anim{
         }
     }
 
-    findNearestPoint(){
-        let cp_max = [];
-        let cp_min = [];
-        for(let i=0;i<this.cp.length;i++){
-            if(this.cp[i].type==="max"){
-                cp_max.push(this.cp[i]);
-            } else if (this.cp[i].type==="min"){
-                cp_min.push(this.cp[i])
-            }
-        }
-        for(let i=0;i<this.cp.length;i++){
-            if(this.cp[i].type==="saddle"){
-                if(cp_max.length>2){
-                    this.cp[i].np.max = this.find2MinPt(this.cp[i],cp_max);
-                } else { this.cp[i].np.max = cp_max;}
-                for(let j=0;j<this.cp[i].np.max.length;j++){
-                    let max_id = this.cp[i].np.max[j].id;
-                    this.cp[max_id].np.push(this.cp[i]); // add this saddle as a np to the related max
-                }
-                let cp_min_new = cp_min.slice(0);
-                cp_min_new.push({"x":this.cp[i].x,"y":0});
-                cp_min_new.push({"x":this.cp[i].x,"y":1});
-                if(cp_min.length>2){
-                    this.cp[i].np.min = this.find2MinPt(this.cp[i],cp_min);
-                } else {this.cp[i].np.min = cp_min_new;}
-                for(let j=0;j<this.cp[i].np.min.length;j++){
-                    let min_id = this.cp[i].np.min[j].id;
-                    if(min_id!=undefined){
-                        this.cp[min_id].np.push(this.cp[i]); // add this saddle as a np to the related min
-                    }
-                }
-            }
-        }
-        console.log(this.cp)
-    }
-    
     findRange(){
         for(let i=0;i<this.cp.length;i++){
             this.cp[i].lvalue = 0;
             this.cp[i].uvalue = 10;
-            if(this.cp[i].type==="max"){
-                for(let j=0;j<this.cp[i].np.length;j++){
-                    if(this.cp[i].np[j].fv>this.cp[i].lvalue){
-                        this.cp[i].lvalue = this.cp[i].np[j].fv;
+            for(let eid in this.cp[i].edges){
+                if(this.cp[i].type === "saddle"){
+                    let np = this.cp[i].edges[eid][2];
+                    if(np.type === "max"){
+                        if(np.fv < this.cp[i].uvalue){
+                            this.cp[i].uvalue = np.fv;
+                        }
+                    } else if(np.type === "min"){
+                        if(np.fv > this.cp[i].lvalue){
+                            this.cp[i].lvalue = np.fv;
+                        }
+
                     }
-                }
-            } else if(this.cp[i].type==="min"){
-                for(let j=0;j<this.cp[i].np.length;j++){
-                    if(this.cp[i].np[j].fv<this.cp[i].uvalue){
-                        this.cp[i].uvalue = this.cp[i].np[j].fv;
+
+                } else if(this.cp[i].type === "max"){
+                    let np = this.cp[i].edges[eid][0];
+                    if(np.fv > this.cp[i].lvalue){
+                        this.cp[i].lvalue = np.fv;
                     }
-                }
-            } else if(this.cp[i].type==="saddle"){
-                for(let j=0;j<this.cp[i].np.max.length;j++){
-                    if(this.cp[i].np.max[j].fv<this.cp[i].uvalue){
-                        this.cp[i].uvalue = this.cp[i].np.max[j].fv
+                } else if(this.cp[i].type === "min"){
+                    let np = this.cp[i].edges[eid][0];
+                    if(np.fv < this.cp[i].uvalue){
+                        this.cp[i].uvalue = np.fv;
                     }
-                }
-                for(let j=0;j<this.cp[i].np.min.length;j++){
-                    if(this.cp[i].np.min[j].fv>this.cp[i].lvalue){
-                        this.cp[i].lvalue = this.cp[i].np.min[j].fv
-                    }
+
                 }
             }
+
         }
     }
 
@@ -398,12 +364,16 @@ class anim{
 
     deleteOldEdge(edgeid){
         if(this.edges[edgeid]!=undefined){
+            console.log(this.edges)
             let startpoint = this.edges[edgeid][0];
             let endpoint = this.edges[edgeid][2];
             // delete edge
             delete this.edges[edgeid];
             // delete cp[edge]
-            delete this.cp[startpoint.id].edges[edgeid];
+            console.log(this.cp[startpoint.id])
+            if(this.cp[startpoint.id]!=undefined){
+                delete this.cp[startpoint.id].edges[edgeid];
+            }
             if(this.cp[endpoint.id]!=undefined){
                 delete this.cp[endpoint.id].edges[edgeid];
             }
@@ -485,7 +455,6 @@ class anim{
         }
               
         function draggedText(d,i) {
-            console.log("d3",d3.mouse(this))
             // for(let j=0;j<that.edges.length;j++){
             //     let ed = that.edges[j];
             //     console.log("ed",that.edges[j])
@@ -508,9 +477,6 @@ class anim{
             //     // }
             //     // that.mapEdges("p"+j, newPoints);
             // }
-            // d3.select(this)
-            //     .attr("x",d3.mouse(this)[0])
-            //     .attr("y", d3.mouse(this)[1]);
             d3.select("#cp"+d.id)
                 .attr("x",(d)=>{
                     d.x = that.xMap.invert(d3.mouse(this)[0])

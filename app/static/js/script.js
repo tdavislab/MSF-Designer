@@ -8,7 +8,6 @@ let Persistence = new persistence(barcode,Anim);
 // let Records = new records(Anim);
 let Moves = new moves(Anim,Sliders,Persistence);
 
-
 function init(){
     d3.select("#undobutton")
         .on("click",()=>{
@@ -112,10 +111,9 @@ function init(){
             grad_data: JSON.stringify(Anim.grad)
         }, function(res){
             Persistence.barcode = res.data;
-            // Persistence.recoverCP();
             Persistence.drawPersistence();
-            Persistence.recoverCP();
             Persistence.recoverEdge();
+            Persistence.recoverPersisitence();
             d3.select("#loadergroup").classed("loader",false)
             d3.select("#persistencegroup").select("svg").style("visibility","visible")
             console.log("response",res)
