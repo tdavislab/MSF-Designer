@@ -4,7 +4,6 @@ class persistence{
         this.local_max = 10;
         this.local_min = 0;
         this.barcode = barcode;
-        console.log(barcode)
         this.margin = {"top":20,"bottom":20,"left":10,"right":10};
         this.svgWidth = 1200;
         this.svgHeight = 300;
@@ -17,8 +16,6 @@ class persistence{
         this.persistenceBarGroup = this.svg.append('g')
             .attr("id","persistencebargroup");
 
-        // this.recoverCP();
-        // this.birthID = [];
         this.drawPersistence();
         this.barcode.sort(function(a,b){
             if(a.death<0){
@@ -127,25 +124,6 @@ class persistence{
             })
 
     }
-    // recoverCP(){
-    //     let birthID = [];
-    //     for(let i=0;i<this.barcode.length;i++){
-    //         let birth_fv = this.local_max - this.barcode[i].birth;
-    //         // console.log(birthID)
-
-    //         let birth_cp = this.findCP(birth_fv,birthID);
-    //         // console.log(birth_fv,birth_cp)
-
-    //         birthID.push(birth_cp.id);
-    //         let death_cp = undefined;
-    //         if(this.barcode[i].death>0){
-    //             let death_fv = this.local_max - this.barcode[i].death;
-    //             death_cp = this.findCP1(death_fv,birth_cp);
-    //         }
-    //         this.barcode[i].birth_cp = birth_cp;
-    //         this.barcode[i].death_cp = death_cp;
-    //     }
-    // }
 
     recoverEdge(){
         let edgelist = [];
@@ -156,102 +134,39 @@ class persistence{
                 let min_dist = 100;
                 let min_ed_key;
                 let min_ed_value;
+                
                 for(let ed_key in this.anim.edges){
-                    // console.log(ed_key)
                     let ed = this.anim.edges[ed_key];
+                    let b_ed;
+                    let d_ed;
                     if(ed[3]==="max"){ // compare the function value and period ?
-
-                        let b_ed = ed[2].fv;
-                        let d_ed = ed[0].fv;
-                        // let life_ed = b_ed - d_ed;
-                        let b_bar = this.local_max - this.barcode[i].birth;
-                        let d_bar = this.local_max - this.barcode[i].death;
-                        let dist = Math.abs(b_ed-b_bar)+Math.abs(d_ed-d_bar);
-                        // console.log(b_ed,d_ed,b_bar,d_bar)
-                        // console.log(dist)
-                        // console.log(dist)
-                        if(dist<=min_dist && edgelist.indexOf(ed_key)===-1 && cplist.indexOf(ed[0].id)===-1 && cplist.indexOf(ed[2].id)===-1){
-                            min_dist = dist;
-                            min_ed_key = ed_key;
-                            min_ed_value = ed;
-                        }
-
-                        // console.log("min",min_dist)
-                    
+                        b_ed = ed[2].fv;
+                        d_ed = ed[0].fv;                    
                     } else if(ed[3]==="min"){ 
-                        let b_ed = ed[0].fv;
-                        let d_ed = ed[2].fv;
-                        // let life_ed = b_ed - d_ed;
-                        // **** need to fill !!!!
+                        b_ed = ed[0].fv;
+                        d_ed = ed[2].fv;
                     }
-                
+                    let b_bar = this.local_max - this.barcode[i].birth;
+                    let d_bar = this.local_max - this.barcode[i].death;
+                    let dist = Math.abs(b_ed-b_bar)+Math.abs(d_ed-d_bar);
+                    if(dist<=min_dist && edgelist.indexOf(ed_key)===-1 && cplist.indexOf(ed[0].id)===-1 && cplist.indexOf(ed[2].id)===-1){
+                        min_dist = dist;
+                        min_ed_key = ed_key;
+                        min_ed_value = ed;
+                    }
                 }
-                // console.log(min_ed_key)
-
                 
+
                 this.barcode[i].edge = {"key":min_ed_key,"value":min_ed_value};
                 edgelist.push(min_ed_key);
                 cplist.push(min_ed_value[0].id);
                 cplist.push(min_ed_value[2].id);
-                console.log(this.barcode)
-                console.log(edgelist)
-                console.log(cplist)
-
+                // console.log(this.barcode)
+                // console.log(edgelist)
+                // console.log(cplist)
             }
-
         }
     }
-
-    // recoverEdge(){
-    //     for(let i=0;i<this.barcode.length;i++){
-    //         if(this.barcode[i].death>0){
-    //             if(this.barcode[i].birth_cp.type==="saddle"){
-    //                 this.barcode[i].edgeID = "edge"+this.barcode[i].birth_cp.id.toString()+this.barcode[i].death_cp.id.toString()
-    //             } else {
-    //                 this.barcode[i].edgeID = "edge"+this.barcode[i].death_cp.id.toString()+this.barcode[i].birth_cp.id.toString()
-    //             }
-    //         } else {
-    //             this.barcode[i].edgeID = undefined;
-    //         }
-            
-    //     }
-    //     console.log(this.barcode)
-    // }
-
-    // findCP(fv,birthid){
-    //     console.log(birthid)
-    //     // given the function value, find the cp id
-    //     let min_dist = 100;
-    //     let cp = undefined;
-    //     for(let i=0;i<this.anim.cp.length;i++){
-    //         // console.log(i)
-    //         // console.log(birthid.indexOf(i))
-    //         // console.log(min_dist,this.anim.cp[i].fv - fv)
-    //         if(Math.abs(this.anim.cp[i].fv - fv)<min_dist && birthid.indexOf(i)===-1){
-    //             cp = this.anim.cp[i];
-    //             min_dist = Math.abs(this.anim.cp[i].fv - fv);
-                
-    //         }
-    //     }
-    //     return cp
-    // }
-    // findCP1(fv,birthcp){
-    //     // given the function value, find the cp id
-    //     let np = []
-    //     for(let i=0;i<birthcp.np.length;i++){
-    //         np.push(birthcp.np[i].id)
-    //     }
-    //     let min_dist = 100;
-    //     let cp = undefined;
-    //     for(let i=0;i<this.anim.cp.length;i++){
-    //         if(Math.abs(this.anim.cp[i].fv - fv)<min_dist && np.indexOf(i)!=-1){
-    //             cp = this.anim.cp[i];
-    //             min_dist = Math.abs(this.anim.cp[i].fv - fv);
-                
-    //         }
-    //     }
-    //     return cp
-    // }
     
     drawPersistence(){
         this.barcode.sort(function(a,b){
