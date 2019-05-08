@@ -3,7 +3,6 @@ class moves{
         this.anim = anim;
         this.sliders = sliders;
         this.persistence = persistence;
-        // this.records = records;
 
         this.apType = "";
         this.amType = "";
@@ -35,9 +34,6 @@ class moves{
                     let pt_saddle = new criticalPoint(id+1,(x+mincp.x)/2,(y+mincp.y)/2,"saddle");
                     this.anim.cp.push(pt_saddle);
                     this.anim.cp_saddle.push(pt_saddle);
-                    // if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                        // this.anim.drawFlag=true;
-                    // }
                     d3.select("#amoveplus")
                         .attr("value","Face-max move")
                     this.apType="";
@@ -52,10 +48,7 @@ class moves{
                     this.anim.drawAnnotation();
                     this.anim.addedges();
                     this.sliders.addSlider();
-                    // this.anim.findNearestPoint();
                     this.anim.findRange();
-                    // this.anim.addStep();
-                    // this.anim.drawStep();
                 }
                 
             })
@@ -91,7 +84,6 @@ class moves{
                 this.anim.drawAnnotation();
                 this.anim.addedges();
                 this.sliders.addSlider();
-                this.anim.findNearestPoint();
                 this.anim.findRange();
             })
     }
@@ -124,7 +116,6 @@ class moves{
                     this.anim.drawAnnotation();
                     this.anim.addedges();
                     this.sliders.addSlider();
-                    this.anim.findNearestPoint();
                     this.anim.findRange();
                 }
             })
@@ -158,7 +149,6 @@ class moves{
                     this.anim.drawAnnotation();
                     this.anim.addedges();
                     this.sliders.addSlider();
-                    this.anim.findNearestPoint();
                     this.anim.findRange();
                 }
             })
@@ -201,7 +191,6 @@ class moves{
                 this.anim.drawAnnotation();
                 this.anim.addedges();
                 this.sliders.addSlider();
-                this.anim.findNearestPoint();
                 this.anim.findRange();
             })
     }

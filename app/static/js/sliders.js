@@ -185,15 +185,13 @@ class sliders{
             d3.select("#high")
             d3.select(this).attr("cx",p);
             d3.select("#value"+i).text(Math.round(that.xMap[i].invert(p)*10)/10);
-            // console.log(that.xMap[i].invert(p))
             d3.select("#showbar"+i).attr("x2",p);
-            console.log("critical point",that.anim.cp)
-            that.anim.grad = that.anim.constructMesh(that.anim.sigma)
         }
 
         function dragended(d) {
             d3.select(this).classed("active", false)
                 .classed("mouseover",false);
+            that.anim.constructMesh(that.anim.sigma)
         }
 
     }
