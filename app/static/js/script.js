@@ -15,10 +15,38 @@ function init(){
                 Anim.stepRecorder.pop();
             }
             let currentStep = Anim.stepRecorder[Anim.stepRecorder.length-1];
-            Anim.cp = currentStep.cp.slice()
-            Anim.edges = {...currentStep.edges};
-            Anim.edgeMapper = {...currentStep.edgeMapper};
-            // console.log(Anim.cp,Anim.edges,Anim.edgeMapper)
+            // recover edge
+            for(let eid in Anim.edges){
+                if(Object.keys(currentStep.edges).indexOf(eid)===-1){
+                    Anim.deleteOldEdge(eid);
+                } else {
+                    Anim.edges[eid][0].x = currentStep.edges[eid][0].x;
+                    Anim.edges[eid][0].y = currentStep.edges[eid][0].y;
+                    Anim.edges[eid][1].x = currentStep.edges[eid][1].x;
+                    Anim.edges[eid][1].y = currentStep.edges[eid][1].y;
+                    Anim.edges[eid][2].x = currentStep.edges[eid][2].x;
+                    Anim.edges[eid][2].y = currentStep.edges[eid][2].y;
+                }
+
+            }
+            // recover cp
+            // cp with larger id will be undone first
+            let cp = Anim.cp.slice();
+            Anim.cp = [];
+            for(let i=0;i<cp.length;i++){
+                for(let j=0;j<currentStep.cp.length;j++){
+                    if(cp[i].id===currentStep.cp[j].id){
+                        cp[i].x = currentStep.cp[j].x;
+                        cp[i].y = currentStep.cp[j].y;
+                        Anim.cp.push(cp[i]);
+
+                    }
+                }
+            }
+            // recover edgemapper
+            for(let eid in Anim.edges){
+                Anim.edgeMapper[eid] = Anim.initializeEdgeMapper(Anim.edges[eid]);
+            }
             Anim.assignEdge();
             Anim.constructMesh(Anim.sigma);
             Anim.drawAnnotation();

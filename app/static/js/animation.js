@@ -44,10 +44,10 @@ class criticalPoint{
 }
 
 class editStep{
-    constructor(cp,edges,edgeMapper){
+    constructor(cp,edges){
         this.cp = cp;
         this.edges = edges;
-        this.edgeMapper = edgeMapper;
+        // this.edgeMapper = edgeMapper;
     }
 }
 
@@ -222,15 +222,23 @@ class anim{
     }
 
     addStep(){
-        let cp = this.cp.slice();
-        let edges = {...this.edges};
-        let edgeMapper = {...this.edgeMapper};
-        let step = new editStep(cp, edges, edgeMapper);
+        let cp = [];
+        this.cp.forEach(p=>cp.push({"x":p.x,"y":p.y,"type":p.type,"id":p.id}));
+        let edges = {};
+        for(let eid in this.edges){
+            let ed = this.edges[eid];
+            let ed0 = {"id":ed[0].id,"x":ed[0].x,"y":ed[0].y,"type":ed[0].type};
+            let ed1 = {"x":ed[1].x,"y":ed[1].y};
+            let ed2 = {"id":ed[2].id,"x":ed[2].x,"y":ed[2].y,"type":ed[2].type};
+            edges[eid] = [ed0, ed1, ed2, ed[3]];
+        }
+        let step = new editStep(cp, edges);
         this.stepRecorder.push(step);
 
     }
 
     drawStep(){
+        console.log(this.stepRecorder)
         for(let j=1;j<=3;j++){
             // console.log(j)
             let idx = this.stepRecorder.length-j;
@@ -327,9 +335,7 @@ class anim{
                         if(np.fv > this.cp[i].lvalue){
                             this.cp[i].lvalue = np.fv;
                         }
-
                     }
-
                 } else if(this.cp[i].type === "max"){
                     let np = this.cp[i].edges[eid][0];
                     if(np.fv > this.cp[i].lvalue){
@@ -340,10 +346,8 @@ class anim{
                     if(np.fv < this.cp[i].uvalue){
                         this.cp[i].uvalue = np.fv;
                     }
-
                 }
             }
-
         }
     }
 
@@ -455,28 +459,6 @@ class anim{
         }
               
         function draggedText(d,i) {
-            // for(let j=0;j<that.edges.length;j++){
-            //     let ed = that.edges[j];
-            //     console.log("ed",that.edges[j])
-            //     if([that.edges[j][0].x,that.edges[j][0].y].join()===[that.cp[i].x,that.cp[i].y].join()) {
-            //         that.edges[j][0] = {"x":that.xMapReverse(d3.mouse(this)[0]),"y":that.yMapReverse(d3.mouse(this)[1])};
-            //     } else if ([that.edges[j][2].x,that.edges[j][2].y].join()===[that.cp[i].x,that.cp[i].y].join()) {
-            //         that.edges[j][2] = {"x":that.xMapReverse(d3.mouse(this)[0]),"y":that.yMapReverse(d3.mouse(this)[1])};
-            //     }
-            //     // that.edges[j][1] = {"x":(that.edges[j][0].x+that.edges[j][2].x)/2,"y":(that.edges[j][0].y+that.edges[j][2].y)/2};
-            // }
-            //     // let totalLength = d3.select("#p"+j).node().getTotalLength();
-            //     // let stepLength = totalLength/that.numSeg;
-            //     // let newPoints = [];
-            //     // for(let k=0;k<that.numSeg;k++){
-            //     //     let pt = d3.select("#p"+j).node().getPointAtLength(k*stepLength)
-            //     //     if((ed[0][0]>ed[2][0])||(ed[0][1]>ed[2][1])){
-            //     //         pt = d3.select("#p"+j).node().getPointAtLength((that.numSeg-k)*stepLength)
-            //     //     }
-            //     //     newPoints.push([that.xMapReverse(pt.x), that.yMapReverse(pt.y)]);
-            //     // }
-            //     // that.mapEdges("p"+j, newPoints);
-            // }
             d3.select("#cp"+d.id)
                 .attr("x",(d)=>{
                     d.x = that.xMap.invert(d3.mouse(this)[0])
@@ -489,48 +471,6 @@ class anim{
             }
             that.addedges();
             that.drawAnnotation();
-
-            // d.x = that.xMap.invert(d3.mouse(this)[0]);
-            // d.y = that.yMap.invert(d3.mouse(this)[1]);  // edge node will change automatically
-            // for(let eid in d.edges){
-            //     if(d.type==="saddle"){
-            //         // that.addNewEdge(d, d.edges[eid][2],d.edges[eid][3]);
-            //         d3.select("#"+eid)
-            //             .attr("d",(d)=>{
-            //                 console.log(d)
-            //                 return that.curve0({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},d.value[1],d.value[2])})
-            //     } else if(d.type==="max" || d.type === "min"){
-            //         // that.addNewEdge(d.edges[eid][0], d, d.edges[eid][3]);
-            //         // console.log(d.edges[eid])
-            //         d3.select("#"+eid)
-            //             .attr("d",(d)=>that.curve0(d.value[0],d.value[1],{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])}))
-            //     }
-            // }
-            // if(d.type==="saddle"){
-            //     console.log("this is a saddle")
-            // } else if(d.type==="max"){ // **** need fix here
-            //     let np_saddle = that.findMinPt(d,that.cp_saddle);
-            //     let edgeid = "edge"+np_saddle.id+d.id;
-            //     let totalLength = d3.select("#"+edgeid).node().getTotalLength();
-            //     let stepLength = totalLength/that.numSeg;
-            //     let newPoints = [];
-            //     for(let i=0;i<that.numSeg;i++){
-            //         let pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength)
-            //         if((d.x>d.np.x)||(d.y>d.np.y)){
-            //             pt = d3.select("#additionalEdge").node().getPointAtLength((that.numSeg-i)*stepLength)
-            //         }
-            //         newPoints.push({"x":that.xMapReverse(pt.x), "y":that.yMapReverse(pt.y)});
-
-            //     }
-            //     that.mapEdges(edgeid, newPoints);
-            //     console.log("mapedge",that.edgeMapper);
-            //     // that.mathEdges(edgeid,) //**** new points???
-            //     // console.log("edge length",totalLength)
-            // }
-            
-            // console.log("edgeee",that.edges)
-            // console.log("cp",that.cp)
-            
         }
 
         function dragendedText(d) {
@@ -558,6 +498,8 @@ class anim{
                     that.constructMesh(that.sigma);
                     that.drawFlag = true;
                 }
+                that.addStep();
+                that.drawStep();
             } else {
                 that.drawFlag = false;
             }
@@ -604,36 +546,8 @@ class anim{
 
         function draggedNode(d,i){
             // **** need boundary control ****
-            // console.log("d3",d3.event)
-            // let ed_new = [d.value[0],{"x":that.xMapReverse(d3.event.x),"y":that.yMapReverse(d3.event.y)}, d.value[2]];
-            // console.log(ed_new)
-            // d3.select("#"+d.key)
-                // .attr("d",that.curve0(ed_new))
-                // .style("opacity",0)
-            // let totalLength = d3.select("#"+d.key).node().getTotalLength();
-            // let stepLength = totalLength/that.numSeg;
-            // let newPoints = [];
-            // for(let i=0;i<that.numSeg;i++){
-            //     let pt = d3.select("#"+d.key).node().getPointAtLength(i*stepLength)
-            //     if((d.value[0].x>d.value[2].x)||(d.value[0].y>d.value[2].y)){
-            //         pt = d3.select("#"+d.key).node().getPointAtLength((that.numSeg-i)*stepLength)
-            //     }
-            //     newPoints.push({"x":that.xMapReverse(pt.x), "y":that.yMapReverse(pt.y)});
-            // }
             that.mapEdges(d.key);
-            // console.log(that.edgeMapper)
-            // **** need to check intersection!!
-            // if(that.ifCurvesIntersect(pathid, newPoints)===false){
-                // that.mapEdges(d.key, newPoints);
             d3.select(this).attr("cx", d.value[1].x = that.xMapReverse(d3.event.x)).attr("cy", d.value[1].y = that.yMapReverse(d3.event.y));
-                
-                
-            // } else {
-                // ed_new = [ed[0], {"x":(ed[0].x+ed[2].x)/2,"y":(ed[0].y+ed[2].y)/2}, ed[2]]
-                // d3.select("#additionalEdge")
-                    // .attr("d",that.curve0(ed_new))
-                    // .style("opacity",0)
-            // }
             that.drawAnnotation();
             that.addedges();
         }
@@ -660,6 +574,8 @@ class anim{
                 }
                 that.drawAnnotation();
                 that.addedges();
+                that.addStep();
+                that.drawStep();
             } else {
                 that.drawFlag = false;
             }
