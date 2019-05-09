@@ -204,6 +204,10 @@ class anim{
         this.yMapReverse = d3.scaleLinear()
             .domain([0, this.canvasHeight])
             .range([0, 1]);
+        this.curve0 = d3.line()
+            .x(d=>this.xMap(d.x))
+            .y(d=>this.yMap(d.y))
+            .curve(d3.curveCardinal.tension(0));
 
        
         this.grad = this.initializeMesh();
@@ -213,7 +217,6 @@ class anim{
 
 
         // console.log(this.grad)
-        // this.findNearestPoint();
         this.findRange();
         this.drawAnnotation();
         this.addedges();
@@ -222,6 +225,7 @@ class anim{
     }
 
     addStep(){
+        // add step for legend
         let cp = [];
         this.cp.forEach(p=>cp.push({"x":p.x,"y":p.y,"type":p.type,"id":p.id}));
         let edges = {};
@@ -238,6 +242,7 @@ class anim{
     }
 
     drawStep(){
+        // draw legend
         console.log(this.stepRecorder)
         for(let j=1;j<=3;j++){
             // console.log(j)
@@ -321,6 +326,7 @@ class anim{
     }
 
     findRange(){
+        // find the range of the function value for each critical point
         for(let i=0;i<this.cp.length;i++){
             this.cp[i].lvalue = 0;
             this.cp[i].uvalue = 10;
@@ -459,18 +465,22 @@ class anim{
         }
               
         function draggedText(d,i) {
-            d3.select("#cp"+d.id)
-                .attr("x",(d)=>{
-                    d.x = that.xMap.invert(d3.mouse(this)[0])
-                    return that.xMap(d.x)})
-                .attr("y",(d)=>{
-                    d.y = that.yMap.invert(d3.mouse(this)[1])
-                    return that.yMap(d.y)});
-            for(let eid in d.edges){
-                that.mapEdges(eid);
+            if(that.xMap.invert(d3.mouse(this)[0])>=0 && that.xMap.invert(d3.mouse(this)[0])<=1 && that.yMap.invert(d3.mouse(this)[1])>=0 && that.yMap.invert(d3.mouse(this)[1])<=1){
+                d3.select("#cp"+d.id)
+                    .attr("x",(d)=>{
+                        d.x = that.xMap.invert(d3.mouse(this)[0])
+                        return that.xMap(d.x)})
+                    .attr("y",(d)=>{
+                        d.y = that.yMap.invert(d3.mouse(this)[1])
+                        return that.yMap(d.y)});
+                for(let eid in d.edges){
+                    that.mapEdges(eid);
+                }
+                that.addedges();
+                that.drawAnnotation();
+
             }
-            that.addedges();
-            that.drawAnnotation();
+            
         }
 
         function dragendedText(d) {
@@ -545,11 +555,13 @@ class anim{
         }
 
         function draggedNode(d,i){
-            // **** need boundary control ****
-            that.mapEdges(d.key);
-            d3.select(this).attr("cx", d.value[1].x = that.xMapReverse(d3.event.x)).attr("cy", d.value[1].y = that.yMapReverse(d3.event.y));
-            that.drawAnnotation();
-            that.addedges();
+            if(that.xMap.invert(d3.mouse(this)[0])>=0 && that.xMap.invert(d3.mouse(this)[0])<=1 && that.yMap.invert(d3.mouse(this)[1])>=0 && that.yMap.invert(d3.mouse(this)[1])<=1){
+                that.mapEdges(d.key);
+                d3.select(this).attr("cx", d.value[1].x = that.xMap.invert(d3.mouse(this)[0])).attr("cy", d.value[1].y = that.yMap.invert(d3.mouse(this)[1]));
+                that.drawAnnotation();
+                that.addedges();
+            }
+            
         }
 
         function dragendedNode(d) {
@@ -867,10 +879,6 @@ class anim{
     }
 
     addedges(){
-        this.curve0 = d3.line()
-            .x(d=>this.xMap(d.x))
-            .y(d=>this.yMap(d.y))
-            .curve(d3.curveCardinal.tension(0));
         let edgelist = d3.entries(this.edges);
         let edges = this.edgeGroup.selectAll("path").data(edgelist);
         edges.exit().remove();
@@ -879,7 +887,6 @@ class anim{
         edges
             .attr("d",(d)=>{
                 let d_new = d.value.slice(0,3);
-                // console.log(this.curve0(d_new))
                 return this.curve0(d_new);
             })
             .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
@@ -908,12 +915,10 @@ class anim{
         let grad_new = [];
         for(let x=0;x<=1;x+=this.step){
             for(let y=0;y<=1;y+=this.step){
-                // grad_new.push([x,y])
                 grad_new.push({"x":x,"y":y});
             }
         }
         return grad_new
-
     }
 
     assignEdge(){
@@ -923,41 +928,30 @@ class anim{
             for(let key in this.edgeMapper){
                 let ed = this.edgeMapper[key];
                 for(let i=0;i<ed.length;i++){
-                    edgepoints.push({"x":ed[i].x_new,"y":ed[i].y_new,"edgeid":key,"inedgeid":i})
+                    edgepoints.push({"x":ed[i].x_new,"y":ed[i].y_new,"edgeid":key,"inedgeid":i});
                 }
             }
-        
         // console.log(edgepoints)
             for(let x=0;x<=1;x+=this.step){
                 for(let y=0;y<=1;y+=this.step){
                     let gradid = Math.round(x/this.step*100+y/this.step);
                     let edpoint = this.findMinPt({"x":x,"y":y},edgepoints);
                     this.grad[gradid]["ed"] = edpoint;
-
-
                 }
             }
-
         } else {
             for(let x=0;x<=1;x+=this.step){
                 for(let y=0;y<=1;y+=this.step){
                     let gradid = Math.round(x/this.step*100+y/this.step);
                     this.grad[gradid]["ed"] = undefined;
-
-
                 }
             }
-
         }
-        
-
     }
 
     constructMesh(sigma){
         console.log("constucting")
         // initialize the triangulation
-        // let grad_new = [];
-        console.log(this.cp)
         let cp_max = [];
         for(let i=0;i<this.cp.length;i++){
             if(this.cp[i].type==="max"){
