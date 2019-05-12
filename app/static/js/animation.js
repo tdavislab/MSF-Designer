@@ -9,11 +9,6 @@ class criticalPoint{
         this.fv = this.f(x,y,type); // function value
         this.fv_perb = this.fv + Math.random();
         this.edges = {};
-        // if(type === "saddle"){ // initialize nearest points
-        //     this.np = {"max":[],"min":[]}; // np: nearest points
-        // } else {
-        //     this.np = [] // max/min only connects to saddle
-        // }
         this.lvalue = 0;
         this.uvalue = 10;
     }
@@ -47,7 +42,6 @@ class editStep{
     constructor(cp,edges){
         this.cp = cp;
         this.edges = edges;
-        // this.edgeMapper = edgeMapper;
     }
 }
 
