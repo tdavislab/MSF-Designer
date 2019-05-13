@@ -216,6 +216,9 @@ class anim{
         this.addedges();
         this.drawStep();
 
+        this.modeType = d3.select('input[name="mode-type"]:checked').node().value;
+        console.log(this.modeType)
+
     }
 
     addStep(){
@@ -232,14 +235,12 @@ class anim{
         }
         let step = new editStep(cp, edges);
         this.stepRecorder.push(step);
-
     }
 
     drawStep(){
         // draw legend
         console.log(this.stepRecorder)
         for(let j=1;j<=3;j++){
-            // console.log(j)
             let idx = this.stepRecorder.length-j;
             if(this.stepRecorder[idx]!=undefined){
                 d3.select("#record"+j)
@@ -248,7 +249,6 @@ class anim{
                     .attr("stroke","rgb(44,123,246)")
                 let step = this.stepRecorder[idx]
                 let edgelist = d3.entries(step.edges);
-                // console.log(d3.select("#record"+j))
                 let edges = d3.select("#record"+j).selectAll("path").data(edgelist);
                 edges.exit().remove();
                 let newedges = edges.enter().append("path");
@@ -260,7 +260,6 @@ class anim{
                     })
                     .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
                     .attr("transform","translate("+(this.margin.left+(j-1)*this.step_frameWidth + (j-1)*this.margin.betweenstep)+","+this.margin.top+")")
-                    // .attr("id",(d)=>d.key)
                     .style("fill", "none")
                     .style("stroke", "black")
                     .style("stroke-width",2)
@@ -308,8 +307,6 @@ class anim{
                             return "\uf140"
                         }
                     })
-
-
             }else{
                 d3.select("#record"+j)
                     .style("visibility","hidden");
@@ -903,6 +900,43 @@ class anim{
                     .style("stroke-width",2)
             })
     }
+
+    findEdges(){
+        // initialize edges
+        // let edges = {};
+        for(let i=0;i<this.cp_saddle.length;i++){
+            if(this.cp_max.length>0){
+                let pts = [];
+                let cp_new_max = this.cp_max.slice(0);
+                if(cp_new_max.length>2){
+                    // find the closest max points
+                    pts = this.find2MinPt(this.cp_saddle[i],this.cp_max);
+                } else { pts = cp_new_max; }
+                for(let j=0;j<pts.length;j++){
+                    // let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
+                    // let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
+                    // edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"max"]
+                    this.addNewEdge(this.cp_saddle[i],pts[j],"max");
+                    // edges.push([this.cp_saddle[i],midpt,pts[j],"max","edge"+this.cp_saddle[i].id+pts[j].id])
+                }
+            }
+            let cp_new_min = this.cp_min.slice(0);
+            let pts = [];
+            if(cp_new_min.length>2){
+                // find the closest min points
+                pts = this.find2MinPt(this.cp_saddle[i],cp_new_min);
+            } else { pts = cp_new_min;}
+            for(let j=0;j<pts.length;j++){
+                // let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
+                // let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
+                // edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"min"]
+                this.addNewEdge(this.cp_saddle[i],pts[j],"min");
+                // edges.push([this.cp_saddle[i],midpt,pts[j],"min","edge"+this.cp_saddle[i].id+pts[j].id]);                
+            }
+        }
+        // return edges;
+    }
+
 
 
     initializeMesh(){

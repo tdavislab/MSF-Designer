@@ -21,12 +21,18 @@
         <h1>Visualization For Morse-Smale Vector Fields Design</h1>
         <!-- <hr style="margin-bottom: 0"> -->
         <!-- <br> -->
+        <div id="mode" style="padding-top:10px;padding-bottom:10px">
+            <input type="radio" name="mode-type" value="beginner" id="mode1" checked="checked">
+            <label for="mode1">Beginner Mode</label>
+            <input type="radio" name="mode-type" value="expert" id="mode2" >
+            <label for="mode2">Expert Mode</label>
+        </div>
         <table>
             <tr>
                 <td id="container" width="1050px" height = "1050px" style="border: 2px solid grey; background-color: white" rowspan="2">
                                             
-                        <canvas id="animation" style="position: absolute; top:100px; left:110px; z-index:1" width="1000" height="1000" ></canvas>
-                        <svg id="annotation" style="position: absolute; top:100px; left:110px; z-index:1" width="1000" height="1000"></svg>
+                        <canvas id="animation" style="position: absolute; top:160px; left:90px; z-index:1" width="1000" height="1000" ></canvas>
+                        <svg id="annotation" style="position: absolute; top:160px; left:90px; z-index:1" width="1000" height="1000"></svg>
                     
                 </td>
                 <td id="button-group" style="vertical-align: top; padding: 20px; border: 2px solid grey">
