@@ -164,7 +164,6 @@ class anim{
             this.addNewEdge(this.cp[1],this.cp[2],"max");
             this.addNewEdge(this.cp[1],{"x":0.5,"y":0,"id":"b0"+10},"min");
             this.addNewEdge(this.cp[1],{"x":0.5,"y":1,"id":"b1"+10},"min")
-            // this.edges = this.findEdges(this.cp);
         } else{
             this.edges = edges
         }
@@ -901,40 +900,52 @@ class anim{
             })
     }
 
-    findEdges(){
+    findEdges(saddle){
         // initialize edges
         // let edges = {};
-        for(let i=0;i<this.cp_saddle.length;i++){
-            if(this.cp_max.length>0){
-                let pts = [];
-                let cp_new_max = this.cp_max.slice(0);
-                if(cp_new_max.length>2){
-                    // find the closest max points
-                    pts = this.find2MinPt(this.cp_saddle[i],this.cp_max);
-                } else { pts = cp_new_max; }
-                for(let j=0;j<pts.length;j++){
-                    // let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
-                    // let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
-                    // edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"max"]
-                    this.addNewEdge(this.cp_saddle[i],pts[j],"max");
-                    // edges.push([this.cp_saddle[i],midpt,pts[j],"max","edge"+this.cp_saddle[i].id+pts[j].id])
-                }
-            }
-            let cp_new_min = this.cp_min.slice(0);
+        if(this.cp_max.length>0){
             let pts = [];
-            if(cp_new_min.length>2){
-                // find the closest min points
-                pts = this.find2MinPt(this.cp_saddle[i],cp_new_min);
-            } else { pts = cp_new_min;}
+            let cp_new_max = this.cp_max.slice(0);
+            if(cp_new_max.length>2){
+                // find the closest max points
+                pts = this.find2MinPt(saddle,this.cp_max);
+            } else { pts = cp_new_max; }
             for(let j=0;j<pts.length;j++){
-                // let midpt = {"x":(this.cp_saddle[i].x+pts[j].x)/2, "y":(this.cp_saddle[i].y+pts[j].y)/2};
-                // let edgeid = "edge"+this.cp_saddle[i].id+pts[j].id;
-                // edges[edgeid] = [this.cp_saddle[i],midpt,pts[j],"min"]
-                this.addNewEdge(this.cp_saddle[i],pts[j],"min");
-                // edges.push([this.cp_saddle[i],midpt,pts[j],"min","edge"+this.cp_saddle[i].id+pts[j].id]);                
+                this.addNewEdge(saddle,pts[j],"max");
             }
         }
-        // return edges;
+        let cp_new_min = [];
+        this.cp.forEach(p=>{
+            if(p.type==="min"){
+                cp_new_min.push(p);
+            }
+        })
+        let bound_upper = [];
+        let bound_lower = [];
+        this.cp_min.forEach(p=>{
+            if(p.y===0){
+                bound_upper.push(p);
+            } else if(p.y===1){
+                bound_lower.push(p);
+            }
+        })
+        let pts = [];
+        if(cp_new_min.length>2){
+        //     // find the closest min points
+            pts = this.find2MinPt(saddle,cp_new_min);
+        } else if(cp_new_min.length===1){
+            pts.push(cp_new_min[0])
+            if(cp_new_min[0].y>=saddle.y){
+                pts.push(this.findMinPt(saddle,bound_lower));
+            } else { pts.push(this.findMinPt(saddle,bound_upper));}
+        } else if(cp_new_min.length===0){
+            pts.push(this.findMinPt(saddle,bound_lower));
+            pts.push(this.findMinPt(saddle,bound_upper));
+
+        }
+        for(let j=0;j<pts.length;j++){
+            this.addNewEdge(saddle,pts[j],"min");               
+        }
     }
 
 

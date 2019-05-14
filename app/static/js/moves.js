@@ -47,7 +47,33 @@ class moves{
                         this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
                         // this.anim.edges.push([pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min","temp4"]);
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
-                        this.anim.findEdges();
+                        this.anim.findEdges(pt_saddle);
+                        // check edge intersection
+                        let ifInter = false;
+                        for(let eid1 in this.anim.edges){
+                            for(let eid2 in this.anim.edges){
+                                if(eid1 != eid2){
+                                    if(this.anim.ifCurvesIntersect(this.anim.edgeMapper[eid1], this.anim.edgeMapper[eid2])){
+                                        d3.select("#"+eid1)
+                                            .style("stroke", "red")
+                                        d3.select("#"+eid2)
+                                            .style("stroke", "red")
+                                        ifInter = true;
+                                    }
+                                }
+                            }
+                        }
+                        if(!ifInter){
+                            this.anim.addStep();
+                            this.anim.drawStep();
+                            if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                                this.anim.assignEdge();
+                                // this.anim.constructMesh(this.anim.sigma);
+                                this.anim.drawFlag = true;
+                            }
+                        }
+                        
+                        // this.anim.drawFlag = true;
                     }
                     
                     this.anim.drawAnnotation();
@@ -77,14 +103,16 @@ class moves{
                     d3.select("#amoveminus")
                         .attr("value","Face-min move")
                     this.amType="";
-                    this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max"];
-                    // this.anim.edges.push([pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max","temp1"]);
-                    this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max"];
-                    // this.anim.edges.push([pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max","temp2"]);
-                    this.anim.edges["temp3"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"];
-                    // this.anim.edges.push([pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min","temp3"]);
-                    this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
-                    // this.anim.edges.push([pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min","temp4"]);
+                    if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                        this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max"];
+                        // this.anim.edges.push([pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max","temp1"]);
+                        this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max"];
+                        // this.anim.edges.push([pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max","temp2"]);
+                        this.anim.edges["temp3"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"];
+                        // this.anim.edges.push([pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min","temp3"]);
+                        this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
+                        // this.anim.edges.push([pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min","temp4"]);
+                    } 
                 }
                 this.anim.drawAnnotation();
                 this.anim.addedges();
@@ -111,12 +139,42 @@ class moves{
                             .attr("value","Edge-max move")
                         this.bpType="";
                         // fix edges
-                        this.anim.deleteOldEdge(d.key);
-                        this.anim.addNewEdge(pt_saddle,d.value[2],"max");
-                        this.anim.addNewEdge(pt_saddle,pt_max,"max");
-                        this.anim.addNewEdge(d.value[0],pt_max,"max");
-                        this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"]; // new min edge 1
-                        this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"]; // new min edge 2
+                        if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                            this.anim.deleteOldEdge(d.key);
+                            this.anim.addNewEdge(pt_saddle,d.value[2],"max");
+                            this.anim.addNewEdge(pt_saddle,pt_max,"max");
+                            this.anim.addNewEdge(d.value[0],pt_max,"max");
+                            this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"]; // new min edge 1
+                            this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"]; // new min edge 2
+                        } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
+                            this.anim.findEdges(pt_saddle);
+                            // check edge intersection
+                            let ifInter = false;
+                            for(let eid1 in this.anim.edges){
+                                for(let eid2 in this.anim.edges){
+                                    if(eid1 != eid2){
+                                        if(this.anim.ifCurvesIntersect(this.anim.edgeMapper[eid1], this.anim.edgeMapper[eid2])){
+                                            d3.select("#"+eid1)
+                                                .style("stroke", "red")
+                                            d3.select("#"+eid2)
+                                                .style("stroke", "red")
+                                            ifInter = true;
+                                        }
+                                    }
+                                }
+                            }
+                            if(!ifInter){
+                                this.anim.addStep();
+                                this.anim.drawStep();
+                                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                                    this.anim.assignEdge();
+                                    // this.anim.constructMesh(this.anim.sigma);
+                                    this.anim.drawFlag = true;
+                                }
+                            }
+                            
+                            // this.anim.drawFlag = true;
+                        }
                     }
                     this.anim.drawAnnotation();
                     this.anim.addedges();
@@ -144,12 +202,42 @@ class moves{
                             .attr("value","Edge-min move")
                         this.bmType="";
                         // fix edges
-                        this.anim.deleteOldEdge(d.key);
-                        this.anim.addNewEdge(pt_saddle,d.value[2],"min");
-                        this.anim.addNewEdge(pt_saddle,pt_min,"min");
-                        this.anim.addNewEdge(d.value[0],pt_min,"min");
-                        this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"max"]; // new max edge 1
-                        this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"max"]; // new max edge 2
+                        if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                            this.anim.deleteOldEdge(d.key);
+                            this.anim.addNewEdge(pt_saddle,d.value[2],"min");
+                            this.anim.addNewEdge(pt_saddle,pt_min,"min");
+                            this.anim.addNewEdge(d.value[0],pt_min,"min");
+                            this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"max"]; // new max edge 1
+                            this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"max"]; // new max edge 2
+                        } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
+                            this.anim.findEdges(pt_saddle);
+                            // check edge intersection
+                            let ifInter = false;
+                            for(let eid1 in this.anim.edges){
+                                for(let eid2 in this.anim.edges){
+                                    if(eid1 != eid2){
+                                        if(this.anim.ifCurvesIntersect(this.anim.edgeMapper[eid1], this.anim.edgeMapper[eid2])){
+                                            console.log(eid1,eid2)
+                                            d3.select("#"+eid1)
+                                                .style("stroke", "red")
+                                            d3.select("#"+eid2)
+                                                .style("stroke", "red")
+                                            ifInter = true;
+                                        }
+                                    }
+                                }
+                            }
+                            console.log(ifInter)
+                            if(!ifInter){
+                                this.anim.addStep();
+                                this.anim.drawStep();
+                                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                                    this.anim.assignEdge();
+                                    this.anim.constructMesh(this.anim.sigma);
+                                    this.anim.drawFlag = true;
+                                }
+                            }
+                        }
                     }
                     this.anim.drawAnnotation();
                     this.anim.addedges();
