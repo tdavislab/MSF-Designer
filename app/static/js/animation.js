@@ -350,7 +350,15 @@ class anim{
     addNewEdge(startpoint, endpoint, type){
         let edgeid = "edge"+startpoint.id+endpoint.id;
         // add to this.edges
-        this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2, "y":(startpoint.y+endpoint.y)/2},endpoint,type];
+        // check if there has already been an edge between start and end points
+        if(Object.keys(this.edges).indexOf(edgeid)!=-1){
+            this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2-0.03, "y":(startpoint.y+endpoint.y)/2-0.03},endpoint,type];
+            let edgeid_new = edgeid + "_1";
+            this.edges[edgeid_new] = [startpoint,{"x":(startpoint.x+endpoint.x)/2+0.03, "y":(startpoint.y+endpoint.y)/2+0.03},endpoint,type];
+        } else {
+            this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2, "y":(startpoint.y+endpoint.y)/2},endpoint,type];
+        }
+        
         // add this edge to corresponding critical points
         // startpoint is always a saddle point
         // console.log(startpoint,this.cp[startpoint.id])
@@ -779,8 +787,8 @@ class anim{
         let pt2 = line1[1];
         let pt3 = line2[0];
         let pt4 = line2[1];
-        let x = undefined;
-        let y = undefined;
+        let x;
+        let y;
         // if they share the same endpoint, they do not intersect
         if((pt1.x===pt3.x && pt1.y===pt3.y)||(pt1.x===pt4.x && pt1.y===pt4.y)||(pt2.x===pt3.x && pt2.y===pt3.y)||(pt2.x===pt4.x && pt2.y===pt4.y)){
             return false;
@@ -800,7 +808,7 @@ class anim{
             let b2 = (pt3.x*pt4.y-pt4.x*pt3.y)/(pt3.x-pt4.x);
             x = pt1.x;
             y = a2*x+b2;
-        } else if(pt3.x===pt4.x){
+        } else if(pt3.x===pt4.x){ // if line2 is vertical
             let a1 = (pt1.y-pt2.y)/(pt1.x-pt2.x);
             let b1 = (pt1.x*pt2.y-pt2.x*pt1.y)/(pt1.x-pt2.x);
             x = pt3.x;
@@ -829,12 +837,9 @@ class anim{
                 let line1 = [{"x":curve1[i-1].x_new,"y":curve1[i-1].y_new}, {"x":curve1[i].x_new,"y":curve1[i].y_new}];
                 let line2 = [{"x":curve2[j-1].x_new,"y":curve2[j-1].y_new}, {"x":curve2[j].x_new,"y":curve2[j].y_new}];
                 if(this.ifLinesIntersect(line1,line2)){
-
-                    console.log(line1,line2)
-
+                    // console.log(line1,line2)
                     return true;
                 }
-
             }
         }
         return false;
@@ -901,7 +906,7 @@ class anim{
     }
 
     findEdges(saddle){
-        // initialize edges
+        // automatically find edges, only for "expert mode"
         // let edges = {};
         if(this.cp_max.length>0){
             let pts = [];
@@ -961,7 +966,6 @@ class anim{
     }
 
     assignEdge(){
-        // console.log("assigning edge points")
         if(Object.keys(this.edges).length>0){
             let edgepoints = [];
             for(let key in this.edgeMapper){
@@ -1201,7 +1205,6 @@ class anim{
         }
     }
     
-
     calFV(x,y,cp){
         let w = 1;
         let sigma = 0.1;
