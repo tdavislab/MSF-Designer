@@ -110,8 +110,34 @@ function init(){
                 dataType:'json',
                 success: function (response) {
                     data=response;
+                    console.log(data);
+                    // recover cp and edges
+                    let edges_recover = [];
+                    let cp_recover = [];
+                    Object.keys(data.edge).forEach(eid=>{
+                        let ed = data.edge[eid];
+                        let ed_recover;
+                        if(data.cp[ed[2]]!=undefined){
+                            ed_recover = [data.cp[ed[0]], ed[1], data.cp[ed[2]], ed[3]];
+                        } else {
+                            ed_recover = [data.cp[ed[0]], ed[1], ed[2], ed[3]];
+                        }
+                        edges_recover[eid] = ed_recover;
+                    })
+                    data.cp.forEach(p=>{
+                        let ed_new = {};
+                        p.edges.forEach(eid=>{
+                            ed_new[eid] = edges_recover[eid];
+                        })
+                        p.edges = ed_new;
+                        cp_recover.push(p);
+                        // cp_recover.edges = ed_new;
+                    })
+                    console.log(edges_recover)
+                    console.log(cp_recover)
+
                     Anim.clearCanvas();
-                    Anim = new anim(data.cp,data.edge);
+                    Anim = new anim(cp_recover,edges_recover,data.edgeMapper);
                     Sliders = new sliders(Anim);
                     Persistence = new persistence(barcode,Anim);
                     Moves = new moves(Anim,Sliders,Persistence);
@@ -125,7 +151,28 @@ function init(){
     $("#export").click(function(){
         console.log("cp",Anim.cp)
         let v = $("#exFilename").val();
-        let anim_info = {"cp":Anim.cp, "edge":Anim.edges, "filename":v}
+        console.log(v)
+        // avoid circular structure
+        let cp_new = [];
+        let edges_new = {};
+        Anim.cp.forEach(p=>{
+            let p_new = {"fv":p.fv, "fv_perb":p.fv_perb, "id":p.id, "lvalue":p.lvalue, "uvalue":p.uvalue, "type":p.type, "x":p.x, "y":p.y};
+            p_new.edges = Object.keys(p.edges);
+            cp_new.push(p_new);
+        })
+        Object.keys(Anim.edges).forEach(eid=>{
+            let ed = Anim.edges[eid];
+            let ed_new;
+            if(ed[2].type!=undefined){
+                ed_new = [ed[0].id, ed[1], ed[2].id, ed[3]];
+            } else {
+                ed_new = [ed[0].id, ed[1], ed[2], ed[3]];
+            }
+            edges_new[eid] = ed_new;
+        })
+        // console.log(cp_new)
+        let anim_info = {"cp":cp_new, "edge":edges_new, "edgeMapper":Anim.edgeMapper, "filename":v}
+        console.log(anim_info)
         $.post( "/export", {
             javascript_data: JSON.stringify(anim_info)
         });

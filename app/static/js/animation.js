@@ -46,7 +46,7 @@ class editStep{
 }
 
 class anim{
-    constructor(cp=undefined, edges=undefined) {
+    constructor(cp=undefined, edges=undefined, edgeMapper=undefined) {
         this.canvasWidth = document.getElementById('animation').offsetWidth;
         this.canvasHeight = document.getElementById('animation').offsetHeight;
         this.svg = d3.select("#annotation");
@@ -163,9 +163,10 @@ class anim{
             this.addNewEdge(this.cp[1],this.cp[0],"max");
             this.addNewEdge(this.cp[1],this.cp[2],"max");
             this.addNewEdge(this.cp[1],{"x":0.5,"y":0,"id":"b0"+10},"min");
-            this.addNewEdge(this.cp[1],{"x":0.5,"y":1,"id":"b1"+10},"min")
+            this.addNewEdge(this.cp[1],{"x":0.5,"y":1,"id":"b1"+10},"min");
         } else{
-            this.edges = edges
+            this.edges = edges;
+            this.edgeMapper = edgeMapper;
         }
         
         console.log(this.edges)
@@ -353,8 +354,8 @@ class anim{
         // check if there has already been an edge between start and end points
         if(Object.keys(this.edges).indexOf(edgeid)!=-1){
             this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2-0.03, "y":(startpoint.y+endpoint.y)/2-0.03},endpoint,type];
-            let edgeid_new = edgeid + "_1";
-            this.edges[edgeid_new] = [startpoint,{"x":(startpoint.x+endpoint.x)/2+0.03, "y":(startpoint.y+endpoint.y)/2+0.03},endpoint,type];
+            edgeid = edgeid + "_1";
+            this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2+0.03, "y":(startpoint.y+endpoint.y)/2+0.03},endpoint,type];
         } else {
             this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2, "y":(startpoint.y+endpoint.y)/2},endpoint,type];
         }
