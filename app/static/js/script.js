@@ -131,11 +131,7 @@ function init(){
                         })
                         p.edges = ed_new;
                         cp_recover.push(p);
-                        // cp_recover.edges = ed_new;
                     })
-                    console.log(edges_recover)
-                    console.log(cp_recover)
-
                     Anim.clearCanvas();
                     Anim = new anim(cp_recover,edges_recover,data.edgeMapper);
                     Sliders = new sliders(Anim);

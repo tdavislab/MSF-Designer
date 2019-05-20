@@ -833,12 +833,12 @@ class anim{
     }
 
     ifCurvesIntersect(curve1, curve2){
+        // console.log("checking")
         for(let i=1; i<curve1.length; i++){
             for(let j=1; j<curve2.length; j++){
                 let line1 = [{"x":curve1[i-1].x_new,"y":curve1[i-1].y_new}, {"x":curve1[i].x_new,"y":curve1[i].y_new}];
                 let line2 = [{"x":curve2[j-1].x_new,"y":curve2[j-1].y_new}, {"x":curve2[j].x_new,"y":curve2[j].y_new}];
                 if(this.ifLinesIntersect(line1,line2)){
-                    // console.log(line1,line2)
                     return true;
                 }
             }
@@ -904,6 +904,34 @@ class anim{
                 d3.select("#"+d.key)
                     .style("stroke-width",2)
             })
+
+        // // check if intersect
+        // let ifInter = false;
+        // for(let eid1 in this.edges){
+        //     for(let eid2 in this.edges){
+        //         if(eid1 != eid2){
+        //             if(this.ifCurvesIntersect(this.edgeMapper[eid1], this.edgeMapper[eid2])){
+        //                     // console.log(eid1,eid2)
+        //                 d3.select("#"+eid1)
+        //                     .style("stroke", "red")
+        //                 d3.select("#"+eid2)
+        //                     .style("stroke", "red")
+        //                 ifInter = true;
+        //             }
+        //         }
+        //     }
+        // }
+        // // console.log(ifInter)
+        // if(!ifInter){
+        //     this.addStep();
+        //     this.drawStep();
+        //     if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+        //         this.assignEdge();
+        //         // this.anim.constructMesh(this.anim.sigma);
+        //         this.drawFlag = true;
+        //     }
+        // }
+
     }
 
     findEdges(saddle){
