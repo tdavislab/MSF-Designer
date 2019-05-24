@@ -209,6 +209,15 @@ class anim{
         this.constructMesh(this.sigma);
         this.animation();
 
+        let mindist = 1;
+        for(let i=0;i<this.grad.length;i++){
+            let edgedist = this.calDist({"x":this.grad[i].x,"y":this.grad[i].y},this.grad[i].ed);
+            if(edgedist<mindist){
+                mindist = edgedist;
+            }
+        }
+        console.log("mindist",mindist)
+
 
         // console.log(this.grad)
         this.findRange();
@@ -349,6 +358,7 @@ class anim{
     }
 
     addNewEdge(startpoint, endpoint, type){
+        console.log(startpoint,endpoint,type)
         let edgeid = "edge"+startpoint.id+endpoint.id;
         // add to this.edges
         // check if there has already been an edge between start and end points
@@ -359,7 +369,6 @@ class anim{
         } else {
             this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2, "y":(startpoint.y+endpoint.y)/2},endpoint,type];
         }
-        
         // add this edge to corresponding critical points
         // startpoint is always a saddle point
         // console.log(startpoint,this.cp[startpoint.id])
@@ -369,17 +378,18 @@ class anim{
         }
         // add this edge to this.edgeMapper
         this.edgeMapper[edgeid] = this.initializeEdgeMapper(this.edges[edgeid])
+        console.log(edgeid,this.edges[edgeid])
+
     }
 
     deleteOldEdge(edgeid){
         if(this.edges[edgeid]!=undefined){
-            console.log(this.edges)
+            // console.log(this.edges)
             let startpoint = this.edges[edgeid][0];
             let endpoint = this.edges[edgeid][2];
             // delete edge
             delete this.edges[edgeid];
             // delete cp[edge]
-            console.log(this.cp[startpoint.id])
             if(this.cp[startpoint.id]!=undefined){
                 delete this.cp[startpoint.id].edges[edgeid];
             }
@@ -583,13 +593,20 @@ class anim{
                     that.constructMesh(that.sigma);
                     that.drawFlag = true;
                 }
-                that.drawAnnotation();
-                that.addedges();
                 that.addStep();
                 that.drawStep();
+                that.addedges();
+                that.drawAnnotation();
+
+
+
+
             } else {
                 that.drawFlag = false;
             }
+
+            
+            
             
         }
 
@@ -709,6 +726,23 @@ class anim{
                 }
                 that.addStep();
                 that.drawStep();
+            }
+            console.log("lllllllllllllllll")
+            if(that.cp.length!=that.cp[that.cp.length-1].id+1){
+                for(let k=0; k<that.cp.length; k++){
+                    that.cp[k].id = k;
+                }
+    
+                // rename edge key
+                for(let eid in that.edges){
+                    let ed = that.edges[eid];
+                    console.log(eid,ed)
+                    // let newid = "edge"+ed[0].id+ed[2].id;
+                    that.deleteOldEdge(eid);
+                    that.addNewEdge(ed[0],ed[2],ed[3]);
+                }
+    
+                console.log(that.edges)
             }
             that.drawAnnotation();
             that.addedges();
@@ -904,34 +938,6 @@ class anim{
                 d3.select("#"+d.key)
                     .style("stroke-width",2)
             })
-
-        // // check if intersect
-        // let ifInter = false;
-        // for(let eid1 in this.edges){
-        //     for(let eid2 in this.edges){
-        //         if(eid1 != eid2){
-        //             if(this.ifCurvesIntersect(this.edgeMapper[eid1], this.edgeMapper[eid2])){
-        //                     // console.log(eid1,eid2)
-        //                 d3.select("#"+eid1)
-        //                     .style("stroke", "red")
-        //                 d3.select("#"+eid2)
-        //                     .style("stroke", "red")
-        //                 ifInter = true;
-        //             }
-        //         }
-        //     }
-        // }
-        // // console.log(ifInter)
-        // if(!ifInter){
-        //     this.addStep();
-        //     this.drawStep();
-        //     if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-        //         this.assignEdge();
-        //         // this.anim.constructMesh(this.anim.sigma);
-        //         this.drawFlag = true;
-        //     }
-        // }
-
     }
 
     findEdges(saddle){
@@ -982,8 +988,6 @@ class anim{
         }
     }
 
-
-
     initializeMesh(){
         let grad_new = [];
         for(let x=0;x<=1;x+=this.step){
@@ -995,6 +999,7 @@ class anim{
     }
 
     assignEdge(){
+        console.log("assigning edge")
         if(Object.keys(this.edges).length>0){
             let edgepoints = [];
             for(let key in this.edgeMapper){
@@ -1091,8 +1096,14 @@ class anim{
                             dy2 = (edp[idx].y_new - edp[idx-1].y_new)*10;
                         }
                     }
-                    dx = (edgedist/0.4*dx1 + (1-edgedist/0.4)*dx2)*1.5;
-                    dy = (edgedist/0.4*dy1 + (1-edgedist/0.4)*dy2)*1.5;
+                    if(edgedist<this.calDist({"x":x,"y":y},cpt)&&this.calDist({"x":x,"y":y},cpt)<0.01){
+                        dx = dx2*3.75;
+                        dy = dy2*3.75;
+                    } else {
+                        dx = (edgedist/0.4*dx1 + (1-edgedist/0.4)*dx2)*1.5;
+                        dy = (edgedist/0.4*dy1 + (1-edgedist/0.4)*dy2)*1.5;
+                    }
+                    
 
                 }
                 

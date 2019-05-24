@@ -34,6 +34,7 @@ class persistence{
     }
 
     findTempEdge(){
+        console.log("finding temp edges")
         let cpidx = [];
         let tempidx = 1;
         this.anim.cp.forEach(p=>cpidx.push(p.id));
@@ -42,6 +43,7 @@ class persistence{
             let ed = this.anim.edges[eid];
             console.log(ed)
             if(cpidx.indexOf(ed[2].id)===-1){ // if a saddle point is removed, all edges of this point will be removed.
+                console.log("i am here")
                 this.anim.deleteOldEdge(eid);
                 this.anim.edges["temp"+tempidx] = ed
                 tempidx += 1;
@@ -69,8 +71,7 @@ class persistence{
                             .on("click",()=>{
                                 console.log("i am hre")
                                 console.log(that.barcode[i])
-                                // let birthid = that.barcode[i].birth_cp.id
-                                // let deathid = that.barcode[i].death_cp.id
+                                // delete saddle, saddle edges, and max/min
                                 let birthid;
                                 let deathid;
                                 if(that.barcode[i].edge.value[3]==="max"){
@@ -81,10 +82,12 @@ class persistence{
                                     deathid = that.barcode[i].edge.value[2].id;
                                 }
                                 let saddle_edges = that.barcode[i].edge.value[0].edges;
+                                // console.log(saddle_edges)
                                 for(let ed_key in saddle_edges){
-                                    console.log(ed_key)
+                                    // console.log(saddle_edges[ed_key])
                                     that.anim.deleteOldEdge(ed_key);
                                 }
+                            
                                 let cp = that.anim.cp.slice();
                                 that.anim.cp = []
                                 for(let k=0; k<cp.length; k++){
@@ -92,21 +95,43 @@ class persistence{
                                         that.anim.cp.push(cp[k])
                                     }
                                 }
-                                that.findTempEdge()
+
+                                // make sure there are 4 edges for each saddle (beginner & expert)
+                                if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                                    that.findTempEdge();
+                                } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
+                                    that.anim.cp.forEach(p=>{
+                                        if(p.type==="saddle"){
+                                            this.anim.findEdges(p);
+                                        }
+                                    })
+                                }
+
 
                                 // rename cp id
-                                for(let k=0; k<that.anim.cp.length; k++){
-                                    that.anim.cp[k].id = k;
-                                }
+                                // for(let k=0; k<that.anim.cp.length; k++){
+                                //     that.anim.cp[k].id = k;
+                                // }
 
-                                // rename edge key
-                                for(let eid in that.anim.edges){
-                                    let ed = that.anim.edges[eid];
-                                    // let newid = "edge"+ed[0].id+ed[2].id;
-                                    that.anim.deleteOldEdge(eid);
-                                    that.anim.addNewEdge(ed[0],ed[2],ed[3]);
-                                }
+                                // // rename edge key
+                                // for(let eid in that.anim.edges){
+                                //     let ed = that.anim.edges[eid];
+                                //     console.log(eid,ed)
+                                //     // let newid = "edge"+ed[0].id+ed[2].id;
+                                //     that.anim.deleteOldEdge(eid);
+                                //     that.anim.addNewEdge(ed[0],ed[2],ed[3]);
+                                // }
 
+                                // for(let ed in that.anim.edges){
+                                //     console.log(that.anim.edges[ed])
+                                // }
+
+
+                                
+                                
+                                
+
+                                
 
                                 
                                 console.log(that.anim.cp)
@@ -117,6 +142,8 @@ class persistence{
                                 that.anim.constructMesh(that.anim.sigma)
                                 that.anim.drawAnnotation();
                                 that.anim.addedges();
+                                that.anim.addStep();
+                                that.anim.drawStep();
                                 d3.event.stopPropagation();
                             })
                     }
