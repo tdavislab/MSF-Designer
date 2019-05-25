@@ -45,7 +45,7 @@ class moves{
                         this.anim.drawAnnotation();
                         this.anim.addedges();
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
-                        this.anim.findEdges(pt_saddle);
+                        this.anim.findEdges();
                         this.anim.drawAnnotation();
                         this.anim.addedges();
                         // check edge intersection
@@ -106,7 +106,7 @@ class moves{
                         this.anim.drawAnnotation();
                         this.anim.addedges();
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
-                        this.anim.findEdges(pt_saddle);
+                        this.anim.findEdges();
                         this.anim.drawAnnotation();
                         this.anim.addedges();
                         // check edge intersection
@@ -168,7 +168,7 @@ class moves{
                             this.anim.drawAnnotation();
                             this.anim.addedges();
                         } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
-                            this.anim.findEdges(pt_saddle);
+                            this.anim.findEdges();
                             this.anim.drawAnnotation();
                             this.anim.addedges();
                             // check edge intersection
@@ -231,7 +231,7 @@ class moves{
                             this.anim.drawAnnotation();
                             this.anim.addedges();
                         } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
-                            this.anim.findEdges(pt_saddle);
+                            this.anim.findEdges();
                             this.anim.drawAnnotation();
                             this.anim.addedges();
                             // check edge intersection

@@ -665,12 +665,14 @@ class anim{
         }
 
         function dragendedTerminal(d,i) {
+            let ifinter=false;
+            let ifclose = false;
             d3.select(this).classed("active", false);
             if(d.value[3]==="max"){
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_max);
                 if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
                     // check intersection
-                    let ifinter = false;
+                    // ifinter = false;
                     for(let k in that.edges){
                         if(k!=d.key){
                             let line1 = [that.edges[k][0],that.edges[k][2]];
@@ -690,15 +692,22 @@ class anim{
                     }                      
                 }
             } else if (d.value[3]==="min"){
+                console.log("this is a min edge")
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_min);
                 if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
+                    ifclose = true;
+                    console.log("<0.03")
                     // check intersection
-                    let ifinter = false;
+                    // ifinter = false;
                     for(let k in that.edges){
                         if(k!=d.key){
-                            let line1 = [that.edges[k][0],that.edges[k][2]];
-                            let line2 = [d.value[0],cpm];
-                            if(that.ifLinesIntersect(line1,line2)){
+                            // let line1 = [that.edges[k][0],that.edges[k][2]];
+                            // let line2 = [d.value[0],cpm];
+                            let curve1 = that.edgeMapper[k];
+                            let curve2 = that.initializeEdgeMapper([d.value[0],{"x":(d.value[0].x+cpm.x)/2, "y":(d.value[0].y
+                                +cpm.y)/2},cpm,"min"]);
+                            console.log(curve1, curve2)
+                            if(that.ifCurvesIntersect(curve1,curve2)){
                                 ifinter=true;
                             }
                         }
@@ -718,7 +727,9 @@ class anim{
                     iftemp = true;
                 }
             }
-            if(!iftemp){
+            console.log(iftemp, ifinter)
+            if(!iftemp && !ifinter && ifclose){
+                console.log("flag")
                 if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
                     that.assignEdge();
                     that.constructMesh(that.sigma);
@@ -726,26 +737,24 @@ class anim{
                 }
                 that.addStep();
                 that.drawStep();
+                that.drawAnnotation();
+                that.addedges();
             }
-            console.log("lllllllllllllllll")
             if(that.cp.length!=that.cp[that.cp.length-1].id+1){
                 for(let k=0; k<that.cp.length; k++){
                     that.cp[k].id = k;
                 }
-    
                 // rename edge key
                 for(let eid in that.edges){
                     let ed = that.edges[eid];
                     console.log(eid,ed)
-                    // let newid = "edge"+ed[0].id+ed[2].id;
                     that.deleteOldEdge(eid);
                     that.addNewEdge(ed[0],ed[2],ed[3]);
                 }
     
                 console.log(that.edges)
             }
-            that.drawAnnotation();
-            that.addedges();
+            
         }
 
     }
@@ -940,52 +949,63 @@ class anim{
             })
     }
 
-    findEdges(saddle){
+    findEdges(){
         // automatically find edges, only for "expert mode"
-        // let edges = {};
-        if(this.cp_max.length>0){
-            let pts = [];
-            let cp_new_max = this.cp_max.slice(0);
-            if(cp_new_max.length>2){
-                // find the closest max points
-                pts = this.find2MinPt(saddle,this.cp_max);
-            } else { pts = cp_new_max; }
-            for(let j=0;j<pts.length;j++){
-                this.addNewEdge(saddle,pts[j],"max");
-            }
-        }
-        let cp_new_min = [];
-        this.cp.forEach(p=>{
-            if(p.type==="min"){
-                cp_new_min.push(p);
-            }
-        })
-        let bound_upper = [];
-        let bound_lower = [];
-        this.cp_min.forEach(p=>{
-            if(p.y===0){
-                bound_upper.push(p);
-            } else if(p.y===1){
-                bound_lower.push(p);
-            }
-        })
-        let pts = [];
-        if(cp_new_min.length>2){
-        //     // find the closest min points
-            pts = this.find2MinPt(saddle,cp_new_min);
-        } else if(cp_new_min.length===1){
-            pts.push(cp_new_min[0])
-            if(cp_new_min[0].y>=saddle.y){
-                pts.push(this.findMinPt(saddle,bound_lower));
-            } else { pts.push(this.findMinPt(saddle,bound_upper));}
-        } else if(cp_new_min.length===0){
-            pts.push(this.findMinPt(saddle,bound_lower));
-            pts.push(this.findMinPt(saddle,bound_upper));
+        for(let i=0;i<this.cp.length;i++){
+            if(this.cp[i].type==="saddle"){
+                let saddle = this.cp[i];
+                for(let ed_key in saddle.edges){
+                    this.deleteOldEdge(ed_key);
+                }
+                if(this.cp_max.length>0){
+                    let pts = [];
+                    let cp_new_max = this.cp_max.slice(0);
+                    if(cp_new_max.length>2){
+                        // find the closest max points
+                        pts = this.find2MinPt(saddle,this.cp_max);
+                    } else { pts = cp_new_max; }
+                    for(let j=0;j<pts.length;j++){
+                        this.addNewEdge(saddle,pts[j],"max");
+                    }
+                }
+                let cp_new_min = [];
+                this.cp.forEach(p=>{
+                    if(p.type==="min"){
+                        cp_new_min.push(p);
+                    }
+                })
+                let bound_upper = [];
+                let bound_lower = [];
+                this.cp_min.forEach(p=>{
+                    if(p.y===0){
+                        bound_upper.push(p);
+                    } else if(p.y===1){
+                        bound_lower.push(p);
+                    }
+                })
+                let pts = [];
+                if(cp_new_min.length>=2){
+                //     // find the closest min points
+                    pts = this.find2MinPt(saddle,cp_new_min);
+                } else if(cp_new_min.length===1){
+                    pts.push(cp_new_min[0])
+                    if(cp_new_min[0].y>=saddle.y){
+                        pts.push(this.findMinPt(saddle,bound_lower));
+                    } else { pts.push(this.findMinPt(saddle,bound_upper));}
+                } else if(cp_new_min.length===0){
+                    pts.push(this.findMinPt(saddle,bound_lower));
+                    pts.push(this.findMinPt(saddle,bound_upper));
 
+                }
+                for(let j=0;j<pts.length;j++){
+                    this.addNewEdge(saddle,pts[j],"min");               
+                }
+
+                
+            }
         }
-        for(let j=0;j<pts.length;j++){
-            this.addNewEdge(saddle,pts[j],"min");               
-        }
+        
+        
     }
 
     initializeMesh(){
@@ -1304,7 +1324,7 @@ class anim{
         $('#annotation').remove();
         $('#slidersSVG').remove();
         $('#phSVG').remove();
-        $('#container').append('<canvas id="animation" style="position: absolute; top:100px; left:110px; z-index:1" width="1000" height="1000" ></canvas>');
-        $('#container').append('<svg id="annotation" style="position: absolute; top:100px; left:110px; z-index:1" width="1000" height="1000"></svg>');
+        $('#container').append('<canvas id="animation" style="position: absolute; top:160px; left:90px; z-index:1" width="1000" height="1000" ></canvas>');
+        $('#container').append('<svg id="annotation" style="position: absolute; top:160px; left:90px; z-index:1" width="1000" height="1000"></svg>');
     }  
 }

@@ -126,13 +126,6 @@ class persistence{
                                 //     console.log(that.anim.edges[ed])
                                 // }
 
-
-                                
-                                
-                                
-
-                                
-
                                 
                                 console.log(that.anim.cp)
                                 console.log(that.anim.edges)
