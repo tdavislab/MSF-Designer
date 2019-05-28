@@ -666,7 +666,7 @@ class anim{
 
         function dragendedTerminal(d,i) {
             let ifinter=false;
-            let ifclose = false;
+            // let ifclose = false;
             d3.select(this).classed("active", false);
             if(d.value[3]==="max"){
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_max);
@@ -695,7 +695,7 @@ class anim{
                 console.log("this is a min edge")
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_min);
                 if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
-                    ifclose = true;
+                    // ifclose = true;
                     console.log("<0.03")
                     // check intersection
                     // ifinter = false;
@@ -712,6 +712,19 @@ class anim{
                             }
                         }
                     }
+                    // for(let eid1 in that.edges){
+                    //     for(let eid2 in that.edges){
+                    //         if(eid1 != eid2){
+                    //             if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
+                    //                 d3.select("#"+eid1)
+                    //                     .style("stroke", "red")
+                    //                 d3.select("#"+eid2)
+                    //                     .style("stroke", "red")
+                    //                 ifinter = true;
+                    //             }
+                    //         }
+                    //     }
+                    // }
                     if(!ifinter){
                         that.deleteOldEdge(d.key);
                         that.addNewEdge(d.value[0],cpm,"min");
@@ -719,41 +732,74 @@ class anim{
                             .attr("cx",that.xMap(cpm.x))
                             .attr("cy",that.yMap(cpm.y))
                     }
+                    let iftemp = false;
+                    for(let k in that.edges){
+                        if(["temp1","temp2","temp3","temp4"].indexOf(k)!=-1){
+                            iftemp = true;
+                        }
+                    }
+                    // console.log(iftemp, ifinter)
+                    if(!iftemp && !ifinter){
+                        console.log("flag")
+                        if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                            that.assignEdge();
+                            that.constructMesh(that.sigma);
+                            that.drawFlag=true;
+                        }
+                        that.addStep();
+                        that.drawStep();
+                        that.drawAnnotation();
+                        that.addedges();
+                    }
+                    if(that.cp.length!=that.cp[that.cp.length-1].id+1){
+                        for(let k=0; k<that.cp.length; k++){
+                            that.cp[k].id = k;
+                        }
+                        // rename edge key
+                        for(let eid in that.edges){
+                            let ed = that.edges[eid];
+                            console.log(eid,ed)
+                            that.deleteOldEdge(eid);
+                            that.addNewEdge(ed[0],ed[2],ed[3]);
+                        }
+            
+                        console.log(that.edges)
+                    }
                 }
             }
-            let iftemp = false;
-            for(let k in that.edges){
-                if(["temp1","temp2","temp3","temp4"].indexOf(k)!=-1){
-                    iftemp = true;
-                }
-            }
-            console.log(iftemp, ifinter)
-            if(!iftemp && !ifinter && ifclose){
-                console.log("flag")
-                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                    that.assignEdge();
-                    that.constructMesh(that.sigma);
-                    that.drawFlag=true;
-                }
-                that.addStep();
-                that.drawStep();
-                that.drawAnnotation();
-                that.addedges();
-            }
-            if(that.cp.length!=that.cp[that.cp.length-1].id+1){
-                for(let k=0; k<that.cp.length; k++){
-                    that.cp[k].id = k;
-                }
-                // rename edge key
-                for(let eid in that.edges){
-                    let ed = that.edges[eid];
-                    console.log(eid,ed)
-                    that.deleteOldEdge(eid);
-                    that.addNewEdge(ed[0],ed[2],ed[3]);
-                }
+            // let iftemp = false;
+            // for(let k in that.edges){
+            //     if(["temp1","temp2","temp3","temp4"].indexOf(k)!=-1){
+            //         iftemp = true;
+            //     }
+            // }
+            // // console.log(iftemp, ifinter)
+            // if(!iftemp && !ifinter){
+            //     console.log("flag")
+            //     if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+            //         that.assignEdge();
+            //         that.constructMesh(that.sigma);
+            //         that.drawFlag=true;
+            //     }
+            //     that.addStep();
+            //     that.drawStep();
+            //     that.drawAnnotation();
+            //     that.addedges();
+            // }
+            // if(that.cp.length!=that.cp[that.cp.length-1].id+1){
+            //     for(let k=0; k<that.cp.length; k++){
+            //         that.cp[k].id = k;
+            //     }
+            //     // rename edge key
+            //     for(let eid in that.edges){
+            //         let ed = that.edges[eid];
+            //         console.log(eid,ed)
+            //         that.deleteOldEdge(eid);
+            //         that.addNewEdge(ed[0],ed[2],ed[3]);
+            //     }
     
-                console.log(that.edges)
-            }
+            //     console.log(that.edges)
+            // }
             
         }
 
@@ -984,17 +1030,20 @@ class anim{
                     }
                 })
                 let pts = [];
+                let pt_lower = this.findMinPt(saddle,bound_lower);
+                let pt_upper = this.findMinPt(saddle,bound_upper);
                 if(cp_new_min.length>=2){
                 //     // find the closest min points
                     pts = this.find2MinPt(saddle,cp_new_min);
                 } else if(cp_new_min.length===1){
                     pts.push(cp_new_min[0])
-                    if(cp_new_min[0].y>=saddle.y){
-                        pts.push(this.findMinPt(saddle,bound_lower));
-                    } else { pts.push(this.findMinPt(saddle,bound_upper));}
+                    pts.push(this.findMinPt(saddle,[pt_lower,pt_upper]));
+                    // if(cp_new_min[0].y>=saddle.y){
+                    //     pts.push(this.findMinPt(saddle,bound_lower));
+                    // } else { pts.push(this.findMinPt(saddle,bound_upper));}
                 } else if(cp_new_min.length===0){
-                    pts.push(this.findMinPt(saddle,bound_lower));
-                    pts.push(this.findMinPt(saddle,bound_upper));
+                    pts.push(pt_lower);
+                    pts.push(pt_upper);
 
                 }
                 for(let j=0;j<pts.length;j++){
