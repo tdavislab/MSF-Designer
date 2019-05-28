@@ -358,7 +358,6 @@ class anim{
     }
 
     addNewEdge(startpoint, endpoint, type){
-        console.log(startpoint,endpoint,type)
         let edgeid = "edge"+startpoint.id+endpoint.id;
         // add to this.edges
         // check if there has already been an edge between start and end points
@@ -371,20 +370,16 @@ class anim{
         }
         // add this edge to corresponding critical points
         // startpoint is always a saddle point
-        // console.log(startpoint,this.cp[startpoint.id])
         this.cp[startpoint.id].edges[edgeid] = this.edges[edgeid]
         if(this.cp[endpoint.id]!=undefined){
             this.cp[endpoint.id].edges[edgeid] = this.edges[edgeid]
         }
         // add this edge to this.edgeMapper
         this.edgeMapper[edgeid] = this.initializeEdgeMapper(this.edges[edgeid])
-        console.log(edgeid,this.edges[edgeid])
-
     }
 
     deleteOldEdge(edgeid){
         if(this.edges[edgeid]!=undefined){
-            // console.log(this.edges)
             let startpoint = this.edges[edgeid][0];
             let endpoint = this.edges[edgeid][2];
             // delete edge
@@ -576,7 +571,7 @@ class anim{
         function dragendedNode(d) {
             let ifInter = false;
             for(let eid in that.edges){
-                if(eid!=d.key){
+                if(eid!=d.key && ["temp1","temp2","temp3","temp4"].indexOf(eid)===-1){
                     if(that.ifCurvesIntersect(that.edgeMapper[eid], that.edgeMapper[d.key])){
                         d3.select("#"+eid)
                             .style("stroke", "red")
@@ -597,17 +592,9 @@ class anim{
                 that.drawStep();
                 that.addedges();
                 that.drawAnnotation();
-
-
-
-
             } else {
                 that.drawFlag = false;
             }
-
-            
-            
-            
         }
 
         let terminalNodes = this.terminalNodesGroup.selectAll("circle").data(edgelist)
@@ -673,11 +660,12 @@ class anim{
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_max);
                 if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
                     // check intersection
-                    // ifinter = false;
+                    // ifinter: if this edge does not intersect with other edges, draw this edge
                     for(let k in that.edges){
-                        if(k!=d.key){
+                        if(k!=d.key && ["temp1","temp2","temp3","temp4"].indexOf(k)===-1){
                             let curve1 = that.edgeMapper[k];
-                            let curve2 = that.initializeEdgeMapper([d.value[0],{"x":(d.value[0].x+cpm.x)/2, "y":(d.value[0].y+cpm.y)/2},cpm,"min"]);
+                            let curve2 = that.initializeEdgeMapper([d.value[0],{"x":(d.value[0].x+cpm.x)/2, "y":(d.value[0].y+cpm.y)/2},cpm,"max"]);
+                            console.log(k,curve1)
                             if(that.ifCurvesIntersect(curve1,curve2)){
                                 ifinter=true;
                             }
@@ -693,9 +681,10 @@ class anim{
                         that.addedges();
 
                     }
+                    //ifinter1: if there are no any other edges intersect, allow this configuration
                     for(let eid1 in that.edges){
                         for(let eid2 in that.edges){
-                            if(eid1 != eid2){
+                            if(eid1 != eid2 && ["temp1","temp2","temp3","temp4"].indexOf(eid1)===-1 && ["temp1","temp2","temp3","temp4"].indexOf(eid2)===-1){
                                 if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
                                     d3.select("#"+eid1)
                                         .style("stroke", "red")
@@ -712,9 +701,7 @@ class anim{
                             iftemp = true;
                         }
                     }
-                    console.log(iftemp, ifinter1)
                     if(!iftemp && !ifinter1){
-                        console.log("flag")
                         if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
@@ -722,8 +709,6 @@ class anim{
                         }
                         that.addStep();
                         that.drawStep();
-                        // that.drawAnnotation();
-                        // that.addedges();
                     }
                     if(that.cp.length!=that.cp[that.cp.length-1].id+1){
                         for(let k=0; k<that.cp.length; k++){
@@ -732,12 +717,9 @@ class anim{
                         // rename edge key
                         for(let eid in that.edges){
                             let ed = that.edges[eid];
-                            console.log(eid,ed)
                             that.deleteOldEdge(eid);
                             that.addNewEdge(ed[0],ed[2],ed[3]);
                         }
-            
-                        console.log(that.edges)
                     }
 
                 }
@@ -745,12 +727,10 @@ class anim{
                 console.log("this is a min edge")
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_min);
                 if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
-                    // ifclose = true;
-                    console.log("<0.03")
-                    
                     // check intersection
+                    // ifinter: if this edge does not intersect with other edges, draw this edge
                     for(let k in that.edges){
-                        if(k!=d.key){
+                        if(k!=d.key && ["temp1","temp2","temp3","temp4"].indexOf(k)===-1){
                             let curve1 = that.edgeMapper[k];
                             let curve2 = that.initializeEdgeMapper([d.value[0],{"x":(d.value[0].x+cpm.x)/2, "y":(d.value[0].y+cpm.y)/2},cpm,"min"]);
                             if(that.ifCurvesIntersect(curve1,curve2)){
@@ -768,9 +748,10 @@ class anim{
                         that.drawAnnotation();
                         that.addedges();
                     }
+                    //ifinter1: if there are no any other edges intersect, allow this configuration
                     for(let eid1 in that.edges){
                         for(let eid2 in that.edges){
-                            if(eid1 != eid2){
+                            if(eid1 != eid2 && ["temp1","temp2","temp3","temp4"].indexOf(eid1)===-1 && ["temp1","temp2","temp3","temp4"].indexOf(eid2)===-1){
                                 if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
                                     d3.select("#"+eid1)
                                         .style("stroke", "red")
@@ -787,9 +768,7 @@ class anim{
                             iftemp = true;
                         }
                     }
-                    console.log(iftemp, ifinter1)
                     if(!iftemp && !ifinter1){
-                        console.log("flag")
                         if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
@@ -797,11 +776,7 @@ class anim{
                         }
                         that.addStep();
                         that.drawStep();
-                        // that.drawAnnotation();
-                        // that.addedges();
                     }
-                    // that.drawAnnotation();
-                    // that.addedges();
                     if(that.cp.length!=that.cp[that.cp.length-1].id+1){
                         for(let k=0; k<that.cp.length; k++){
                             that.cp[k].id = k;
@@ -809,49 +784,13 @@ class anim{
                         // rename edge key
                         for(let eid in that.edges){
                             let ed = that.edges[eid];
-                            console.log(eid,ed)
                             that.deleteOldEdge(eid);
                             that.addNewEdge(ed[0],ed[2],ed[3]);
                         }
             
-                        console.log(that.edges)
                     }
                 }
             }
-            // let iftemp = false;
-            // for(let k in that.edges){
-            //     if(["temp1","temp2","temp3","temp4"].indexOf(k)!=-1){
-            //         iftemp = true;
-            //     }
-            // }
-            // // console.log(iftemp, ifinter)
-            // if(!iftemp && !ifinter){
-            //     console.log("flag")
-            //     if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-            //         that.assignEdge();
-            //         that.constructMesh(that.sigma);
-            //         that.drawFlag=true;
-            //     }
-            //     that.addStep();
-            //     that.drawStep();
-            //     that.drawAnnotation();
-            //     that.addedges();
-            // }
-            // if(that.cp.length!=that.cp[that.cp.length-1].id+1){
-            //     for(let k=0; k<that.cp.length; k++){
-            //         that.cp[k].id = k;
-            //     }
-            //     // rename edge key
-            //     for(let eid in that.edges){
-            //         let ed = that.edges[eid];
-            //         console.log(eid,ed)
-            //         that.deleteOldEdge(eid);
-            //         that.addNewEdge(ed[0],ed[2],ed[3]);
-            //     }
-    
-            //     console.log(that.edges)
-            // }
-            
         }
 
     }
@@ -895,20 +834,21 @@ class anim{
         let newPoints = [];
         for(let i=0;i<this.numSeg;i++){
             let pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength)
-            if((ed[0].x>ed[2].x)||(ed[0].y>ed[2].y)){
+            // if((ed[0].x>ed[2].x)||(ed[0].y>ed[2].y)){
+            if(this.edgeMapper[edgeid][0]["direction"]==="in"){
                 pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength)
             }
             newPoints.push({"x":this.xMap.invert(pt.x), "y":this.yMap.invert(pt.y)});
         }
-        newPoints.sort(function(a,b){
-            return d3.ascending(a.x,b.x) || d3.ascending(a.y,b.y);
-        })
-        // **** need to fix
-        if(edgeid==="edge1b010" || edgeid ==="edge1b110"){
-            newPoints.sort(function(a,b){
-                return d3.ascending(a.y,b.y) || d3.ascending(a.x,b.x);
-            })
-        }
+        // newPoints.sort(function(a,b){
+        //     return d3.ascending(a.x,b.x) || d3.ascending(a.y,b.y);
+        // })
+        // // **** need to fix
+        // if(edgeid==="edge1b010" || edgeid ==="edge1b110"){
+        //     newPoints.sort(function(a,b){
+        //         return d3.ascending(a.y,b.y) || d3.ascending(a.x,b.x);
+        //     })
+        // }
         for(let i=0;i<this.numSeg;i++){
             // let pt = this.findMinPt([this.edgeMapper[edgeid][i].x, this.edgeMapper[edgeid][i].y], newPoints);
             let pt = newPoints[i]
