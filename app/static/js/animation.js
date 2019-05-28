@@ -666,6 +666,7 @@ class anim{
 
         function dragendedTerminal(d,i) {
             let ifinter=false;
+            let ifinter1 = false;
             // let ifclose = false;
             d3.select(this).classed("active", false);
             if(d.value[3]==="max"){
@@ -675,9 +676,9 @@ class anim{
                     // ifinter = false;
                     for(let k in that.edges){
                         if(k!=d.key){
-                            let line1 = [that.edges[k][0],that.edges[k][2]];
-                            let line2 = [d.value[0],cpm];
-                            if(that.ifLinesIntersect(line1,line2)){
+                            let curve1 = that.edgeMapper[k];
+                            let curve2 = that.initializeEdgeMapper([d.value[0],{"x":(d.value[0].x+cpm.x)/2, "y":(d.value[0].y+cpm.y)/2},cpm,"min"]);
+                            if(that.ifCurvesIntersect(curve1,curve2)){
                                 ifinter=true;
                             }
                         }
@@ -688,49 +689,22 @@ class anim{
                         d3.select("#terminal"+i)
                             .attr("cx",that.xMap(cpm.x))
                             .attr("cy",that.yMap(cpm.y));
+                        that.drawAnnotation();
+                        that.addedges();
 
-                    }                      
-                }
-            } else if (d.value[3]==="min"){
-                console.log("this is a min edge")
-                let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_min);
-                if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
-                    // ifclose = true;
-                    console.log("<0.03")
-                    // check intersection
-                    // ifinter = false;
-                    for(let k in that.edges){
-                        if(k!=d.key){
-                            // let line1 = [that.edges[k][0],that.edges[k][2]];
-                            // let line2 = [d.value[0],cpm];
-                            let curve1 = that.edgeMapper[k];
-                            let curve2 = that.initializeEdgeMapper([d.value[0],{"x":(d.value[0].x+cpm.x)/2, "y":(d.value[0].y
-                                +cpm.y)/2},cpm,"min"]);
-                            console.log(curve1, curve2)
-                            if(that.ifCurvesIntersect(curve1,curve2)){
-                                ifinter=true;
+                    }
+                    for(let eid1 in that.edges){
+                        for(let eid2 in that.edges){
+                            if(eid1 != eid2){
+                                if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
+                                    d3.select("#"+eid1)
+                                        .style("stroke", "red")
+                                    d3.select("#"+eid2)
+                                        .style("stroke", "red")
+                                    ifinter1 = true;
+                                }
                             }
                         }
-                    }
-                    // for(let eid1 in that.edges){
-                    //     for(let eid2 in that.edges){
-                    //         if(eid1 != eid2){
-                    //             if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
-                    //                 d3.select("#"+eid1)
-                    //                     .style("stroke", "red")
-                    //                 d3.select("#"+eid2)
-                    //                     .style("stroke", "red")
-                    //                 ifinter = true;
-                    //             }
-                    //         }
-                    //     }
-                    // }
-                    if(!ifinter){
-                        that.deleteOldEdge(d.key);
-                        that.addNewEdge(d.value[0],cpm,"min");
-                        d3.select("#terminal"+i)
-                            .attr("cx",that.xMap(cpm.x))
-                            .attr("cy",that.yMap(cpm.y))
                     }
                     let iftemp = false;
                     for(let k in that.edges){
@@ -738,8 +712,8 @@ class anim{
                             iftemp = true;
                         }
                     }
-                    // console.log(iftemp, ifinter)
-                    if(!iftemp && !ifinter){
+                    console.log(iftemp, ifinter1)
+                    if(!iftemp && !ifinter1){
                         console.log("flag")
                         if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
                             that.assignEdge();
@@ -748,9 +722,86 @@ class anim{
                         }
                         that.addStep();
                         that.drawStep();
+                        // that.drawAnnotation();
+                        // that.addedges();
+                    }
+                    if(that.cp.length!=that.cp[that.cp.length-1].id+1){
+                        for(let k=0; k<that.cp.length; k++){
+                            that.cp[k].id = k;
+                        }
+                        // rename edge key
+                        for(let eid in that.edges){
+                            let ed = that.edges[eid];
+                            console.log(eid,ed)
+                            that.deleteOldEdge(eid);
+                            that.addNewEdge(ed[0],ed[2],ed[3]);
+                        }
+            
+                        console.log(that.edges)
+                    }
+
+                }
+            } else if (d.value[3]==="min"){
+                console.log("this is a min edge")
+                let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_min);
+                if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
+                    // ifclose = true;
+                    console.log("<0.03")
+                    
+                    // check intersection
+                    for(let k in that.edges){
+                        if(k!=d.key){
+                            let curve1 = that.edgeMapper[k];
+                            let curve2 = that.initializeEdgeMapper([d.value[0],{"x":(d.value[0].x+cpm.x)/2, "y":(d.value[0].y+cpm.y)/2},cpm,"min"]);
+                            if(that.ifCurvesIntersect(curve1,curve2)){
+                                ifinter=true;
+                            }
+                        }
+                    }
+                    
+                    if(!ifinter){
+                        that.deleteOldEdge(d.key);
+                        that.addNewEdge(d.value[0],cpm,"min");
+                        d3.select("#terminal"+i)
+                            .attr("cx",that.xMap(cpm.x))
+                            .attr("cy",that.yMap(cpm.y))
                         that.drawAnnotation();
                         that.addedges();
                     }
+                    for(let eid1 in that.edges){
+                        for(let eid2 in that.edges){
+                            if(eid1 != eid2){
+                                if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
+                                    d3.select("#"+eid1)
+                                        .style("stroke", "red")
+                                    d3.select("#"+eid2)
+                                        .style("stroke", "red")
+                                    ifinter1 = true;
+                                }
+                            }
+                        }
+                    }
+                    let iftemp = false;
+                    for(let k in that.edges){
+                        if(["temp1","temp2","temp3","temp4"].indexOf(k)!=-1){
+                            iftemp = true;
+                        }
+                    }
+                    console.log(iftemp, ifinter1)
+                    if(!iftemp && !ifinter1){
+                        console.log("flag")
+                        if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                            that.assignEdge();
+                            that.constructMesh(that.sigma);
+                            that.drawFlag=true;
+                        }
+                        that.addStep();
+                        that.drawStep();
+                        // that.drawAnnotation();
+                        // that.addedges();
+                    }
+                    // that.drawAnnotation();
+                    // that.addedges();
                     if(that.cp.length!=that.cp[that.cp.length-1].id+1){
                         for(let k=0; k<that.cp.length; k++){
                             that.cp[k].id = k;
