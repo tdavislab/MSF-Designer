@@ -372,6 +372,34 @@ class moves{
                         this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
                         this.anim.drawAnnotation();
                         this.anim.addedges();
+                    } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
+                        this.anim.findEdges();
+                        this.anim.drawAnnotation();
+                        this.anim.addedges();
+                        // check edge intersection
+                        let ifInter = false;
+                        for(let eid1 in this.anim.edges){
+                            for(let eid2 in this.anim.edges){
+                                if(eid1 != eid2){
+                                    if(this.anim.ifCurvesIntersect(this.anim.edgeMapper[eid1], this.anim.edgeMapper[eid2])){
+                                        d3.select("#"+eid1)
+                                            .style("stroke", "red")
+                                        d3.select("#"+eid2)
+                                            .style("stroke", "red")
+                                        ifInter = true;
+                                    }
+                                }
+                            }
+                        }
+                        if(!ifInter){
+                            this.anim.addStep();
+                            this.anim.drawStep();
+                            if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                                this.anim.assignEdge();
+                                this.anim.constructMesh(this.anim.sigma);
+                                this.anim.drawFlag = true;
+                            }
+                        }
                     }
 
                     // let tempIdx = 1;
