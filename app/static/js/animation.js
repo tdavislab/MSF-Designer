@@ -225,8 +225,10 @@ class anim{
         this.addedges();
         this.drawStep();
 
-        this.modeType = d3.select('input[name="mode-type"]:checked').node().value;
-        console.log(this.modeType)
+        // this.modeType = d3.select('input[name="mode-type"]:checked').node().value;
+        // console.log(this.modeType)
+
+        this.dragTerminal = false;
 
     }
 
@@ -489,36 +491,39 @@ class anim{
         }
 
         function dragendedText(d) {
-            console.log("tttttttttttttt")
-            // check edge intersection
-            let ifInter = false;
-            for(let eid1 in that.edges){
-                for(let eid2 in that.edges){
-                    if(eid1 != eid2){
-                        if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
-                            d3.select("#"+eid1)
-                                .style("stroke", "red")
-                            d3.select("#"+eid2)
-                                .style("stroke", "red")
-                            ifInter = true;
+            if(this.dragTerminal){
+                d3.select(this).classed("active", false);
+                // check edge intersection
+                let ifInter = false;
+                for(let eid1 in that.edges){
+                    for(let eid2 in that.edges){
+                        if(eid1 != eid2){
+                            if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
+                                d3.select("#"+eid1)
+                                    .style("stroke", "red")
+                                d3.select("#"+eid2)
+                                    .style("stroke", "red")
+                                ifInter = true;
+                            }
                         }
                     }
                 }
-            }
-            if(!ifInter){
-                that.drawAnnotation();
-                that.addedges();
-                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                    that.assignEdge();
-                    that.constructMesh(that.sigma);
-                    that.drawFlag = true;
+                if(!ifInter){
+                    that.drawAnnotation();
+                    that.addedges();
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        that.assignEdge();
+                        that.constructMesh(that.sigma);
+                        that.drawFlag = true;
+                    }
+                    that.addStep();
+                    that.drawStep();
+                } else {
+                    that.drawFlag = false;
                 }
-                that.addStep();
-                that.drawStep();
-            } else {
-                that.drawFlag = false;
+                this.dragTerminal = false;
             }
-            d3.select(this).classed("active", false);
+            
             
         }
 

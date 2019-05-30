@@ -270,13 +270,10 @@ class moves{
     }
         
     dmovePlus(){
-        console.log("dmoveplus")
-        // console.log(d3.mouse(this))
-
+        this.anim.dragTerminal = false;
         d3.select("#pointgroup").selectAll("text")
             .on("click",(d)=>{ // d is a critical point, not an edge
-                console.log(d)
-                d3.event.stopPropagation();
+                // d3.event.stopPropagation();
                 if(this.dpType==="add" && d.type==="max"){
                     let x=d.x;
                     let y=d.y;
@@ -347,8 +344,10 @@ class moves{
                 this.sliders.addSlider();
                 this.anim.findRange();
             })
+        this.anim.dragTerminal = true;
     }
     dmoveMinus(){
+        this.anim.dragTerminal = false;
         d3.select("#pointgroup").selectAll("text")
             .on("click",(d)=>{
                 if(this.dmType==="add" && d.type==="min"){
@@ -366,6 +365,14 @@ class moves{
                     d3.select("#dmoveminus")
                         .attr("value","Vertex-min Move");
                     this.dmType=""
+                    if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                        this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max"];
+                        this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max"];
+                        this.anim.edges["temp3"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"];
+                        this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
+                        this.anim.drawAnnotation();
+                        this.anim.addedges();
+                    }
 
                     // let tempIdx = 1;
                     // this.anim.addNewEdge()
@@ -378,13 +385,9 @@ class moves{
                 //         this.anim.edgeMapper["p"+i] = this.anim.initializeEdgeMapper(this.anim.edges[i]);
                 //     }
                 // }
-                // this.anim.connNodes = this.anim.findConnNodes(this.anim.edges);
-                // this.anim.grad = this.anim.constructMesh(this.anim.sigma);
-                this.anim.drawAnnotation();
-                this.anim.addedges();
                 this.sliders.addSlider();
-                this.anim.findNearestPoint();
                 this.anim.findRange();
             })
+        this.anim.dragTerminal = true;
     }
 }
