@@ -469,6 +469,7 @@ class anim{
         }
               
         function draggedText(d,i) {
+            console.log("i am hereeeeeeee")
             if(that.xMap.invert(d3.mouse(this)[0])>=0 && that.xMap.invert(d3.mouse(this)[0])<=1 && that.yMap.invert(d3.mouse(this)[1])>=0 && that.yMap.invert(d3.mouse(this)[1])<=1){
                 d3.select("#cp"+d.id)
                     .attr("x",(d)=>{
@@ -488,7 +489,7 @@ class anim{
         }
 
         function dragendedText(d) {
-            d3.select(this).classed("active", false);
+            console.log("tttttttttttttt")
             // check edge intersection
             let ifInter = false;
             for(let eid1 in that.edges){
@@ -517,6 +518,7 @@ class anim{
             } else {
                 that.drawFlag = false;
             }
+            d3.select(this).classed("active", false);
             
         }
 
@@ -832,14 +834,28 @@ class anim{
         let totalLength = d3.select("#"+edgeid).node().getTotalLength();
         let stepLength = totalLength/this.numSeg;
         let newPoints = [];
+        let pt;
         for(let i=0;i<this.numSeg;i++){
-            let pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength)
-            // if((ed[0].x>ed[2].x)||(ed[0].y>ed[2].y)){
-            if(this.edgeMapper[edgeid][0]["direction"]==="in"){
-                pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength)
+            if(ed[3]==="max"){
+                if(this.edgeMapper[edgeid][0]["direction"]==="in"){
+                    pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength);
+                } else if(this.edgeMapper[edgeid][0]["direction"]==="out"){
+                    pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength);
+                }
+            } else if(ed[3]==="min"){
+                if(this.edgeMapper[edgeid][0]["direction"]==="in"){
+                    pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength);
+                }else if(this.edgeMapper[edgeid][0]["direction"]==="out"){
+                    pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength);
+                }
             }
+            // pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength)
+            // if((ed[0].x>ed[2].x)||(ed[0].y>ed[2].y)){
+            // if(this.edgeMapper[edgeid][0]["direction"]==="out"){
+            //     pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength)
+            // }
             newPoints.push({"x":this.xMap.invert(pt.x), "y":this.yMap.invert(pt.y)});
-        }
+        }     
         // newPoints.sort(function(a,b){
         //     return d3.ascending(a.x,b.x) || d3.ascending(a.y,b.y);
         // })
