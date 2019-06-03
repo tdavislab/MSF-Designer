@@ -137,7 +137,7 @@ class persistence{
                                 that.anim.addedges();
                                 that.anim.addStep();
                                 that.anim.drawStep();
-                                d3.event.stopPropagation();
+                                // d3.event.stopPropagation();
                             })
                     }
                 }

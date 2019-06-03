@@ -209,24 +209,20 @@ class anim{
         this.constructMesh(this.sigma);
         this.animation();
 
-        let mindist = 1;
-        for(let i=0;i<this.grad.length;i++){
-            let edgedist = this.calDist({"x":this.grad[i].x,"y":this.grad[i].y},this.grad[i].ed);
-            if(edgedist<mindist){
-                mindist = edgedist;
-            }
-        }
-        console.log("mindist",mindist)
+        // let mindist = 1;
+        // for(let i=0;i<this.grad.length;i++){
+        //     let edgedist = this.calDist({"x":this.grad[i].x,"y":this.grad[i].y},this.grad[i].ed);
+        //     if(edgedist<mindist){
+        //         mindist = edgedist;
+        //     }
+        // }
+        // console.log("mindist",mindist)
 
 
-        // console.log(this.grad)
         this.findRange();
         this.drawAnnotation();
         this.addedges();
         this.drawStep();
-
-        // this.modeType = d3.select('input[name="mode-type"]:checked').node().value;
-        // console.log(this.modeType)
 
         this.dragTerminal = false;
 
@@ -471,7 +467,6 @@ class anim{
         }
               
         function draggedText(d,i) {
-            console.log("i am hereeeeeeee")
             if(that.xMap.invert(d3.mouse(this)[0])>=0 && that.xMap.invert(d3.mouse(this)[0])<=1 && that.yMap.invert(d3.mouse(this)[1])>=0 && that.yMap.invert(d3.mouse(this)[1])<=1){
                 d3.select("#cp"+d.id)
                     .attr("x",(d)=>{
@@ -487,6 +482,7 @@ class anim{
                 that.drawAnnotation();
 
             }
+            this.dragTerminal = true;
             
         }
 
@@ -672,7 +668,6 @@ class anim{
                         if(k!=d.key && ["temp1","temp2","temp3","temp4"].indexOf(k)===-1){
                             let curve1 = that.edgeMapper[k];
                             let curve2 = that.initializeEdgeMapper([d.value[0],{"x":(d.value[0].x+cpm.x)/2, "y":(d.value[0].y+cpm.y)/2},cpm,"max"]);
-                            console.log(k,curve1)
                             if(that.ifCurvesIntersect(curve1,curve2)){
                                 ifinter=true;
                             }
@@ -731,7 +726,6 @@ class anim{
 
                 }
             } else if (d.value[3]==="min"){
-                console.log("this is a min edge")
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_min);
                 if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
                     // check intersection
@@ -873,7 +867,6 @@ class anim{
         for(let i=0;i<this.numSeg;i++){
             // let pt = this.findMinPt([this.edgeMapper[edgeid][i].x, this.edgeMapper[edgeid][i].y], newPoints);
             let pt = newPoints[i]
-            // console.log("i, pt",pt)
             this.edgeMapper[edgeid][i].x_new = pt.x;
             this.edgeMapper[edgeid][i].y_new = pt.y;
         }
@@ -1080,7 +1073,6 @@ class anim{
     }
 
     assignEdge(){
-        console.log("assigning edge")
         if(Object.keys(this.edges).length>0){
             let edgepoints = [];
             for(let key in this.edgeMapper){
@@ -1089,7 +1081,6 @@ class anim{
                     edgepoints.push({"x":ed[i].x_new,"y":ed[i].y_new,"edgeid":key,"inedgeid":i});
                 }
             }
-        // console.log(edgepoints)
             for(let x=0;x<=1;x+=this.step){
                 for(let y=0;y<=1;y+=this.step){
                     let gradid = Math.round(x/this.step*100+y/this.step);
@@ -1169,8 +1160,6 @@ class anim{
                             dy2 = (edp[idx-1].y_new - edp[idx].y_new)*10;
                         }
                     } else {
-                        // console.log("i am here")
-                        // console.log(edp[0].direction)
                         if(this.grad[gradid].ed.inedgeid>0){
                             let idx = this.grad[gradid].ed.inedgeid;
                             dx2 = (edp[idx].x_new - edp[idx-1].x_new)*10;
@@ -1188,11 +1177,7 @@ class anim{
 
                 }
                 
-                    // if(this.grad[gradid].ed.edgeid==="edge10"){
-                    //     console.log(edp[0],edp[0].direction)
-                    // }
-                    
-                // }
+                   
                 // console.log("eeeee",edgedist,dx1,dx2,dy1,dy2)
                 
                 // if(x<=Math.max(edp[0].x_new,edp[9].x_new) && x>=Math.min(edp[0].x_new,edp[9].x_new) && y<=Math.max(edp[0].y_new,edp[9].y_new)+0.05 && y>=Math.min(edp[0].y_new,edp[9].y_new)-0.05){
@@ -1228,8 +1213,7 @@ class anim{
         this.grad.sort(function(a,b){
             return d3.ascending(a.x,b.x) || d3.ascending(a.y,b.y);
         })
-        console.log(this.grad)
-        // return grad_new;
+        // console.log(this.grad)
     }
 
     animation(){            
@@ -1270,58 +1254,33 @@ class anim{
         g.globalCompositeOperation = "source-over";
         
         function draw() {
-            // console.log("drawing")
             let width = document.getElementById('animation').offsetWidth;
             let height = document.getElementById('animation').offsetHeight;
             g.fillStyle = "rgba(255,255, 255, 0.05)";
-            // g.fillStyle = "black";
             g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba   
 
             
             for (let i=0; i<M; i++) { // draw a single timestep for every curve
+                let dr = that.findV(X[i],Y[i],that.grad)[0]
+                let pt_new = that.findV(X[i],Y[i],that.grad)[1]
+                let X_new = pt_new[0];
+                let Y_new = pt_new[1];
 
-                    // let dr = [0,0];
-                    // let X_new = that.adjustFlow(X[i],Y[i])[0];
-                    // let Y_new = that.adjustFlow(X[i],Y[i])[1];
-                    // dr = that.findV(X[i],Y[i],that.grad);
-                    
-                    
-                        // dr = that.gradF(that.cp, X[i],Y[i],0.1);
-                        
-                        // console.log(that.grad)
-                        // let result = that.chooseGrad(X[i],Y[i]);
-                        // console.log(result)
-                        // dr = that.findV(X[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][0]),Y[i]+(0.5-that.chooseGrad(X[i],Y[i])[0][1]),that.chooseGrad(X[i],Y[i])[1])
-                    let dr = that.findV(X[i],Y[i],that.grad)[0]
-                    let pt_new = that.findV(X[i],Y[i],that.grad)[1]
-                    let X_new = pt_new[0];
-                    let Y_new = pt_new[1];
-                    // let fv = that.findV(X[i],Y[i],that.grad)[2]
+                g.setLineDash([1, 0])
+                g.beginPath();
+                g.moveTo(that.xMap(X_new), that.yMap(Y_new)); // the start point of the path
+                g.lineTo(that.xMap(X_new+dr[0]*dt), that.yMap(Y_new+dr[1]*dt)); // the end point
+                X[i]+=dr[0]*dt;
+                Y[i]+=dr[1]*dt;
 
-                        
-                    
-
-                    g.setLineDash([1, 0])
-                    g.beginPath();
-                    g.moveTo(that.xMap(X_new), that.yMap(Y_new)); // the start point of the path
-                    g.lineTo(that.xMap(X_new+dr[0]*dt), that.yMap(Y_new+dr[1]*dt)); // the end point
-                    // X[i]+=dr[0]*(dt+dt*fv*5);
-                    // Y[i]+=dr[1]*(dt+dt*fv*5);
-                    // dt = dt*2
-                    X[i]+=dr[0]*dt;
-                    Y[i]+=dr[1]*dt;
-
-                    g.lineWidth = 1;
-                    // g.strokeStyle = "#FF8000";
-                    // g.strokeStyle = "rgb(141,106,184)"
-                    g.strokeStyle = "rgb(110,24,110)"
-                    // g.strokeStyle = "white"
-                    g.stroke(); // final draw command
-                    if (age[i]++ > MaxAge) {
-                        // increment age of each curve, restart if MaxAge is reached
-                        age[i] = randage();
-                        X[i] = X0[i], Y[i] = Y0[i];
-                    }
+                g.lineWidth = 1;
+                g.strokeStyle = "rgb(110,24,110)"
+                g.stroke(); // final draw command
+                if (age[i]++ > MaxAge) {
+                    // increment age of each curve, restart if MaxAge is reached
+                    age[i] = randage();
+                    X[i] = X0[i], Y[i] = Y0[i];
+                }
             }
         }
     }
