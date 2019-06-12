@@ -27,23 +27,25 @@ class persistence{
             }
             
         })
-        console.log(this.barcode)
+        // console.log(this.barcode)
         this.recoverEdge();
         this.recoverPersisitence();
         
     }
 
     findTempEdge(){
-        console.log("finding temp edges")
+        // console.log("finding temp edges")
         let cpidx = [];
         let tempidx = 1;
         this.anim.cp.forEach(p=>cpidx.push(p.id));
         this.anim.minBound.forEach(p=>cpidx.push(p.id));
         for(let eid in this.anim.edges){
             let ed = this.anim.edges[eid];
-            console.log(ed)
+            // console.log(ed)
             if(cpidx.indexOf(ed[2].id)===-1){ // if a saddle point is removed, all edges of this point will be removed.
-                console.log("i am here")
+                console.log("finding temp")
+                console.log(tempidx)
+                console.log(eid)
                 this.anim.deleteOldEdge(eid);
                 this.anim.edges["temp"+tempidx] = ed
                 tempidx += 1;
@@ -54,7 +56,7 @@ class persistence{
         let that=this;
         d3.select("#simplifyBarcode")
             .on("click",()=>{
-                console.log(that.barcode)
+                // console.log(that.barcode)
                 for(let i=0;i<that.barcode.length;i++){
                     if(that.barcode[i].edge){
                         d3.select("#"+that.barcode[i].edge.key)
@@ -69,8 +71,8 @@ class persistence{
                                     .style("stroke-width","10")
                             })
                             .on("click",()=>{
-                                console.log("i am hre")
-                                console.log(that.barcode[i])
+                                // console.log("i am hre")
+                                // console.log(that.barcode[i])
                                 // delete saddle, saddle edges, and max/min
                                 let birthid;
                                 let deathid;
@@ -96,16 +98,28 @@ class persistence{
                                     }
                                 }
 
+                                that.anim.cp.forEach(p=>{console.log(p.id)});
+                                Object.keys(that.anim.edges).forEach(k=>{
+                                    console.log(k)
+                                })
+
+                                that.anim.drawFlag = false;
+                                that.findTempEdge();
+
+                                Object.keys(that.anim.edges).forEach(k=>{
+                                    console.log(k)
+                                })
+
                                 // make sure there are 4 edges for each saddle (beginner & expert)
-                                if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
-                                    that.findTempEdge();
-                                } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
-                                    that.anim.cp.forEach(p=>{
-                                        if(p.type==="saddle"){
-                                            this.anim.findEdges(p);
-                                        }
-                                    })
-                                }
+                                // if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                                //     that.findTempEdge();
+                                // } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
+                                //     that.anim.cp.forEach(p=>{
+                                //         if(p.type==="saddle"){
+                                //             this.anim.findEdges(p);
+                                //         }
+                                //     })
+                                // }
 
 
                                 // rename cp id
@@ -127,6 +141,7 @@ class persistence{
                                 // }
 
                                 
+                                
                                 console.log(that.anim.cp)
                                 console.log(that.anim.edges)
                                 // that.anim.edges = that.anim.findEdges(that.anim.cp)
@@ -135,8 +150,8 @@ class persistence{
                                 that.anim.constructMesh(that.anim.sigma)
                                 that.anim.drawAnnotation();
                                 that.anim.addedges();
-                                that.anim.addStep();
-                                that.anim.drawStep();
+                                // that.anim.addStep();
+                                // that.anim.drawStep();
                                 // d3.event.stopPropagation();
                             })
                     }
@@ -149,7 +164,7 @@ class persistence{
         let edgelist = [];
         let cplist = [];
         for(let i=0;i<this.barcode.length;i++){
-            console.log(i)
+            // console.log(i)
             if(this.barcode[i].death>0){
                 let min_dist = 100;
                 let min_ed_key;
@@ -199,7 +214,6 @@ class persistence{
             }
             
         })
-        console.log("i am here")
         let xScale = d3.scaleLinear()
             .domain([this.local_min, this.local_max])
             .range([this.margin.left,this.svgWidth-this.margin.right]);

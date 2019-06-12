@@ -356,6 +356,7 @@ class anim{
     }
 
     addNewEdge(startpoint, endpoint, type){
+        // console.log("adding!!", startpoint, endpoint, type)
         let edgeid = "edge"+startpoint.id+endpoint.id;
         // add to this.edges
         // check if there has already been an edge between start and end points
@@ -394,6 +395,10 @@ class anim{
 
         }
         
+    }
+
+    arcChecker(){ // check the order of flow lines
+
     }
 
     drawAnnotation(){
@@ -657,8 +662,26 @@ class anim{
         function dragendedTerminal(d,i) {
             let ifinter=false;
             let ifinter1 = false;
-            // let ifclose = false;
             d3.select(this).classed("active", false);
+            if(that.cp.length!=that.cp[that.cp.length-1].id+1){
+                for(let k=0; k<that.cp.length; k++){
+                    that.cp[k].id = k;
+                }
+                // rename edge key
+                for(let eid in that.edges){
+                    let ed = that.edges[eid];
+                    console.log(eid)
+                    if(["temp1","temp2","temp3","temp4"].indexOf(eid)===-1){
+                        that.deleteOldEdge(eid);
+                        that.addNewEdge(ed[0],ed[2],ed[3]);
+                    }
+                }
+            }
+
+            that.cp.forEach(p=>{console.log(p.id)});
+            Object.keys(that.edges).forEach(k=>{
+                console.log(k)
+            })
             if(d.value[3]==="max"){
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_max);
                 if(that.calDist({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},cpm)<0.03){
@@ -712,18 +735,12 @@ class anim{
                         that.addStep();
                         that.drawStep();
                     }
-                    if(that.cp.length!=that.cp[that.cp.length-1].id+1){
-                        for(let k=0; k<that.cp.length; k++){
-                            that.cp[k].id = k;
-                        }
-                        // rename edge key
-                        for(let eid in that.edges){
-                            let ed = that.edges[eid];
-                            that.deleteOldEdge(eid);
-                            that.addNewEdge(ed[0],ed[2],ed[3]);
-                        }
-                    }
-
+                    
+                    that.cp.forEach(p=>{console.log(p.id)});
+                    Object.keys(that.edges).forEach(k=>{
+                        console.log(k)
+                    })
+                
                 }
             } else if (d.value[3]==="min"){
                 let cpm = that.findMinPt({"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},that.cp_min);
@@ -778,18 +795,7 @@ class anim{
                         that.addStep();
                         that.drawStep();
                     }
-                    if(that.cp.length!=that.cp[that.cp.length-1].id+1){
-                        for(let k=0; k<that.cp.length; k++){
-                            that.cp[k].id = k;
-                        }
-                        // rename edge key
-                        for(let eid in that.edges){
-                            let ed = that.edges[eid];
-                            that.deleteOldEdge(eid);
-                            that.addNewEdge(ed[0],ed[2],ed[3]);
-                        }
-            
-                    }
+                    
                 }
             }
         }

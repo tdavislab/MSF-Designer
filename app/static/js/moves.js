@@ -22,11 +22,11 @@ class moves{
     amovePlus(){
         d3.select("#annotation")
             .on("click", ()=>{
-                console.log("amoveplus")
-                let x = this.anim.xMapReverse(d3.event.x-80);
-                let y = this.anim.yMapReverse(d3.event.y-100+7.5);
-                let mincp = this.anim.findMinPt({"x":x,"y":y},this.cpMax);
                 if(this.apType === "max"){
+                    console.log("amoveplus")
+                    let x = this.anim.xMapReverse(d3.event.x-80);
+                    let y = this.anim.yMapReverse(d3.event.y-100+7.5);
+                    let mincp = this.anim.findMinPt({"x":x,"y":y},this.cpMax);
                     let id = this.anim.cp.length;
                     let pt_max = new criticalPoint(id,x,y,"max");
                     this.cpMax.push(pt_max);
@@ -84,12 +84,12 @@ class moves{
     amoveMinus(){
         d3.select("#annotation")
             .on("click", ()=>{
-                console.log("amoveminus")
-                let x = this.anim.xMapReverse(d3.event.x-80);
-                let y = this.anim.yMapReverse(d3.event.y-100+7.5);
-                // **** Maybe there is no need to find the minpt?
-                let mincp = this.anim.findMinPt({"x":x,"y":y},this.anim.cp);
                 if(this.amType === "min"){
+                    console.log("amoveminus")
+                    let x = this.anim.xMapReverse(d3.event.x-80);
+                    let y = this.anim.yMapReverse(d3.event.y-100+7.5);
+                    // **** Maybe there is no need to find the minpt?
+                    let mincp = this.anim.findMinPt({"x":x,"y":y},this.anim.cp);
                     let id = this.anim.cp.length;
                     let pt_saddle = new criticalPoint(id,x,y,"saddle");
                     this.anim.cp.push(pt_saddle);

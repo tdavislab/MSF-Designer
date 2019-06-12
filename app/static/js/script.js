@@ -15,6 +15,7 @@ function init(){
                 Anim.stepRecorder.pop();
             }
             let currentStep = Anim.stepRecorder[Anim.stepRecorder.length-1];
+            console.log(currentStep.cp)
             // recover edge
             for(let eid in Anim.edges){
                 if(Object.keys(currentStep.edges).indexOf(eid)===-1){
@@ -29,9 +30,12 @@ function init(){
                 }
 
             }
+           
             // recover cp
             // cp with larger id will be undone first
             let cp = Anim.cp.slice();
+            let cp_id = [];
+            cp.forEach(p=>cp_id.push(p.id));
             Anim.cp = [];
             for(let i=0;i<cp.length;i++){
                 for(let j=0;j<currentStep.cp.length;j++){
@@ -43,10 +47,46 @@ function init(){
                     }
                 }
             }
+            for(let i=0;i<currentStep.cp.length;i++){
+                if(cp_id.indexOf(currentStep.cp[i].id)===-1){
+                    Anim.cp.push(new criticalPoint(currentStep.cp[i].id,currentStep.cp[i].x,currentStep.cp[i].y,currentStep.cp[i].type));
+                }
+            }
+            for(let eid in currentStep.edges){
+                if(Object.keys(Anim.edges).indexOf(eid)===-1){
+                    let p_ed0 = currentStep.edges[eid][0];
+                    let p_ed2 = currentStep.edges[eid][2];
+                    Anim.cp.forEach(p=>{
+                        if(p.id === currentStep.edges[eid][0].id){
+                            p_ed0 = p;
+                        } else if(p.id === currentStep.edges[eid][2].id){
+                            p_ed2 = p;
+                        }
+                    })
+                    // console.log(p_ed0,p_ed2)
+                    Anim.addNewEdge(p_ed0, p_ed2, currentStep.edges[3])
+                }
+            }
+            
+            for(let i=0;i<Anim.cp.length;i++){
+                Anim.cp[i].id = i;
+            }
+            for(let eid in Anim.edges){
+                let ed = Anim.edges[eid];
+                // console.log(eid)
+                // if(["temp1","temp2","temp3","temp4"].indexOf(eid)===-1){
+                Anim.deleteOldEdge(eid);
+                Anim.addNewEdge(ed[0],ed[2],ed[3]);
+                // }
+            }
+            Anim.edgeMapper = {};
             // recover edgemapper
             for(let eid in Anim.edges){
                 Anim.edgeMapper[eid] = Anim.initializeEdgeMapper(Anim.edges[eid]);
             }
+            console.log(Anim.cp)
+            console.log(Anim.edges)
+            console.log(Anim.edgeMapper)
             Anim.assignEdge();
             Anim.constructMesh(Anim.sigma);
             Anim.drawAnnotation();
