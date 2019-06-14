@@ -5,7 +5,6 @@ let barcode = [{"birth":0,"death":5},{"birth":0,"death":-1}]
 let Anim = new anim();
 let Sliders = new sliders(Anim);
 let Persistence = new persistence(barcode,Anim);
-// let Records = new records(Anim);
 let Moves = new moves(Anim,Sliders,Persistence);
 
 function init(){
@@ -15,86 +14,17 @@ function init(){
                 Anim.stepRecorder.pop();
             }
             let currentStep = Anim.stepRecorder[Anim.stepRecorder.length-1];
-            console.log(currentStep.cp)
-            // recover edge
-            for(let eid in Anim.edges){
-                if(Object.keys(currentStep.edges).indexOf(eid)===-1){
-                    Anim.deleteOldEdge(eid);
-                } else {
-                    Anim.edges[eid][0].x = currentStep.edges[eid][0].x;
-                    Anim.edges[eid][0].y = currentStep.edges[eid][0].y;
-                    Anim.edges[eid][1].x = currentStep.edges[eid][1].x;
-                    Anim.edges[eid][1].y = currentStep.edges[eid][1].y;
-                    Anim.edges[eid][2].x = currentStep.edges[eid][2].x;
-                    Anim.edges[eid][2].y = currentStep.edges[eid][2].y;
-                }
-
-            }
-           
-            // recover cp
-            // cp with larger id will be undone first
-            let cp = Anim.cp.slice();
-            let cp_id = [];
-            cp.forEach(p=>cp_id.push(p.id));
-            Anim.cp = [];
-            for(let i=0;i<cp.length;i++){
-                for(let j=0;j<currentStep.cp.length;j++){
-                    if(cp[i].id===currentStep.cp[j].id){
-                        cp[i].x = currentStep.cp[j].x;
-                        cp[i].y = currentStep.cp[j].y;
-                        Anim.cp.push(cp[i]);
-
-                    }
-                }
-            }
-            for(let i=0;i<currentStep.cp.length;i++){
-                if(cp_id.indexOf(currentStep.cp[i].id)===-1){
-                    Anim.cp.push(new criticalPoint(currentStep.cp[i].id,currentStep.cp[i].x,currentStep.cp[i].y,currentStep.cp[i].type));
-                }
-            }
-            for(let eid in currentStep.edges){
-                if(Object.keys(Anim.edges).indexOf(eid)===-1){
-                    let p_ed0 = currentStep.edges[eid][0];
-                    let p_ed2 = currentStep.edges[eid][2];
-                    Anim.cp.forEach(p=>{
-                        if(p.id === currentStep.edges[eid][0].id){
-                            p_ed0 = p;
-                        } else if(p.id === currentStep.edges[eid][2].id){
-                            p_ed2 = p;
-                        }
-                    })
-                    // console.log(p_ed0,p_ed2)
-                    Anim.addNewEdge(p_ed0, p_ed2, currentStep.edges[3])
-                }
-            }
-            
-            for(let i=0;i<Anim.cp.length;i++){
-                Anim.cp[i].id = i;
-            }
-            for(let eid in Anim.edges){
-                let ed = Anim.edges[eid];
-                // console.log(eid)
-                // if(["temp1","temp2","temp3","temp4"].indexOf(eid)===-1){
-                Anim.deleteOldEdge(eid);
-                Anim.addNewEdge(ed[0],ed[2],ed[3]);
-                // }
-            }
+            Anim.cp = currentStep.cp;
+            Anim.edges = currentStep.edges;
             Anim.edgeMapper = {};
-            // recover edgemapper
-            for(let eid in Anim.edges){
+            Object.keys(Anim.edges).forEach(eid=>{
                 Anim.edgeMapper[eid] = Anim.initializeEdgeMapper(Anim.edges[eid]);
-            }
-            console.log(Anim.cp)
-            console.log(Anim.edges)
-            console.log(Anim.edgeMapper)
+            })
             Anim.assignEdge();
             Anim.constructMesh(Anim.sigma);
             Anim.drawAnnotation();
             Anim.addedges();
             Anim.drawStep();
-            
-
-
         })
     d3.select("#ifskeleton")
         .on("click",()=>{

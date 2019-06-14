@@ -39,9 +39,10 @@ class criticalPoint{
 }
 
 class editStep{
-    constructor(cp,edges){
+    constructor(cp,edges,modif){
         this.cp = cp;
         this.edges = edges;
+        this.modif = modif;
     }
 }
 
@@ -154,6 +155,8 @@ class anim{
             this.minBound.push({"x":0,"y":v,"id":"b2"+i});
             this.minBound.push({"x":1,"y":v,"id":"b3"+i});
         }
+        this.minBound_dict = {};
+        this.minBound.forEach(p=>this.minBound_dict[p.id] = p);
 
         this.cp_min = this.cp_min.concat(this.minBound);
         this.edges = {};
@@ -229,16 +232,32 @@ class anim{
     }
 
     addStep(){
+        // modiType: cp, connNode, terminalNode, move, simplification
         // add step for legend
         let cp = [];
-        this.cp.forEach(p=>cp.push({"x":p.x,"y":p.y,"type":p.type,"id":p.id}));
+        this.cp.forEach(p=>{
+            let new_p = new criticalPoint(p.id, p.x, p.y, p.type);
+            new_p.fv = p.fv;
+            new_p.fv_perb = p.fv_perb;
+            new_p.lvalue = p.lvalue;
+            new_p.uvalue = p.uvalue;
+            cp.push(new_p);
+        })
         let edges = {};
+        let edgeMapper = {};
         for(let eid in this.edges){
-            let ed = this.edges[eid];
-            let ed0 = {"id":ed[0].id,"x":ed[0].x,"y":ed[0].y,"type":ed[0].type};
-            let ed1 = {"x":ed[1].x,"y":ed[1].y};
-            let ed2 = {"id":ed[2].id,"x":ed[2].x,"y":ed[2].y,"type":ed[2].type};
-            edges[eid] = [ed0, ed1, ed2, ed[3]];
+            let startpoint = cp[this.edges[eid][0].id];
+            let endpoint;
+            let type;
+            if(cp[this.edges[eid][2].id]!=undefined){
+                endpoint = cp[this.edges[eid][2].id];
+                type = endpoint.type;
+            } else {
+                endpoint = this.minBound_dict[this.edges[eid][2].id];
+                type = "min";
+            }
+            this.addNewEdge(startpoint, endpoint, type, cp, edges, edgeMapper);
+            
         }
         let step = new editStep(cp, edges);
         this.stepRecorder.push(step);
@@ -355,26 +374,26 @@ class anim{
         }
     }
 
-    addNewEdge(startpoint, endpoint, type){
+    addNewEdge(startpoint, endpoint, type, that_cp = this.cp, that_edges = this.edges, that_edgeMapper = this.edgeMapper){
         // console.log("adding!!", startpoint, endpoint, type)
         let edgeid = "edge"+startpoint.id+endpoint.id;
         // add to this.edges
         // check if there has already been an edge between start and end points
-        if(Object.keys(this.edges).indexOf(edgeid)!=-1){
-            this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2-0.03, "y":(startpoint.y+endpoint.y)/2-0.03},endpoint,type];
+        if(Object.keys(that_edges).indexOf(edgeid)!=-1){
+            that_edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2-0.03, "y":(startpoint.y+endpoint.y)/2-0.03},endpoint,type];
             edgeid = edgeid + "_1";
-            this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2+0.03, "y":(startpoint.y+endpoint.y)/2+0.03},endpoint,type];
+            that_edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2+0.03, "y":(startpoint.y+endpoint.y)/2+0.03},endpoint,type];
         } else {
-            this.edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2, "y":(startpoint.y+endpoint.y)/2},endpoint,type];
+            that_edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2, "y":(startpoint.y+endpoint.y)/2},endpoint,type];
         }
         // add this edge to corresponding critical points
         // startpoint is always a saddle point
-        this.cp[startpoint.id].edges[edgeid] = this.edges[edgeid]
-        if(this.cp[endpoint.id]!=undefined){
-            this.cp[endpoint.id].edges[edgeid] = this.edges[edgeid]
+        that_cp[startpoint.id].edges[edgeid] = that_edges[edgeid]
+        if(that_cp[endpoint.id]!=undefined){
+            that_cp[endpoint.id].edges[edgeid] = that_edges[edgeid]
         }
         // add this edge to this.edgeMapper
-        this.edgeMapper[edgeid] = this.initializeEdgeMapper(this.edges[edgeid])
+        that_edgeMapper[edgeid] = this.initializeEdgeMapper(that_edges[edgeid])
     }
 
     deleteOldEdge(edgeid){
@@ -469,6 +488,7 @@ class anim{
 
         function dragstarted(d) {
             d3.select(this).raise().classed("active", true);
+            cpChange = {"x":d.x, "y":d.y};
         }
               
         function draggedText(d,i) {
@@ -648,7 +668,7 @@ class anim{
             .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", draggedTerminal)
-                    .on("end", dragendedTerminal))
+                    .on("end", dragendedTerminal));
 
         function draggedTerminal(d,i){
             d3.select("#terminal"+i)
