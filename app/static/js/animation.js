@@ -229,6 +229,8 @@ class anim{
 
         this.dragTerminal = false;
 
+        console.log(this.ifArcViolate(this.cp[1])) // false
+
     }
 
     addStep(){
@@ -416,8 +418,41 @@ class anim{
         
     }
 
-    arcChecker(){ // check the order of flow lines
+    getAngle(x1, y1, x2, y2){
+        // compute the angle between a straight line and the horizontal line
+        let x = x1 - x2;
+        let y = y1 - y2;
+        if(x>=0 && y===0){
+            return 0;
+        } else if(x<0 && y===0){
+            return 180;
+        }
+        let angle = (180 + Math.atan2(-y,-x)*180 / Math.PI + 360) % 360;
+        return 360 - angle;
+    }
 
+    ifArcViolate(saddle){ // check the order of flow lines
+        let max_angles = [];
+        let min_angles = [];
+        for(let eid in saddle.edges){
+            let ed = saddle.edges[eid];
+            if(ed[3]==="max"){
+                max_angles.push(this.getAngle(ed[2].x, ed[2].y, ed[0].x, ed[0].y));
+            } else if(ed[3]==="min"){
+                min_angles.push(this.getAngle(ed[2].x, ed[2].y, ed[0].x, ed[0].y));
+            }
+        }
+        let min_angles_1 = Math.min(min_angles[0], min_angles[1]);
+        let min_angles_2 = Math.max(min_angles[0], min_angles[1]);
+        let max_angles_1 = Math.min(max_angles[0], max_angles[1]);
+        let max_angles_2 = Math.max(max_angles[0], max_angles[1]);
+        console.log(max_angles, min_angles)
+        console.log(min_angles_1, min_angles_2, max_angles_1, max_angles_2)
+        if(min_angles_1 > max_angles_1 && min_angles_1 < max_angles_2 && min_angles_2 > max_angles_2){
+            return false;
+        } else {
+            return true;
+        }
     }
 
     drawAnnotation(){
