@@ -446,13 +446,18 @@ class anim{
         let min_angles_2 = Math.max(min_angles[0], min_angles[1]);
         let max_angles_1 = Math.min(max_angles[0], max_angles[1]);
         let max_angles_2 = Math.max(max_angles[0], max_angles[1]);
-        console.log(max_angles, min_angles)
-        console.log(min_angles_1, min_angles_2, max_angles_1, max_angles_2)
+        // console.log(max_angles, min_angles)
+        // console.log(min_angles_1, min_angles_2, max_angles_1, max_angles_2)
         if(min_angles_1 > max_angles_1 && min_angles_1 < max_angles_2 && min_angles_2 > max_angles_2){
             return false;
         } else {
             return true;
         }
+    }
+
+    ifConfigAllowed(){ // integrate all checkers
+
+
     }
 
     drawAnnotation(){
@@ -523,7 +528,6 @@ class anim{
 
         function dragstarted(d) {
             d3.select(this).raise().classed("active", true);
-            cpChange = {"x":d.x, "y":d.y};
         }
               
         function draggedText(d,i) {
@@ -564,6 +568,15 @@ class anim{
                         }
                     }
                 }
+                // check the line order
+                that.cp.forEach(p=>{
+                    if(p.type === "saddle"){
+                        if(that.ifArcViolate(p)){
+                            ifInter = true;
+                        }
+                    }
+                })
+
                 if(!ifInter){
                     that.drawAnnotation();
                     that.addedges();
@@ -644,6 +657,18 @@ class anim{
                     }
                 }
             }
+            // check the line order
+            that.cp.forEach(p=>{
+                if(p.type === "saddle"){
+                    if(that.ifArcViolate(p)){
+                        ifInter = true;
+                        Object.keys(p.edges).forEach(eid=>{
+                            d3.select("#"+eid)
+                                .style("stroke", "red")
+                        })
+                    }
+                }
+            })
             if(!ifInter){
                 d3.select(this).classed("active", false);
                 if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
