@@ -38,14 +38,14 @@ class moves{
                     d3.select("#amoveplus")
                         .attr("value","Face-max move")
                     this.apType="";
-                    if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                    if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
                         this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max"];
                         this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max"];
                         this.anim.edges["temp3"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"];
                         this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
                         this.anim.drawAnnotation();
                         this.anim.addedges();
-                    } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
+                    } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                         this.anim.findEdges();
                         this.anim.drawAnnotation();
                         this.anim.addedges();
@@ -100,14 +100,14 @@ class moves{
                     d3.select("#amoveminus")
                         .attr("value","Face-min move")
                     this.amType="";
-                    if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                    if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
                         this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max"];
                         this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max"];
                         this.anim.edges["temp3"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"];
                         this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
                         this.anim.drawAnnotation();
                         this.anim.addedges();
-                    } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
+                    } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                         this.anim.findEdges();
                         this.anim.drawAnnotation();
                         this.anim.addedges();
@@ -160,7 +160,7 @@ class moves{
                             .attr("value","Edge-max move")
                         this.bpType="";
                         // fix edges
-                        if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                        if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
                             this.anim.deleteOldEdge(d.key);
                             this.anim.addNewEdge(pt_saddle,d.value[2],"max");
                             this.anim.addNewEdge(pt_saddle,pt_max,"max");
@@ -169,7 +169,7 @@ class moves{
                             this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"]; // new min edge 2
                             this.anim.drawAnnotation();
                             this.anim.addedges();
-                        } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
+                        } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                             this.anim.findEdges();
                             this.anim.drawAnnotation();
                             this.anim.addedges();
@@ -223,7 +223,7 @@ class moves{
                             .attr("value","Edge-min move")
                         this.bmType="";
                         // fix edges
-                        if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                        if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
                             this.anim.deleteOldEdge(d.key);
                             this.anim.addNewEdge(pt_saddle,d.value[2],"min");
                             this.anim.addNewEdge(pt_saddle,pt_min,"min");
@@ -232,7 +232,7 @@ class moves{
                             this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"max"]; // new max edge 2
                             this.anim.drawAnnotation();
                             this.anim.addedges();
-                        } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
+                        } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                             this.anim.findEdges();
                             this.anim.drawAnnotation();
                             this.anim.addedges();
@@ -290,7 +290,7 @@ class moves{
                         .attr("value","Vertex-max Move");                
                     this.dpType=""
 
-                    if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                    if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
                         let tempIdx = 1;
                         for(let eid in d.edges){
                             let dirc_x = (d.edges[eid][0].x - d.edges[eid][2].x)/Math.abs((d.edges[eid][0].x - d.edges[eid][2].x))*0.04;
@@ -306,7 +306,7 @@ class moves{
                         this.anim.edges["temp"+(tempIdx+1)] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"]; // new min edge 2 
                         this.anim.drawAnnotation();
                         this.anim.addedges();
-                    } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
+                    } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                         this.anim.findEdges();
                         this.anim.drawAnnotation();
                         this.anim.addedges();
@@ -365,14 +365,14 @@ class moves{
                     d3.select("#dmoveminus")
                         .attr("value","Vertex-min Move");
                     this.dmType=""
-                    if(d3.select('input[name="mode-type"]:checked').node().value==="beginner"){
+                    if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
                         this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max"];
                         this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max"];
                         this.anim.edges["temp3"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"];
                         this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
                         this.anim.drawAnnotation();
                         this.anim.addedges();
-                    } else if(d3.select('input[name="mode-type"]:checked').node().value==="expert"){
+                    } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                         this.anim.findEdges();
                         this.anim.drawAnnotation();
                         this.anim.addedges();

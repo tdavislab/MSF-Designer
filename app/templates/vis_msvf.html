@@ -18,25 +18,26 @@
 <body>
     <div class="container-fluid" style="width: 95%; padding-top: 20px">
 
-        <h1>Visualization For Morse-Smale Vector Fields Design</h1>
+        <!-- <h1>Visualization For Morse-Smale Vector Fields Design</h1> -->
+        <h1>Visualization For Morse Vector Fields Design</h1>
         <!-- <hr style="margin-bottom: 0"> -->
         <!-- <br> -->
         <div id="mode" style="padding-top:10px;padding-bottom:10px">
-            <input type="radio" name="mode-type" value="beginner" id="mode1" checked="checked">
-            <label for="mode1">Beginner Mode</label>
-            <input type="radio" name="mode-type" value="expert" id="mode2" >
-            <label for="mode2">Expert Mode</label>
+            <input type="radio" name="mode-type" value="manual" id="mode1" checked="checked">
+            <label for="mode1">Manual Mode</label>
+            <input type="radio" name="mode-type" value="semi-automatic" id="mode2" >
+            <label for="mode2">Semi-automatic Mode</label>
         </div>
         <table>
             <tr>
                 <td id="container" width="1050px" height = "1050px" style="border: 2px solid grey; background-color: white" rowspan="2">
                                             
-                        <canvas id="animation" style="position: absolute; top:160px; left:90px; z-index:1" width="1000" height="1000" ></canvas>
-                        <svg id="annotation" style="position: absolute; top:160px; left:90px; z-index:1" width="1000" height="1000"></svg>
+                        <canvas id="animation" style="position: absolute; top:160px; left:110px; z-index:1" width="1000" height="1000" ></canvas>
+                        <svg id="annotation" style="position: absolute; top:160px; left:110px; z-index:1" width="1000" height="1000"></svg>
                     
                 </td>
                 <td id="button-group" style="vertical-align: top; padding: 20px; border: 2px solid grey">
-                        <h4>Control Panel</h4>
+                        <h4>Building Block Panel</h4>
                         <br>
                         <p>                    
                             <input type="button" id="amoveplus" class = "btn btn-danger" value="Face-max Move"></p>
@@ -52,13 +53,20 @@
                         </p>
                         <p><input type="button" id="reset" class="btn btn-primary btn-block"  value="Reset"></p>  
                         <p><input type="button" id="ifflow" class="btn btn-primary btn-block"  value="Disable Flow"></p>  
-                        <p><input type="button" id="ifskeleton" class="btn btn-primary btn-block"  value="Only Display Skeleton"></p>                 
-                        
+                        <p><input type="button" id="ifskeleton" class="btn btn-primary btn-block"  value="Only Display Skeleton"></p>       
                 </td>
                 <td rowspan="2" id="functionValues" style="padding: 20px; border: 1px solid black">
+                        <h4>Function Control Panel</h4>
+                        <br>
                         <p><input type="button" id="enableFV" class="btn btn-outline-primary btn-block"  value="Enable Function Value Control"></p> 
     
     
+                </td>
+                <td rowspan="3" id="undogroup" style="padding: 20px; border: 1px solid grey;">
+                    <div>
+                        <input type="button" class="btn btn-outline-primary" id="undobutton" value="Undo">
+                    </div>
+
                 </td>
             </tr>
             <tr>
@@ -80,18 +88,21 @@
                     </p> 
                 </td>
             </tr>
-            <tr>
+            <!-- <tr>
                     <td id="undogroup" style="padding: 20px; border: 1px solid grey;" colspan="3">
                         <div>
                             <input type="button" class="btn btn-outline-primary" id="undobutton" value="Undo">
                         </div>
                     </td>
-            </tr>
+            </tr> -->
             <tr>
                 <td id="phgroup" style="padding: 20px; border: 1px solid grey;" colspan="3">
                     <div class="scrollable" style="height: 350px;">
+                        <h4>Barcode Panel</h4>
+                        <br>
                         <input type="button" class="btn btn-outline-primary" id="computeBarcode" value="Compute Barcode">
                         <input type="button" class="btn btn-outline-primary" id="simplifyBarcode" value="Simplification">
+                        <input type="button" id="cpdetection" class="btn btn-outline-primary"  value="Singularities Detection">
                         <div id="persistencegroup">
                             <div style="position: relative; top: 50px; left: 700px;" id="loadergroup"></div>
                         </div> 

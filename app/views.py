@@ -47,6 +47,22 @@ def exportFile():
     outfile.close()
     return jsdata
 
+@app.route('/detection', methods=['POST','GET'])
+def RobustCriticalPointDetection():
+    jsdata = request.form.get('grad_data')
+    jsdata1 = json.loads(jsdata)
+    jsdata1 = pd.DataFrame(jsdata1)
+
+    grad = jsdata1.loc[:,["x_new","y_new","dx","dy"]]
+    print(grad.iloc[0:5,:])
+    with open(path.join(APP_STATIC,"assets/rcpd.txt"),"w") as f:
+        for i in range(len(grad)):
+            line = grad.iloc[i,:]
+            f.write(str(line["x_new"])+" "+str(line["y_new"])+" "+str(line["dx"])+" "+str(line["dy"])+"\n")
+    return jsonify(data=grad)
+
+
+
 @app.route('/import', methods=['POST','GET'])
 def importFile():
     jsdata = request.files['files']
@@ -100,7 +116,7 @@ def exportGrad():
             row = list(dim0.iloc[i,:])
             birth = (row[0]-1)/100
             death = (row[1]-1)/100
-            if death - birth > 0.1 or death < 0:
+            if death - birth > 0.01 or death < 0:
                 bar.append({"birth":birth,"death":death})
     return jsonify(data=bar)
 

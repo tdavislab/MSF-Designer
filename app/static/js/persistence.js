@@ -6,7 +6,7 @@ class persistence{
         this.barcode = barcode;
         this.margin = {"top":20,"bottom":20,"left":10,"right":10};
         this.svgWidth = 1200;
-        this.svgHeight = 300;
+        this.svgHeight = 250;
         this.svg = d3.select("#persistencegroup").append("svg")
             .attr("id","phSVG")
             .attr("width", this.svgWidth)
@@ -243,6 +243,7 @@ class persistence{
                 }
             })
             .attr("height",20)
+            .attr("id",(d,i)=>"barcode"+i)
             // .attr("transform", "translate("+this.margin.left+", 0)")
             // .attr("stroke","black")
             // .attr("fill","rgb(172,218,224)")
@@ -250,23 +251,41 @@ class persistence{
             .on("mouseover",mouseover)
             .on("mouseout",mouseout)
 
-            function mouseover(d){
-                d3.select(this).classed("phactive",true);
-                if(d.edge!=undefined){
-                    d3.select("#"+d.edge.key)
-                        .style("stroke","red")
-                        .style("stroke-width","10");
-                }                
+        function mouseover(d){
+            d3.select(this).classed("phactive",true);
+            if(d.edge!=undefined){
+                d3.select("#"+d.edge.key)
+                    .style("stroke","red")
+                    .style("stroke-width","10");
+            }                
+        }
+
+        function mouseout(d){
+            d3.select(this).classed("phactive",false);
+            if(d.edge!=undefined){
+                d3.select("#"+d.edge.key)
+                    .style("stroke","black")
+                    .style("stroke-width","2");
+            }
+        }
+
+        let cpmax = [];
+        this.anim.cp.forEach(p=>{
+            if(p.type==="max"){
+                cpmax.push(p);
+            }
+        })
+        console.log(cpmax)
+        if(this.barcode.length > cpmax.length){
+            let unpairNum = this.barcode.length - cpmax.length;
+            console.log(unpairNum)
+            for(let k=0; k<unpairNum; k++){
+                let barId = this.barcode.length-1-k;
+                d3.select("#barcode"+barId)
+                    .attr("fill","rgb(212,58,129)")
             }
 
-            function mouseout(d){
-                d3.select(this).classed("phactive",false);
-                if(d.edge!=undefined){
-                    d3.select("#"+d.edge.key)
-                        .style("stroke","black")
-                        .style("stroke-width","2");
-                }
-            }
+        }
 
 
     }
