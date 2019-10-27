@@ -161,10 +161,11 @@ class moves{
                         this.bpType="";
                         // fix edges
                         if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
-                            this.anim.deleteOldEdge(d.key);
+                            
                             this.anim.addNewEdge(pt_saddle,d.value[2],"max");
                             this.anim.addNewEdge(pt_saddle,pt_max,"max");
                             this.anim.addNewEdge(d.value[0],pt_max,"max");
+                            this.anim.deleteOldEdge(d.key);
                             this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"]; // new min edge 1
                             this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"]; // new min edge 2
                             this.anim.drawAnnotation();
