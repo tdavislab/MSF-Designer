@@ -55,13 +55,17 @@ def RobustCriticalPointDetection():
 
     grad = jsdata1.loc[:,["x_new","y_new","dx","dy"]]
     print(grad.iloc[0:5,:])
-    with open(path.join(APP_STATIC,"assets/rcpd.txt"),"w") as f:
+    with open(path.join(APP_STATIC,"assets/rcpd"),"w") as f:
         for i in range(len(grad)):
             line = grad.iloc[i,:]
             f.write(str(line["x_new"])+" "+str(line["y_new"])+" "+str(line["dx"])+" "+str(line["dy"])+"\n")
-    return jsonify(data=grad)
-
-
+    os.system(APP_STATIC+"/assets/RobustCriticalPointDetection/build/./CriticalPointDetection "+APP_STATIC+"/assets/rcpd 100 100")
+    cp_detection = []
+    with open(APP_STATIC+"/assets/rcpd.cp.txt") as f:
+        for line in f:
+            line = line.split(" ")
+            cp_detection.append({"x":float(line[1]), "y":float(line[2])}) 
+    return jsonify(data=cp_detection)
 
 @app.route('/import', methods=['POST','GET'])
 def importFile():
@@ -78,13 +82,13 @@ def exportGrad():
     # print(jsdata)
     jsdata1 = json.loads(jsdata)
     jsdata1 = pd.DataFrame(jsdata1)
-    filename = path.join(APP_STATIC,"assets/grad.csv")
-    jsdata1.to_csv(filename)
+    # filename = path.join(APP_STATIC,"assets/grad.csv")
+    # jsdata1.to_csv(filename)
 
-    grad = pd.read_csv(filename)
-    grad = grad.iloc[:,1:]
-    grad = grad.loc[:,["x_new","y_new","fv"]]
-    print(grad.iloc[0:5,:])
+    # grad = pd.read_csv(filename)
+    # grad = grad.iloc[:,1:]
+    # grad = grad.loc[:,["x_new","y_new","fv"]]
+    grad = jsdata1.loc[:,["x_new","y_new","fv"]]
 
     sp = constructSp(grad)
     with open(path.join(APP_STATIC,"assets/grad.txt"),"w") as f:

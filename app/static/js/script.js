@@ -162,11 +162,10 @@ function init(){
     })
 
     $("#cpdetection").click(function(){
-        console.log("cpdetection!!")
         $.post("/detection",{
             grad_data: JSON.stringify(Anim.grad)
         }, function(res){
-            console.log("detection response", res)
+            Anim.criticalPointsDetection(res);
         })
     })
 } init();

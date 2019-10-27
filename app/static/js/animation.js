@@ -242,6 +242,15 @@ class anim{
 
     }
 
+    criticalPointsDetection(cp_detection){
+        console.log(cp_detection)
+        if(cp_detection.length > this.cp.length){
+            console.log("more")
+        }
+
+
+    }
+
     addStep(){
         // modiType: cp, connNode, terminalNode, move, simplification
         // add step for legend
@@ -1300,7 +1309,6 @@ class anim{
                 //     dx1 = dx_new;
                 //     dy1 = dy_new;
                 // }
-                let fv = this.calFV(x,y,cpt);
                 let pt_new = [x,y];
                 let dx=dx1;
                 let dy=dy1;
@@ -1342,6 +1350,9 @@ class anim{
                     
 
                 }
+                let fv_cp = this.findMinPt({"x":x,"y":y},this.cp)
+                let fv = this.calFV(x,y,fv_cp);
+
                 this.grad[gradid]["dx"] = dx;
                 this.grad[gradid]["dy"] = dy;
                 this.grad[gradid]["x_new"] = pt_new[0];
