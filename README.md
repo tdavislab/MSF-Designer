@@ -1,8 +1,15 @@
+Before 
+
 ## How to run
-Exporting files requires a server, please follow the instruction to set up.
+Before run the code, please install the following software/libraries:
+1. Flask: https://palletsprojects.com/p/flask/
+2. Perseus: http://people.maths.ox.ac.uk/nanda/perseus/index.html
+3. Robust Critical Point Detection: https://github.com/bhatiaharsh/RobustCriticalPointDetection
+
+After installation, please follow the following instruction to set up.
 1. Run
 `git clone git@github.com:zhou325/VIS-MSVF.git` to download the repository.
-2. `cd` into the root of this project, run `pip3 install -r requirements.txt` to install the required libraries.
+2. Move Perseus and Robust Critical Point Detection to `VIS-MSVF/app/static/assets/`
 3. Use `python3 run.py` to run the server.
 4. Visit http://localhost:8080/ (If possible, please use Chrome.)
 
