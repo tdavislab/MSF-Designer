@@ -477,6 +477,7 @@ class anim{
         // console.log("draw annotation")
         // console.log(this.cp)
         let edgelist = d3.entries(this.edges);
+        console.log(edgelist)
         // draw frames (local minimum)
         this.frameGroup.selectAll("line")
             .data(this.frames)
@@ -490,6 +491,7 @@ class anim{
         let circles = this.pointsGroup.selectAll("circle").data(this.cp);
         circles.exit().remove();
         circles = circles.enter().append("circle").merge(circles)
+            .attr("id",(d)=>"cpbackground"+d.id)
             .attr("cx",(d)=>this.xMap(d.x))
             .attr("cy",(d)=>this.yMap(d.y))
             .attr("r",15)
@@ -532,6 +534,7 @@ class anim{
         let labels = this.labelsGroup.selectAll("text").data(this.cp);
         labels.exit().remove();
         labels = labels.enter().append("text").merge(labels)
+            .attr("id",(d)=>"cplabel"+d.id)
             .attr("x",(d)=>this.xMap(d.x)-20)
             .attr("y",(d)=>this.yMap(d.y)-20)
             .text((d,i)=>i+1)
@@ -542,13 +545,14 @@ class anim{
         let nodes = this.connNodesGroup.selectAll("circle").data(edgelist);
         nodes.exit().remove();
         nodes = nodes.enter().append("circle").merge(nodes)
+            .attr("id",(d)=>"conn_"+d.key)
             .attr("cx",(d)=>this.xMap(d.value[1].x))
             .attr("cy",(d)=>this.yMap(d.value[1].y))
             .attr("class","connNode")
             .call(d3.drag()
                 .on("start", dragstarted)
-                .on("drag", draggedNode)
-                .on("end", dragendedNode))
+                .on("drag", draggedConnNode)
+                .on("end", dragendedConnNode))
             .on("mouseover",mouseover)
             .on("mouseout",mouseout);
 
@@ -556,9 +560,9 @@ class anim{
         let terminalNodes = this.terminalNodesGroup.selectAll("circle").data(edgelist)
         terminalNodes.exit().remove();
         terminalNodes = terminalNodes.enter().append("circle").merge(terminalNodes)
-            .attr("cx",(d)=>this.terminalPosition(d)[0])
-            .attr("cy",(d)=>this.terminalPosition(d)[1])
-            .attr("id",(d,i)=>"terminal"+i)
+            .attr("id",(d,i)=>"terminal_"+d.key)
+            .attr("cx",(d)=>this.terminalPosition(d.value)[0])
+            .attr("cy",(d)=>this.terminalPosition(d.value)[1])
             .attr("class","terminalNode")
             .on("mouseover",mouseover)
             .on("mouseout",mouseout)
@@ -569,132 +573,146 @@ class anim{
 
         let that=this;
   
-        function draggedText(d,i) {
+        function draggedText(d) {
+            // just draw, do not actually change values
             if(that.ifInsideCanvas(d3.mouse(this))){
-                d3.select("#cp"+d.id)
-                    .attr("x",(d)=>{
-                        d.x = that.xMap.invert(d3.mouse(this)[0])
-                        return that.xMap(d.x)})
-                    .attr("y",(d)=>{
-                        d.y = that.yMap.invert(d3.mouse(this)[1])
-                        return that.yMap(d.y)});
+                d3.select(this)
+                    .attr("x",d3.mouse(this)[0])
+                    .attr("y",d3.mouse(this)[1]);
+                d3.select("#cplabel"+d.id)
+                    .attr("x",d3.mouse(this)[0])
+                    .attr("y",d3.mouse(this)[1]);
+                d3.select("cpbackground"+d.id)
+                    .attr("cx",d3.mouse(this)[0])
+                    .attr("cy",d3.mouse(this)[1]);
                 for(let eid in d.edges){
-                    that.mapEdges(eid);
+                    let ed = d.edges[eid];
+                    let ed_new;
+                    if(d.type==="saddle"){
+                        ed_new = [{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},ed[1],ed[2]];
+                    } else{
+                        ed_new = [ed[0],ed[1],{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])}];
+                    }
+                    d3.select("#"+eid)
+                        .attr("d",that.curve0(ed_new))
+                    d3.select("#terminal_"+eid)
+                        .attr("cx",that.terminalPosition(ed_new)[0])
+                        .attr("cy",that.terminalPosition(ed_new)[1])
                 }
-                that.addedges();
-                that.drawAnnotation();
-
             }
-            this.dragTerminal = true;
-            
         }
 
         function dragendedText(d) {
-            if(this.dragTerminal){
-                d3.select(this).classed("active", false);
+            d3.select(this).classed("active", false);
+            if(that.ifTempEdge()){
+                that.drawAnnotation();
+                that.addedges();
+            } else if(that.ifInsideCanvas(d3.mouse(this))){
+                d.x = that.xMap.invert(d3.mouse(this)[0]);
+                d.y = that.yMap.invert(d3.mouse(this)[1]);
+                for(let eid in d.edges){
+                    that.mapEdges(eid);
+                }
                 // check edge intersection
                 let ifInter = false;
-                for(let eid1 in that.edges){
-                    for(let eid2 in that.edges){
-                        if(eid1 != eid2){
-                            if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
-                                d3.select("#"+eid1)
-                                    .style("stroke", "red")
-                                d3.select("#"+eid2)
-                                    .style("stroke", "red")
-                                ifInter = true;
-                            }
+                for(let i=0; i<edgelist.length-1; i++){
+                    for(let j=i+1; j<edgelist.length; j++){
+                        let eid1 = edgelist[i].key;
+                        let eid2 = edgelist[j].key;
+                        if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
+                            that.highlightIntersection([eid1,eid2]);
+                            ifInter = true;
                         }
                     }
                 }
                 // check the line order
-                that.cp.forEach(p=>{
-                    if(p.type === "saddle"){
-                        if(that.ifArcViolate(p)){
-                            ifInter = true;
+                if(!ifInter){
+                    that.cp.forEach(p=>{
+                        if(p.type === "saddle"){
+                            if(that.ifArcViolate(p)){
+                                alert("Lines are not in correct order!")
+                                ifInter = true;
+                                that.highlightIntersection(Object.keys(p.edges));
+                            }
                         }
-                    }
-                })
-
+                    })
+                }
                 if(!ifInter){
                     that.drawAnnotation();
                     that.addedges();
                     if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
                         that.assignEdge();
                         that.constructMesh(that.sigma);
-                        that.drawFlag = true;
+                        that.drawFlow();
                     }
                     that.addStep();
                     that.drawStep();
-                } else {
-                    that.drawFlag = false;
-                }
-                this.dragTerminal = false;
+                } else { that.drawFlag = false; }
             }
-            
-            
         }
 
-        
-        
-        
-
-        
-
-        function draggedNode(d,i){
-            if(that.xMap.invert(d3.mouse(this)[0])>=0 && that.xMap.invert(d3.mouse(this)[0])<=1 && that.yMap.invert(d3.mouse(this)[1])>=0 && that.yMap.invert(d3.mouse(this)[1])<=1){
-                that.mapEdges(d.key);
-                d3.select(this).attr("cx", d.value[1].x = that.xMap.invert(d3.mouse(this)[0])).attr("cy", d.value[1].y = that.yMap.invert(d3.mouse(this)[1]));
-                that.drawAnnotation();
-                that.addedges();
+        function draggedConnNode(d){
+            // just draw, do not actually change values
+            if(that.ifInsideCanvas(d3.mouse(this))){
+                d3.select(this)
+                    .attr("cx",d3.mouse(this)[0])
+                    .attr("cy",d3.mouse(this)[1]);
+                let edgeid = d.key;
+                d3.select("#"+edgeid)
+                    .attr("d",(d)=>that.curve0([d.value[0],{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},d.value[2]]))
             } 
         }
 
-        function dragendedNode(d) {
-            let ifInter = false;
-            for(let eid in that.edges){
-                if(eid!=d.key && ["temp1","temp2","temp3","temp4"].indexOf(eid)===-1){
-                    if(that.ifCurvesIntersect(that.edgeMapper[eid], that.edgeMapper[d.key])){
-                        d3.select("#"+eid)
-                            .style("stroke", "red")
-                        d3.select("#"+d.key)
-                            .style("stroke", "red")
-                        ifInter = true;
-                    }
-                }
-            }
-            // check the line order
-            that.cp.forEach(p=>{
-                if(p.type === "saddle"){
-                    if(that.ifArcViolate(p)){
-                        ifInter = true;
-                        Object.keys(p.edges).forEach(eid=>{
-                            d3.select("#"+eid)
-                                .style("stroke", "red")
-                        })
-                    }
-                }
-            })
-            if(!ifInter){
-                d3.select(this).classed("active", false);
-                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                    that.assignEdge();
-                    that.constructMesh(that.sigma);
-                    that.drawFlag = true;
-                }
-                that.addStep();
-                that.drawStep();
-                that.addedges();
+        function dragendedConnNode(d){
+            d3.select(this).classed("active", false);
+            if(that.ifTempEdge()){
                 that.drawAnnotation();
-            } else {
-                that.drawFlag = false;
-            }
+                that.addedges();
+            } else if(that.ifInsideCanvas(d3.mouse(this))){
+                d.value[1].x = that.xMap.invert(d3.mouse(this)[0]);
+                d.value[1].y = that.yMap.invert(d3.mouse(this)[1]);
+                that.mapEdges(d.key);
+                let ifInter = false;
+                for(let eid in that.edges){
+                    if(eid!=d.key){
+                        if(that.ifCurvesIntersect(that.edgeMapper[eid], that.edgeMapper[d.key])){
+                            that.highlightIntersection([d.key, eid]);
+                            ifInter = true;
+                        }
+                    }
+                }
+                // check the line order
+                if(!ifInter){
+                    that.cp.forEach(p=>{
+                        if(p.type === "saddle"){
+                            if(that.ifArcViolate(p)){
+                                alert("Lines are not in correct order!")
+                                ifInter = true;
+                                that.highlightIntersection(Object.keys(p.edges));
+                            }
+                        }
+                    })
+                }
+                
+                if(!ifInter){
+                    that.drawAnnotation();
+                    that.addedges();
+                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        that.assignEdge();
+                        that.constructMesh(that.sigma);
+                        that.drawFlow();
+                    }
+                    that.addStep();
+                    that.drawStep();
+                } else { that.drawFlag = false; }
+            } 
         }
 
         
 
-        function draggedTerminal(d,i){
-            d3.select("#terminal"+i)
+        function draggedTerminal(d){
+            // just draw, do not actually change values
+            d3.select(this)
                 .attr("cx",d3.mouse(this)[0])
                 .attr("cy",d3.mouse(this)[1])
             let edgeid = d.key;
@@ -901,6 +919,17 @@ class anim{
 
     }
 
+    drawFlow(){
+        this.drawFlag = true;
+        d3.select("#ifflow").node().value = "Disable Flow";
+    }
+
+    highlightIntersection(eid_list){
+        eid_list.forEach(eid=>{
+            d3.select("#"+eid).style("stroke", "red");
+        })
+    }
+
     ifInsideCanvas(node_coord){
         // When dragging a node, check whether it is still inside the canvas or not.
         let xcoord = node_coord[0];
@@ -912,28 +941,38 @@ class anim{
         } else{ return false; }
     }
 
+    ifTempEdge(){
+        let temp_list = ["temp1","temp2","temp3","temp4"];
+        for(let eid in this.edges){
+            if(temp_list.indexOf(eid)!=-1){
+                alert("Please connect all edges first!")
+                return true;
+            }
+        }
+        return false;
+    }
+
     terminalPosition(edge){
         let tx;
         let ty;
-        if(edge.value[2].y===0 || edge.value[2].y===1 || edge.value[0].x===edge.value[2].x){
-            tx = this.xMap(edge.value[2].x);
-        } else if(edge.value[2].x===0){
-            tx = this.xMap(edge.value[2].x+0.005);
-        } else if(edge.value[2].x===1){
-            tx = this.xMap(edge.value[2].x-0.005);
+        if(edge[2].y===0 || edge[2].y===1 || edge[0].x===edge[2].x){
+            tx = this.xMap(edge[2].x);
+        } else if(edge[2].x===0){
+            tx = this.xMap(edge[2].x+0.005);
+        } else if(edge[2].x===1){
+            tx = this.xMap(edge[2].x-0.005);
         } else {
-            tx = this.xMap(edge.value[2].x + (edge.value[0].x-edge.value[2].x)/Math.abs(edge.value[0].x-edge.value[2].x)*0.015);
+            tx = this.xMap(edge[2].x + (edge[0].x-edge[2].x)/Math.abs(edge[0].x-edge[2].x)*0.015);
         }
 
-        if(edge.value[2].x===0 || edge.value[2].x===1 || edge.value[0].y===edge.value[2].y){
-            ty = this.yMap(edge.value[2].y);
-        } else if(edge.value[2].y===0){
-            ty = this.yMap(edge.value[2].y+0.005);
-
-        } else if(edge.value[2].y===1){
-            ty = this.yMap(edge.value[2].y-0.005);
+        if(edge[2].x===0 || edge[2].x===1 || edge[0].y===edge[2].y){
+            ty = this.yMap(edge[2].y);
+        } else if(edge[2].y===0){
+            ty = this.yMap(edge[2].y+0.005);
+        } else if(edge[2].y===1){
+            ty = this.yMap(edge[2].y-0.005);
         } else {
-            ty = this.yMap(edge.value[2].y + (edge.value[0].y-edge.value[2].y)/Math.abs(edge.value[0].y-edge.value[2].y)*0.015)
+            ty = this.yMap(edge[2].y + (edge[0].y-edge[2].y)/Math.abs(edge[0].y-edge[2].y)*0.015)
         }
 
         return [tx,ty];
