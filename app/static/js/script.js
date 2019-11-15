@@ -81,15 +81,16 @@ function init(){
                     data=response;
                     console.log(data);
                     // recover cp and edges
+                    // To minimize the file size, only save the keys of cp's and edges
                     let edges_recover = [];
                     let cp_recover = [];
                     Object.keys(data.edge).forEach(eid=>{
                         let ed = data.edge[eid];
                         let ed_recover;
-                        if(data.cp[ed[2]]!=undefined){
-                            ed_recover = [data.cp[ed[0]], ed[1], data.cp[ed[2]], ed[3]];
-                        } else {
+                        if(ed[2].ifBound){
                             ed_recover = [data.cp[ed[0]], ed[1], ed[2], ed[3]];
+                        } else {
+                            ed_recover = [data.cp[ed[0]], ed[1], data.cp[ed[2]], ed[3]];
                         }
                         edges_recover[eid] = ed_recover;
                     })
@@ -128,20 +129,19 @@ function init(){
         Object.keys(Anim.edges).forEach(eid=>{
             let ed = Anim.edges[eid];
             let ed_new;
-            if(ed[2].type!=undefined){
-                ed_new = [ed[0].id, ed[1], ed[2].id, ed[3]];
-            } else {
+            if(ed[2].ifBound){
                 ed_new = [ed[0].id, ed[1], ed[2], ed[3]];
+            } else {
+                ed_new = [ed[0].id, ed[1], ed[2].id, ed[3]];
             }
             edges_new[eid] = ed_new;
         })
-        // console.log(cp_new)
-        let anim_info = {"cp":cp_new, "edge":edges_new, "edgeMapper":Anim.edgeMapper, "filename":v}
+        let anim_info = {"cp":cp_new, "edge":edges_new, "edgeMapper":Anim.edgeMapper, "filename":v};
         console.log(anim_info)
         $.post( "/export", {
             javascript_data: JSON.stringify(anim_info)
         });
-        alert("Configuration saved")
+        alert("Configuration saved");
     })
 
     $("#computeBarcode").click(function(){
