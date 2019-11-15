@@ -1,13 +1,12 @@
-
-// local minimum always equal to 0 
-let barcode = [{"birth":0,"death":5},{"birth":0,"death":-1}]
-
-let Anim = new anim();
-let Sliders = new sliders(Anim);
-let Persistence = new persistence(barcode,Anim);
-let Moves = new moves(Anim,Sliders,Persistence);
-
 function init(){
+    // local minimum always equal to 0 
+    let barcode = [{"birth":0,"death":5},{"birth":0,"death":-1}]
+
+    let Anim = new anim();
+    let Sliders = new sliders(Anim);
+    let Persistence = new persistence(barcode,Anim);
+    let Moves = new moves(Anim,Sliders,Persistence);
+
     d3.select("#undobutton")
         .on("click",()=>{
             if(Anim.stepRecorder.length>1){
@@ -153,7 +152,7 @@ function init(){
         }, function(res){
             Persistence.barcode = res.data;
             Persistence.drawPersistence();
-            Persistence.recoverEdge();
+            Persistence.recoverPairs();
             Persistence.recoverPersisitence();
             d3.select("#loadergroup").classed("loader",false)
             d3.select("#persistencegroup").select("svg").style("visibility","visible")
@@ -168,110 +167,79 @@ function init(){
             Anim.criticalPointsDetection(res);
         })
     })
-} init();
 
-
-
-d3.select("#reset")
+    d3.select("#reset")
     .on("click",()=>{
         Anim.clearCanvas();
         Anim = new anim();
         Sliders = new sliders(Anim);
         Persistence = new persistence(barcode,Anim);
         Moves = new moves(Anim,Sliders,Persistence);
-        
-    })
-d3.select("#amoveplus")
-    .on("click",()=>{
-        if(Moves.apType===""){
-            Anim.drawFlag=false;
-            Moves.apType = "max";
-            Moves.amovePlus();
-            d3.select("#amoveplus")
-                .attr("value","Add a max point")
-        }
     })
 
-d3.select("#amoveminus")
-    .on("click",()=>{
-        if(Moves.amType===""){
-            Anim.drawFlag=false;
-            Moves.amType = "min";
-            Moves.amoveMinus();
-            d3.select("#amoveminus")
-                .attr("value","Add a min point")
-        }
-    })
-d3.select("#bmoveplus")
-    .on("click",()=>{
-        if(Moves.bpType===""){
-            Anim.drawFlag=false;
-            Moves.bpType = "max";
-            Moves.bmovePlus();
-            d3.select("#bmoveplus")
-                .attr("value","Add a max point");
-            
-        }
-        
-    })
+    d3.select("#amoveplus")
+        .on("click",()=>{
+            if(Moves.apType===""){
+                Anim.drawFlag=false;
+                Moves.apType = "max";
+                Moves.amovePlus();
+                d3.select("#amoveplus")
+                    .attr("value","Add a max point")
+            }
+        })
 
-d3.select("#bmoveminus")
-    .on("click",()=>{
-        if(Moves.bmType===""){
-            Anim.drawFlag=false;
-            Moves.bmType = "min";
-            Moves.bmoveMinus();
-            d3.select("#bmoveminus")
-                .attr("value","Add a min point");
-            
-        }
-        
-    })
+    d3.select("#amoveminus")
+        .on("click",()=>{
+            if(Moves.amType===""){
+                Anim.drawFlag=false;
+                Moves.amType = "min";
+                Moves.amoveMinus();
+                d3.select("#amoveminus")
+                    .attr("value","Add a min point")
+            }
+        })
 
-// d3.select("#cmoveplus")
-//     .on("click",()=>{
-//         if(Moves.cpType===""){
-//             Anim.drawFlag=false;
-//             Moves.cpType = "max";
-//             Moves.cmovePlus();
-//             d3.select("#cmoveplus")
-//                 .attr("value","Add a max point");
-//         }
-        
-//     })
+    d3.select("#bmoveplus")
+        .on("click",()=>{
+            if(Moves.bpType===""){
+                Anim.drawFlag=false;
+                Moves.bpType = "max";
+                Moves.bmovePlus();
+                d3.select("#bmoveplus")
+                    .attr("value","Add a max point");    
+            }  
+        })
 
-// d3.select("#cmoveminus")
-//     .on("click",()=>{
-//         if(Moves.cmType===""){
-//             Anim.drawFlag=false;
-//             Moves.cmType = "min";
-//             Moves.cmoveMinus();
-//             d3.select("#cmoveminus")
-//                 .attr("value","Add a min point");
-//         }
-        
-//     })
+    d3.select("#bmoveminus")
+        .on("click",()=>{
+            if(Moves.bmType===""){
+                Anim.drawFlag=false;
+                Moves.bmType = "min";
+                Moves.bmoveMinus();
+                d3.select("#bmoveminus")
+                    .attr("value","Add a min point");
+            }
+        })
 
-d3.select("#dmoveplus")
-    .on("click",()=>{
-        if(Moves.dpType===""){
-            Anim.drawFlag=false;
-            Moves.dpType = "add";
-            Moves.dmovePlus();
-            d3.select("#dmoveplus")
-                .attr("value","Click a max point");
-        }
-        
-    })
+    d3.select("#dmoveplus")
+        .on("click",()=>{
+            if(Moves.dpType===""){
+                Anim.drawFlag=false;
+                Moves.dpType = "add";
+                Moves.dmovePlus();
+                d3.select("#dmoveplus")
+                    .attr("value","Click a max point");
+            }
+        })
 
-d3.select("#dmoveminus")
-    .on("click",()=>{
-        if(Moves.dmType===""){
-            Anim.drawFlag=false;
-            Moves.dmType = "add";
-            Moves.dmoveMinus();
-            d3.select("#dmoveminus")
-                .attr("value","Click a min point");
-        }
-        
-    })
+    d3.select("#dmoveminus")
+        .on("click",()=>{
+            if(Moves.dmType===""){
+                Anim.drawFlag=false;
+                Moves.dmType = "add";
+                Moves.dmoveMinus();
+                d3.select("#dmoveminus")
+                    .attr("value","Click a min point");
+            } 
+        })
+} init();

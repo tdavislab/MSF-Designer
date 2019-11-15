@@ -251,118 +251,7 @@ class anim{
 
     }
 
-    addStep(){
-        // modiType: cp, connNode, terminalNode, move, simplification
-        // add step for legend
-        let cp = [];
-        this.cp.forEach(p=>{
-            let new_p = new criticalPoint(p.id, p.x, p.y, p.type);
-            new_p.fv = p.fv;
-            new_p.fv_perb = p.fv_perb;
-            new_p.lvalue = p.lvalue;
-            new_p.uvalue = p.uvalue;
-            cp.push(new_p);
-        })
-        let edges = {};
-        let edgeMapper = {};
-        for(let eid in this.edges){
-            let startpoint = cp[this.edges[eid][0].id];
-            let endpoint;
-            let type;
-            if(cp[this.edges[eid][2].id]!=undefined){
-                endpoint = cp[this.edges[eid][2].id];
-                type = endpoint.type;
-            } else {
-                endpoint = this.minBound_dict[this.edges[eid][2].id];
-                type = "min";
-            }
-            let midpoint = {"x":this.edges[eid][1].x, "y":this.edges[eid][1].y};
-            this.addNewEdge(startpoint, endpoint, type, cp, edges, edgeMapper, midpoint);
-            
-        }
-        let step = new editStep(cp, edges);
-        this.stepRecorder.push(step);
-    }
-
-    drawStep(){
-        // draw legend
-        console.log(this.stepRecorder)
-        for(let j=1;j<=3;j++){
-            let idx = this.stepRecorder.length-j;
-            if(this.stepRecorder[idx]!=undefined){
-                d3.select("#record"+j)
-                    .style("visibility","visible");
-                d3.select("#record"+j).select("rect")
-                    .attr("stroke","rgb(44,123,246)")
-                let step = this.stepRecorder[idx]
-                let edgelist = d3.entries(step.edges);
-                let edges = d3.select("#record"+j).selectAll("path").data(edgelist);
-                edges.exit().remove();
-                let newedges = edges.enter().append("path");
-                edges = newedges.merge(edges);
-                edges
-                    .attr("d",(d)=>{
-                        let d_new = d.value.slice(0,3);
-                        return this.step_curveMap(d_new);
-                    })
-                    .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
-                    // .attr("transform","translate("+(this.margin.left+(j-1)*this.step_frameWidth + (j-1)*this.margin.betweenstep)+","+this.margin.top+")")
-                    .attr("transform","translate("+this.margin.left+","+(this.margin.top+(j-1)*this.step_frameHeight + (j-1)*this.margin.betweenstep)+")")
-                    .style("fill", "none")
-                    .style("stroke", "black")
-                    .style("stroke-width",2)
-                    .style("stroke-dasharray",(d)=>{
-                        if(d.value[3]==="max"){
-                            return "5,5";
-                        } else {return "";}
-                    })
-
-                let circles = d3.select("#record"+j).selectAll("circle").data(step.cp);
-                circles.exit().remove();
-                let newcircles = circles.enter().append("circle");
-                circles = newcircles.merge(circles);
-                circles
-                    .attr("cx",(d)=>this.step_xMap(d.x)+this.margin.left)
-                    .attr("cy",(d)=>this.step_yMap(d.y)+this.margin.top+(j-1)*this.step_frameHeight + (j-1)*this.margin.betweenstep)
-                    .attr("r",15)
-                    .attr("fill","white");
-            
-                let circletext = d3.select("#record"+j).selectAll("text").data(step.cp);
-                circletext.exit().remove();
-                let newcircletext = circletext.enter().append("text");
-                circletext = newcircletext.merge(circletext);
-                circletext
-                    .attr('text-anchor', 'middle')
-                    .attr('dominant-baseline', 'central')
-                    .attr('font-size', '35px')
-                    .attr("x",(d)=>this.step_xMap(d.x)+this.margin.left)
-                    .attr("y",(d)=>this.step_yMap(d.y)+this.margin.top+(j-1)*this.step_frameHeight + (j-1)*this.margin.betweenstep)
-                    .attr("class",(d)=>{
-                        if(d.type==="max"){
-                            return "far max"
-                        } else if (d.type==="saddle"){
-                            return "far saddle"
-                        } else if (d.type==="min"){
-                            return "fas min"
-                        }
-                    })
-                    .text((d)=>{
-                        if(d.type==="max"){
-                            return "\uf192"
-                        } else if (d.type==="saddle"){
-                            return "\uf057"
-                        } else if (d.type==="min"){
-                            return "\uf140"
-                        }
-                    })
-            }else{
-                d3.select("#record"+j)
-                    .style("visibility","hidden");
-                
-            }
-
-        }
-    }
+    
 
     findRange(){
         // find the range of the function value for each critical point
@@ -400,8 +289,8 @@ class anim{
         // console.log("adding!!", startpoint, endpoint, type)
         let edgeid = "edge"+startpoint.id+endpoint.id;
         // add to this.edges
-        // check if there has already been an edge between start and end points
         if(Object.keys(that_edges).indexOf(edgeid)!=-1){
+            // check if there has already been an edge between start and end points
             that_edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2-0.03, "y":(startpoint.y+endpoint.y)/2-0.03},endpoint,type];
             edgeid = edgeid + "_1";
             that_edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2+0.03, "y":(startpoint.y+endpoint.y)/2+0.03},endpoint,type];
@@ -415,32 +304,132 @@ class anim{
         }
         // add this edge to corresponding critical points
         // startpoint is always a saddle point
-        that_cp[startpoint.id].edges[edgeid] = that_edges[edgeid]
-        if(that_cp[endpoint.id]!=undefined){
-            that_cp[endpoint.id].edges[edgeid] = that_edges[edgeid]
-        }
+        this.cpReassignEdge();
+        // that_cp[startpoint.id].edges[edgeid] = that_edges[edgeid]
+        // if(that_cp[endpoint.id]!=undefined){
+        //     that_cp[endpoint.id].edges[edgeid] = that_edges[edgeid]
+        // }
         // add this edge to this.edgeMapper
         that_edgeMapper[edgeid] = this.initializeEdgeMapper(that_edges[edgeid])
     }
 
     deleteOldEdge(edgeid){
         if(this.edges[edgeid]!=undefined){
-            let startpoint = this.edges[edgeid][0];
-            let endpoint = this.edges[edgeid][2];
             // delete edge
             delete this.edges[edgeid];
-            // delete cp[edge]
-            if(this.cp[startpoint.id]!=undefined){
-                delete this.cp[startpoint.id].edges[edgeid];
-            }
-            if(this.cp[endpoint.id]!=undefined){
-                delete this.cp[endpoint.id].edges[edgeid];
-            }
             // delete edgemapper
             delete this.edgeMapper[edgeid];
-
+            // re-assign edges to cp
+            this.cpReassignEdge();
         }
         
+    }
+
+    cpReassignEdge(){ // re-assign edges to cp
+        this.cp.forEach(p=>{
+            let edges = {};
+            for(let ed_key in this.edges){
+                let ed = this.edges[ed_key];
+                if(ed[0].id === p.id || ed[2].id === p.id){
+                    edges[ed_key] = ed;
+                }
+            }
+            p.edges = edges;
+        })
+    }
+
+    cpReorganize(){
+        this.cpClassification();
+        this.cpReassignID();
+    }
+
+    cpClassification(){ // classfy cps into max/min/saddle
+        let cp_max = [];
+        let cp_min = [];
+        let cp_saddle = [];
+        this.cp.forEach(p=>{
+            if(p.type === "max"){ cp_max.push(p); }
+            if(p.type === "min"){ cp_min.push(p); }
+            if(p.type === "saddle"){ cp_saddle.push(p); }
+        })
+        this.cp_max = cp_max;
+        this.cp_min = cp_min;
+        this.cp_saddle = cp_saddle;
+    }
+
+    cpReassignID(){
+        for(let i=0; i<this.cp.length; i++){
+            this.cp[i].id = i;
+        }
+        this.edgeReassignID();
+    }
+
+    edgeReassignID(){
+        for(let ed_key in this.edges){
+            let ed = this.edges[ed_key];
+            let ed_key_new = "edge"+ed[0].id+ed[2].id;
+            if(ed_key_new != ed_key){
+                this.addNewEdge(ed[0],ed[2],ed[3],this.cp,this.edges,this.edgeMapper,ed[1]);
+                this.deleteOldEdge(ed_key);
+            }
+        }
+    }
+
+    // reassignTempEdges(){
+    //     // if there are temp edges, re-assign them
+    //     for(let ed)
+    // }
+
+
+
+
+    mapEdges(edgeid){
+        // update edgeMapper when change the edge curve
+        let ed = this.edges[edgeid];
+        let totalLength = d3.select("#"+edgeid).node().getTotalLength();
+        let stepLength = totalLength/this.numSeg;
+        let newPoints = [];
+        let pt;
+        for(let i=0;i<this.numSeg;i++){
+            if(ed[3]==="max"){
+                if(this.edgeMapper[edgeid][0]["direction"]==="in"){
+                    pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength);
+                } else if(this.edgeMapper[edgeid][0]["direction"]==="out"){
+                    pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength);
+                }
+            } else if(ed[3]==="min"){
+                if(this.edgeMapper[edgeid][0]["direction"]==="in"){
+                    pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength);
+                }else if(this.edgeMapper[edgeid][0]["direction"]==="out"){
+                    pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength);
+                }
+            }
+            // pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength)
+            // if((ed[0].x>ed[2].x)||(ed[0].y>ed[2].y)){
+            // if(this.edgeMapper[edgeid][0]["direction"]==="out"){
+            //     pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength)
+            // }
+            newPoints.push({"x":this.xMap.invert(pt.x), "y":this.yMap.invert(pt.y)});
+        }     
+        // newPoints.sort(function(a,b){
+        //     return d3.ascending(a.x,b.x) || d3.ascending(a.y,b.y);
+        // })
+        // // **** need to fix
+        // if(edgeid==="edge1b010" || edgeid ==="edge1b110"){
+        //     newPoints.sort(function(a,b){
+        //         return d3.ascending(a.y,b.y) || d3.ascending(a.x,b.x);
+        //     })
+        // }
+        for(let i=0;i<this.numSeg;i++){
+            // let pt = this.findMinPt([this.edgeMapper[edgeid][i].x, this.edgeMapper[edgeid][i].y], newPoints);
+            let pt = newPoints[i]
+            this.edgeMapper[edgeid][i].x_new = pt.x;
+            this.edgeMapper[edgeid][i].y_new = pt.y;
+        }
+        // this.edgeMapper[edgeid]
+        // console.log(newPoints)
+        
+
     }
 
     getAngle(x1, y1, x2, y2){
@@ -485,6 +474,8 @@ class anim{
     }
 
     drawAnnotation(){
+        // console.log("draw annotation")
+        // console.log(this.cp)
         let edgelist = d3.entries(this.edges);
         // draw critical points
         let circles = this.pointsGroup.selectAll("circle").data(this.cp);
@@ -963,9 +954,13 @@ class anim{
         }
         if(edge[2].type==="max"){
             if((edge[2].x>edge[0].x)||(edge[2].y>edge[0].y)){
+                
                 em[0]["direction"] = "in";
                 em[this.numSeg-1]["direction"] = "out";
             } else {
+                xRange = ed[0].x-ed[2].x;
+                yRange = ed[0].y-ed[2].y;
+
                 em[0]["direction"] = "out";
                 em[this.numSeg-1]["direction"] = "in";
             }
@@ -981,53 +976,7 @@ class anim{
         return em;
     }
 
-    mapEdges(edgeid){
-        let ed = this.edges[edgeid];
-        let totalLength = d3.select("#"+edgeid).node().getTotalLength();
-        let stepLength = totalLength/this.numSeg;
-        let newPoints = [];
-        let pt;
-        for(let i=0;i<this.numSeg;i++){
-            if(ed[3]==="max"){
-                if(this.edgeMapper[edgeid][0]["direction"]==="in"){
-                    pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength);
-                } else if(this.edgeMapper[edgeid][0]["direction"]==="out"){
-                    pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength);
-                }
-            } else if(ed[3]==="min"){
-                if(this.edgeMapper[edgeid][0]["direction"]==="in"){
-                    pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength);
-                }else if(this.edgeMapper[edgeid][0]["direction"]==="out"){
-                    pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength);
-                }
-            }
-            // pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength)
-            // if((ed[0].x>ed[2].x)||(ed[0].y>ed[2].y)){
-            // if(this.edgeMapper[edgeid][0]["direction"]==="out"){
-            //     pt = d3.select("#"+edgeid).node().getPointAtLength((this.numSeg-i)*stepLength)
-            // }
-            newPoints.push({"x":this.xMap.invert(pt.x), "y":this.yMap.invert(pt.y)});
-        }     
-        // newPoints.sort(function(a,b){
-        //     return d3.ascending(a.x,b.x) || d3.ascending(a.y,b.y);
-        // })
-        // // **** need to fix
-        // if(edgeid==="edge1b010" || edgeid ==="edge1b110"){
-        //     newPoints.sort(function(a,b){
-        //         return d3.ascending(a.y,b.y) || d3.ascending(a.x,b.x);
-        //     })
-        // }
-        for(let i=0;i<this.numSeg;i++){
-            // let pt = this.findMinPt([this.edgeMapper[edgeid][i].x, this.edgeMapper[edgeid][i].y], newPoints);
-            let pt = newPoints[i]
-            this.edgeMapper[edgeid][i].x_new = pt.x;
-            this.edgeMapper[edgeid][i].y_new = pt.y;
-        }
-        // this.edgeMapper[edgeid]
-        // console.log(newPoints)
-        
-
-    }
+    
 
     ifLinesIntersect(line1,line2){
         // for example, line1 = [pt1,pt2]; pt1 = {x:0,y:0};
@@ -1093,34 +1042,6 @@ class anim{
         return false;
     }
 
-    calDist(loc1, loc2){
-        let dist = Math.sqrt(Math.pow(loc1.x-loc2.x,2)+Math.pow(loc1.y-loc2.y,2));
-        return dist;
-    }
-
-    findMinPt(pt0, pts){
-        let dist = this.calDist(pt0,pts[0]);
-        let minPt = pts[0];
-        for(let i=1;i<pts.length;i++){
-            let disti = this.calDist(pt0,pts[i]);
-            if(disti < dist){
-                dist = disti;
-                minPt = pts[i]
-            }
-        }
-        return minPt
-    }
-
-    find2MinPt(pt,pts){
-        let pt1 = this.findMinPt(pt,pts);
-        let idx1 = pts.indexOf(pt1);
-        let pts1 = pts.slice(0,idx1);
-        let pts2 = pts.slice(idx1+1);
-        let pts_new = pts1.concat(pts2);
-        let pt2 = this.findMinPt(pt,pts_new);
-        return [pt1,pt2];
-    }
-
     addedges(){
         let edgelist = d3.entries(this.edges);
         let edges = this.edgeGroup.selectAll("path").data(edgelist);
@@ -1151,68 +1072,6 @@ class anim{
                 d3.select("#"+d.key)
                     .style("stroke-width",2)
             })
-    }
-
-    findEdges(){
-        // automatically find edges, only for "expert mode"
-        for(let i=0;i<this.cp.length;i++){
-            if(this.cp[i].type==="saddle"){
-                let saddle = this.cp[i];
-                for(let ed_key in saddle.edges){
-                    this.deleteOldEdge(ed_key);
-                }
-                if(this.cp_max.length>0){
-                    let pts = [];
-                    let cp_new_max = this.cp_max.slice(0);
-                    if(cp_new_max.length>2){
-                        // find the closest max points
-                        pts = this.find2MinPt(saddle,this.cp_max);
-                    } else { pts = cp_new_max; }
-                    for(let j=0;j<pts.length;j++){
-                        this.addNewEdge(saddle,pts[j],"max");
-                    }
-                }
-                let cp_new_min = [];
-                this.cp.forEach(p=>{
-                    if(p.type==="min"){
-                        cp_new_min.push(p);
-                    }
-                })
-                let bound_upper = [];
-                let bound_lower = [];
-                this.cp_min.forEach(p=>{
-                    if(p.y===0){
-                        bound_upper.push(p);
-                    } else if(p.y===1){
-                        bound_lower.push(p);
-                    }
-                })
-                let pts = [];
-                let pt_lower = this.findMinPt(saddle,bound_lower);
-                let pt_upper = this.findMinPt(saddle,bound_upper);
-                if(cp_new_min.length>=2){
-                //     // find the closest min points
-                    pts = this.find2MinPt(saddle,cp_new_min);
-                } else if(cp_new_min.length===1){
-                    pts.push(cp_new_min[0])
-                    pts.push(this.findMinPt(saddle,[pt_lower,pt_upper]));
-                    // if(cp_new_min[0].y>=saddle.y){
-                    //     pts.push(this.findMinPt(saddle,bound_lower));
-                    // } else { pts.push(this.findMinPt(saddle,bound_upper));}
-                } else if(cp_new_min.length===0){
-                    pts.push(pt_lower);
-                    pts.push(pt_upper);
-
-                }
-                for(let j=0;j<pts.length;j++){
-                    this.addNewEdge(saddle,pts[j],"min");               
-                }
-
-                
-            }
-        }
-        
-        
     }
 
     initializeMesh(){
@@ -1365,6 +1224,26 @@ class anim{
         })
     }
 
+    calFV(x,y,cp){
+        let w = 1;
+        let sigma = 0.1;
+        let x_new = x-cp.x;
+        let y_new = y-cp.y;
+        if(cp.type === "max"){
+            // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
+            return -Math.pow(x_new,2) - Math.pow(y_new,2)+cp.fv;
+        } else if(cp.type === "saddle"){
+            // if(x_new<0){
+            //     x_new = x - 0.25
+            // } else{ x_new = x-0.75}
+            // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
+            return Math.pow(x_new,2) - Math.pow(y_new,2)+cp.fv;
+        } else if(cp.type === "min"){
+            return Math.pow(x_new,2) + Math.pow(y_new,2)+cp.fv;
+        }
+        // return w*Math.exp(-(Math.pow(x,2)+Math.pow(y,2))/sigma)
+    }
+
     animation(){            
         let N = 50;
         let dt = 0.001;
@@ -1394,6 +1273,7 @@ class anim{
         for (var i=0; i<M; i++) {
             age.push(randage());
         }
+
         // let drawFlag = this.drawFlag
         setInterval(function () {if (that.drawFlag) {draw();}}, frameRate);
         d3.timer(function () {if (that.drawFlag) {draw();}}, frameRate);
@@ -1433,26 +1313,6 @@ class anim{
             }
         }
     }
-    
-    calFV(x,y,cp){
-        let w = 1;
-        let sigma = 0.1;
-        let x_new = x-cp.x;
-        let y_new = y-cp.y;
-        if(cp.type === "max"){
-            // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-            return -Math.pow(x_new,2) - Math.pow(y_new,2)+cp.fv;
-        } else if(cp.type === "saddle"){
-            // if(x_new<0){
-            //     x_new = x - 0.25
-            // } else{ x_new = x-0.75}
-            // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-            return Math.pow(x_new,2) - Math.pow(y_new,2)+cp.fv;
-        } else if(cp.type === "min"){
-            return Math.pow(x_new,2) + Math.pow(y_new,2)+cp.fv;
-        }
-        // return w*Math.exp(-(Math.pow(x,2)+Math.pow(y,2))/sigma)
-    }
 
     findV(x,y, grad){
         // Find the vector value for the point
@@ -1477,6 +1337,215 @@ class anim{
         let fv = (triang[0].fv + triang[1].fv + triang[2].fv)/3
         return [ex_v,pt_new,fv];
         // return ex_v;
+    }
+
+    // **************** This is only for "semi-auto" mode ****************
+
+    findEdges(){
+        // automatically find edges, only for "expert mode"
+        for(let i=0;i<this.cp.length;i++){
+            if(this.cp[i].type==="saddle"){
+                let saddle = this.cp[i];
+                for(let ed_key in saddle.edges){
+                    this.deleteOldEdge(ed_key);
+                }
+                if(this.cp_max.length>0){
+                    let pts = [];
+                    let cp_new_max = this.cp_max.slice(0);
+                    if(cp_new_max.length>2){
+                        // find the closest max points
+                        pts = this.find2MinPt(saddle,this.cp_max);
+                    } else { pts = cp_new_max; }
+                    for(let j=0;j<pts.length;j++){
+                        this.addNewEdge(saddle,pts[j],"max");
+                    }
+                }
+                let cp_new_min = [];
+                this.cp.forEach(p=>{
+                    if(p.type==="min"){
+                        cp_new_min.push(p);
+                    }
+                })
+                let bound_upper = [];
+                let bound_lower = [];
+                this.cp_min.forEach(p=>{
+                    if(p.y===0){
+                        bound_upper.push(p);
+                    } else if(p.y===1){
+                        bound_lower.push(p);
+                    }
+                })
+                let pts = [];
+                let pt_lower = this.findMinPt(saddle,bound_lower);
+                let pt_upper = this.findMinPt(saddle,bound_upper);
+                if(cp_new_min.length>=2){
+                //     // find the closest min points
+                    pts = this.find2MinPt(saddle,cp_new_min);
+                } else if(cp_new_min.length===1){
+                    pts.push(cp_new_min[0])
+                    pts.push(this.findMinPt(saddle,[pt_lower,pt_upper]));
+                    // if(cp_new_min[0].y>=saddle.y){
+                    //     pts.push(this.findMinPt(saddle,bound_lower));
+                    // } else { pts.push(this.findMinPt(saddle,bound_upper));}
+                } else if(cp_new_min.length===0){
+                    pts.push(pt_lower);
+                    pts.push(pt_upper);
+
+                }
+                for(let j=0;j<pts.length;j++){
+                    this.addNewEdge(saddle,pts[j],"min");               
+                }
+
+                
+            }
+        }
+        
+        
+    }
+
+    // **************** Draw "undo" sketch ****************
+
+    addStep(){
+        // modiType: cp, connNode, terminalNode, move, simplification
+        // add step for legend
+        let cp = [];
+        this.cp.forEach(p=>{
+            let new_p = new criticalPoint(p.id, p.x, p.y, p.type);
+            new_p.fv = p.fv;
+            new_p.fv_perb = p.fv_perb;
+            new_p.lvalue = p.lvalue;
+            new_p.uvalue = p.uvalue;
+            cp.push(new_p);
+        })
+        let edges = {};
+        let edgeMapper = {};
+        for(let eid in this.edges){
+            let startpoint = cp[this.edges[eid][0].id];
+            let endpoint;
+            let type;
+            if(cp[this.edges[eid][2].id]!=undefined){
+                endpoint = cp[this.edges[eid][2].id];
+                type = endpoint.type;
+            } else {
+                endpoint = this.minBound_dict[this.edges[eid][2].id];
+                type = "min";
+            }
+            let midpoint = {"x":this.edges[eid][1].x, "y":this.edges[eid][1].y};
+            this.addNewEdge(startpoint, endpoint, type, cp, edges, edgeMapper, midpoint);
+            
+        }
+        let step = new editStep(cp, edges);
+        this.stepRecorder.push(step);
+    }
+
+    drawStep(){
+        // draw legend
+        console.log(this.stepRecorder)
+        for(let j=1;j<=3;j++){
+            let idx = this.stepRecorder.length-j;
+            if(this.stepRecorder[idx]!=undefined){
+                d3.select("#record"+j)
+                    .style("visibility","visible");
+                d3.select("#record"+j).select("rect")
+                    .attr("stroke","rgb(44,123,246)")
+                let step = this.stepRecorder[idx]
+                let edgelist = d3.entries(step.edges);
+                let edges = d3.select("#record"+j).selectAll("path").data(edgelist);
+                edges.exit().remove();
+                let newedges = edges.enter().append("path");
+                edges = newedges.merge(edges);
+                edges
+                    .attr("d",(d)=>{
+                        let d_new = d.value.slice(0,3);
+                        return this.step_curveMap(d_new);
+                    })
+                    .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
+                    // .attr("transform","translate("+(this.margin.left+(j-1)*this.step_frameWidth + (j-1)*this.margin.betweenstep)+","+this.margin.top+")")
+                    .attr("transform","translate("+this.margin.left+","+(this.margin.top+(j-1)*this.step_frameHeight + (j-1)*this.margin.betweenstep)+")")
+                    .style("fill", "none")
+                    .style("stroke", "black")
+                    .style("stroke-width",2)
+                    .style("stroke-dasharray",(d)=>{
+                        if(d.value[3]==="max"){
+                            return "5,5";
+                        } else {return "";}
+                    })
+
+                let circles = d3.select("#record"+j).selectAll("circle").data(step.cp);
+                circles.exit().remove();
+                let newcircles = circles.enter().append("circle");
+                circles = newcircles.merge(circles);
+                circles
+                    .attr("cx",(d)=>this.step_xMap(d.x)+this.margin.left)
+                    .attr("cy",(d)=>this.step_yMap(d.y)+this.margin.top+(j-1)*this.step_frameHeight + (j-1)*this.margin.betweenstep)
+                    .attr("r",15)
+                    .attr("fill","white");
+            
+                let circletext = d3.select("#record"+j).selectAll("text").data(step.cp);
+                circletext.exit().remove();
+                let newcircletext = circletext.enter().append("text");
+                circletext = newcircletext.merge(circletext);
+                circletext
+                    .attr('text-anchor', 'middle')
+                    .attr('dominant-baseline', 'central')
+                    .attr('font-size', '35px')
+                    .attr("x",(d)=>this.step_xMap(d.x)+this.margin.left)
+                    .attr("y",(d)=>this.step_yMap(d.y)+this.margin.top+(j-1)*this.step_frameHeight + (j-1)*this.margin.betweenstep)
+                    .attr("class",(d)=>{
+                        if(d.type==="max"){
+                            return "far max"
+                        } else if (d.type==="saddle"){
+                            return "far saddle"
+                        } else if (d.type==="min"){
+                            return "fas min"
+                        }
+                    })
+                    .text((d)=>{
+                        if(d.type==="max"){
+                            return "\uf192"
+                        } else if (d.type==="saddle"){
+                            return "\uf057"
+                        } else if (d.type==="min"){
+                            return "\uf140"
+                        }
+                    })
+            }else{
+                d3.select("#record"+j)
+                    .style("visibility","hidden");
+                
+            }
+
+        }
+    }
+
+    // **************** The following are well-written functions ****************
+
+    calDist(loc1, loc2){
+        let dist = Math.sqrt(Math.pow(loc1.x-loc2.x,2)+Math.pow(loc1.y-loc2.y,2));
+        return dist;
+    }
+
+    findMinPt(pt0, pts){
+        let dist = this.calDist(pt0,pts[0]);
+        let minPt = pts[0];
+        for(let i=1;i<pts.length;i++){
+            let disti = this.calDist(pt0,pts[i]);
+            if(disti < dist){
+                dist = disti;
+                minPt = pts[i]
+            }
+        }
+        return minPt
+    }
+
+    find2MinPt(pt,pts){
+        let pt1 = this.findMinPt(pt,pts);
+        let idx1 = pts.indexOf(pt1);
+        let pts1 = pts.slice(0,idx1);
+        let pts2 = pts.slice(idx1+1);
+        let pts_new = pts1.concat(pts2);
+        let pt2 = this.findMinPt(pt,pts_new);
+        return [pt1,pt2];
     }
 
     clearCanvas(){
