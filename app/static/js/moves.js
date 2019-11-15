@@ -22,8 +22,9 @@ class moves{
     amovePlus(){
         d3.select("#annotation")
             .on("click", ()=>{
+                console.log("amoveplus")
+
                 if(this.apType === "max"){
-                    console.log("amoveplus")
                     let x = this.anim.xMapReverse(d3.event.x-80);
                     let y = this.anim.yMapReverse(d3.event.y-100+7.5);
                     let mincp = this.anim.findMinPt({"x":x,"y":y},this.cpMax);
@@ -271,9 +272,12 @@ class moves{
         
     dmovePlus(){
         this.anim.dragTerminal = false;
+        console.log("dmove")
+
         d3.select("#pointgroup").selectAll("text")
             .on("click",(d)=>{ // d is a critical point, not an edge
                 // d3.event.stopPropagation();
+
                 if(this.dpType==="add" && d.type==="max"){
                     let x=d.x;
                     let y=d.y;

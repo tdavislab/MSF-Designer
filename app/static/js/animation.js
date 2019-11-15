@@ -211,27 +211,10 @@ class anim{
             .y(d=>this.yMap(d.y))
             .curve(d3.curveCardinal.tension(0));
 
-       
         this.grad = this.initializeMesh();
         this.assignEdge();
         this.constructMesh(this.sigma);
         this.animation();
-
-        // let mindist = 1;
-        // let maxdist = 0;
-        // for(let i=0;i<this.grad.length;i++){
-        //     let edgedist = this.calDist({"x":this.grad[i].x,"y":this.grad[i].y},this.grad[i].ed);
-        //     if(edgedist<mindist){
-        //         mindist = edgedist;
-        //     }
-        //     if(edgedist>maxdist){
-        //         maxdist = edgedist;
-        //     }
-        // }
-        // console.log("mindist",mindist)
-        // console.log("maxdist", maxdist)
-
-
         this.findRange();
         this.drawAnnotation();
         this.addedges();
@@ -517,7 +500,7 @@ class anim{
                 })
             .attr("id",(d)=>"cp"+d.id)
             .call(d3.drag()
-                    .on("start", dragstarted)
+                    .on("start", dragstartedText)
                     .on("drag", draggedText)
                     .on("end", dragendedText)) 
             .on("mouseover",mouseover)
@@ -565,6 +548,10 @@ class anim{
 
         let that=this;
   
+        function dragstartedText(d){
+            this.dragText = true;
+        }
+
         function draggedText(d) {
             // just draw, do not actually change values
             if(that.ifInsideCanvas(d3.mouse(this))){
@@ -595,53 +582,58 @@ class anim{
         }
 
         function dragendedText(d) {
-            d3.select(this).classed("active", false);
-            if(that.ifTempEdge()){
-                alert("Please connect all edges first!")
-                that.drawAnnotation();
-                that.addedges();
-            } else if(that.ifInsideCanvas(d3.mouse(this))){
-                d.x = that.xMap.invert(d3.mouse(this)[0]);
-                d.y = that.yMap.invert(d3.mouse(this)[1]);
-                for(let eid in d.edges){
-                    that.mapEdges(eid);
-                }
-                // check edge intersection
-                let ifInter = false;
-                for(let i=0; i<edgelist.length-1; i++){
-                    for(let j=i+1; j<edgelist.length; j++){
-                        let eid1 = edgelist[i].key;
-                        let eid2 = edgelist[j].key;
-                        if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
-                            that.highlightIntersection([eid1,eid2]);
-                            ifInter = true;
-                        }
-                    }
-                }
-                // check the line order
-                if(!ifInter){
-                    that.cp.forEach(p=>{
-                        if(p.type === "saddle"){
-                            if(that.ifArcViolate(p)){
-                                alert("Lines are not in correct order!")
-                                ifInter = true;
-                                that.highlightIntersection(Object.keys(p.edges));
-                            }
-                        }
-                    })
-                }
-                if(!ifInter){
+            console.log("dragging text")
+            // d3.event.stopPropagation();
+            if(this.dragText){
+                if(that.ifTempEdge()){
+                    alert("Please connect all edges first!")
                     that.drawAnnotation();
                     that.addedges();
-                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
-                        that.assignEdge();
-                        that.constructMesh(that.sigma);
-                        that.drawFlow();
+                } else if(that.ifInsideCanvas(d3.mouse(this))){
+                    d.x = that.xMap.invert(d3.mouse(this)[0]);
+                    d.y = that.yMap.invert(d3.mouse(this)[1]);
+                    for(let eid in d.edges){
+                        that.mapEdges(eid);
                     }
-                    that.addStep();
-                    that.drawStep();
-                } else { that.drawFlag = false; }
+                    // check edge intersection
+                    let ifInter = false;
+                    for(let i=0; i<edgelist.length-1; i++){
+                        for(let j=i+1; j<edgelist.length; j++){
+                            let eid1 = edgelist[i].key;
+                            let eid2 = edgelist[j].key;
+                            if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
+                                that.highlightIntersection([eid1,eid2]);
+                                ifInter = true;
+                            }
+                        }
+                    }
+                    // check the line order
+                    if(!ifInter){
+                        that.cp.forEach(p=>{
+                            if(p.type === "saddle"){
+                                if(that.ifArcViolate(p)){
+                                    alert("Lines are not in correct order!")
+                                    ifInter = true;
+                                    that.highlightIntersection(Object.keys(p.edges));
+                                }
+                            }
+                        })
+                    }
+                    if(!ifInter){
+                        that.drawAnnotation();
+                        that.addedges();
+                        if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                            that.assignEdge();
+                            that.constructMesh(that.sigma);
+                            that.drawFlow();
+                        }
+                        that.addStep();
+                        that.drawStep();
+                    } else { that.drawFlag = false; }
+                }
+                this.dragText = false;
             }
+            
         }
 
         function draggedConnNode(d){
@@ -712,6 +704,7 @@ class anim{
         }
 
         function dragendedTerminal(d,i) {
+            console.log("dragging terminal")
             d3.select(this).classed("active", false);
             if(that.ifInsideCanvas(d3.mouse(this))){
                 let ifInter=false;
@@ -788,8 +781,8 @@ class anim{
             }
         }
 
-        function dragstarted(d) {
-            d3.select(this).raise().classed("active", true);
+        function dragstarted() {
+            // d3.select(this).raise().classed("active", true);
         }
 
         function mouseover() {

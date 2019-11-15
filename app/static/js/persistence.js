@@ -125,10 +125,13 @@ class persistence{
                     }
                 }
                 
-                this.barcode[i].edge = {"key":min_ed_key,"value":min_ed_value};
-                edgelist.push(min_ed_key);
-                cplist.push(min_ed_value[0].id);
-                cplist.push(min_ed_value[2].id);
+                if(min_ed_key){
+                    this.barcode[i].edge = {"key":min_ed_key,"value":min_ed_value};
+                    edgelist.push(min_ed_key);
+                    cplist.push(min_ed_value[0].id);
+                    cplist.push(min_ed_value[2].id);
+                }
+                
             }
         }
     }
