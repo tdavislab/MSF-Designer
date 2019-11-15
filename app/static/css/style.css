@@ -17,20 +17,30 @@
 } */
 
 
-.connNode{
+.connNode {
     r: 8;
     fill: rgb(274,194,68);
     stroke: black;
     stroke-width: 2;
 }
 
+.connNode.active{
+    r: 15;
+}
+
+.terminalNode {
+    r: 5;
+    fill: grey;
+    stroke: black;
+}
+
+.terminalNode.active{
+    r: 10;
+}
+
 .frame{
     stroke: rgb(44,123,246);
     stroke-width: 5;
-}
-
-circle.mouseover{
-    r: 15;
 }
 
 text.max{
@@ -39,12 +49,14 @@ text.max{
 
 text.saddle{
     fill: #13B913;
-    /* stroke: black; */
-    /* stroke-width: 3; */
 }
 
 text.min{
     fill: rgb(44,123,246);
+}
+
+text.active{
+    font-size:45px;
 }
 
 .track {
@@ -101,6 +113,11 @@ text.label{
     fill: rgb(212,58,129);
 }
 
+/* 
+path.actived {
+    stroke-width: 10;
+} */
+
 
 div.scrollable {
     width: 100%;
@@ -110,6 +127,8 @@ div.scrollable {
     overflow-y: scroll;
     /* -webkit-overflow-scrolling: touch; */
 }
+
+/* Loader */
 
 .loader {
     border: 16px solid #f3f3f3; /* Light grey */
@@ -124,10 +143,6 @@ div.scrollable {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
-/* 
-path.actived {
-    stroke-width: 10;
-} */
 
 [type="radio"]:checked,
 [type="radio"]:not(:checked) {

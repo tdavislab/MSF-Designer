@@ -55,8 +55,8 @@ class anim{
         .attr("id","edgegroup");
         this.pointsGroup = this.svg.append("g")
             .attr("id","pointgroup");
-        this.heightsGroup = this.svg.append("g")
-            .attr("id","heightsgroup");
+        this.labelsGroup = this.svg.append("g")
+            .attr("id","labelsgroup");
         this.frameGroup = this.svg.append("g")
             .attr("id","framegroup");
         this.additionalEdge = this.svg.append("path")
@@ -158,7 +158,7 @@ class anim{
         this.minBound_dict = {};
         this.minBound.forEach(p=>this.minBound_dict[p.id] = p);
 
-        console.log("minBound", this.minBound)
+        // console.log("minBound", this.minBound)
 
         this.cp_min = this.cp_min.concat(this.minBound);
         this.edges = {};
@@ -214,19 +214,19 @@ class anim{
         this.constructMesh(this.sigma);
         this.animation();
 
-        let mindist = 1;
-        let maxdist = 0;
-        for(let i=0;i<this.grad.length;i++){
-            let edgedist = this.calDist({"x":this.grad[i].x,"y":this.grad[i].y},this.grad[i].ed);
-            if(edgedist<mindist){
-                mindist = edgedist;
-            }
-            if(edgedist>maxdist){
-                maxdist = edgedist;
-            }
-        }
-        console.log("mindist",mindist)
-        console.log("maxdist", maxdist)
+        // let mindist = 1;
+        // let maxdist = 0;
+        // for(let i=0;i<this.grad.length;i++){
+        //     let edgedist = this.calDist({"x":this.grad[i].x,"y":this.grad[i].y},this.grad[i].ed);
+        //     if(edgedist<mindist){
+        //         mindist = edgedist;
+        //     }
+        //     if(edgedist>maxdist){
+        //         maxdist = edgedist;
+        //     }
+        // }
+        // console.log("mindist",mindist)
+        // console.log("maxdist", maxdist)
 
 
         this.findRange();
@@ -237,7 +237,7 @@ class anim{
         this.dragTerminal = false;
 
         // console.log(this.ifArcViolate(this.cp[1])) // false
-        console.log("grad",this.grad)
+        // console.log("grad",this.grad)
         console.log('cp', this.cp)
 
     }
@@ -477,12 +477,19 @@ class anim{
         // console.log("draw annotation")
         // console.log(this.cp)
         let edgelist = d3.entries(this.edges);
+        // draw frames (local minimum)
+        this.frameGroup.selectAll("line")
+            .data(this.frames)
+            .enter().append("line")
+            .attr("x1",(d)=>this.xMap(d[0]))
+            .attr("y1",(d)=>this.yMap(d[1]))
+            .attr("x2",(d)=>this.xMap(d[2]))
+            .attr("y2",(d)=>this.yMap(d[3]))
+            .attr("class","frame");
         // draw critical points
         let circles = this.pointsGroup.selectAll("circle").data(this.cp);
         circles.exit().remove();
-        let newcircles = circles.enter().append("circle");
-        circles = newcircles.merge(circles);
-        circles
+        circles = circles.enter().append("circle").merge(circles)
             .attr("cx",(d)=>this.xMap(d.x))
             .attr("cy",(d)=>this.yMap(d.y))
             .attr("r",15)
@@ -490,9 +497,7 @@ class anim{
         
         let circletext = this.pointsGroup.selectAll("text").data(this.cp);
         circletext.exit().remove();
-        let newcircletext = circletext.enter().append("text");
-        circletext = newcircletext.merge(circletext);
-        circletext
+        circletext = circletext.enter().append("text").merge(circletext)
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
             .attr('font-size', '35px')
@@ -520,33 +525,52 @@ class anim{
             .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", draggedText)
-                    .on("end", dragendedText))
-            .on("mouseover",(d)=>{
-                d3.select("#cp"+d.id).attr("font-size","45px")
-            })
-            .on("mouseout",(d)=>{
-                d3.select("#cp"+d.id).attr("font-size","35px")
-            }); 
+                    .on("end", dragendedText)) 
+            .on("mouseover",mouseover)
+            .on("mouseout",mouseout)
         
-        let labels = this.heightsGroup.selectAll("text").data(this.cp);
+        let labels = this.labelsGroup.selectAll("text").data(this.cp);
         labels.exit().remove();
-        let newlabels = labels.enter().append("text");
-        labels = newlabels.merge(labels);
-        labels
+        labels = labels.enter().append("text").merge(labels)
             .attr("x",(d)=>this.xMap(d.x)-20)
             .attr("y",(d)=>this.yMap(d.y)-20)
             .text((d,i)=>i+1)
             .attr("class",(d)=>"label "+d.type)
-            .style("font-weight","bold")
+            .style("font-weight","bold");
+        
+        // draw midpoint nodes
+        let nodes = this.connNodesGroup.selectAll("circle").data(edgelist);
+        nodes.exit().remove();
+        nodes = nodes.enter().append("circle").merge(nodes)
+            .attr("cx",(d)=>this.xMap(d.value[1].x))
+            .attr("cy",(d)=>this.yMap(d.value[1].y))
+            .attr("class","connNode")
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", draggedNode)
+                .on("end", dragendedNode))
+            .on("mouseover",mouseover)
+            .on("mouseout",mouseout);
+
+        // draw terminal nodes
+        let terminalNodes = this.terminalNodesGroup.selectAll("circle").data(edgelist)
+        terminalNodes.exit().remove();
+        terminalNodes = terminalNodes.enter().append("circle").merge(terminalNodes)
+            .attr("cx",(d)=>this.terminalPosition(d)[0])
+            .attr("cy",(d)=>this.terminalPosition(d)[1])
+            .attr("id",(d,i)=>"terminal"+i)
+            .attr("class","terminalNode")
+            .on("mouseover",mouseover)
+            .on("mouseout",mouseout)
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", draggedTerminal)
+                .on("end", dragendedTerminal));
 
         let that=this;
-
-        function dragstarted(d) {
-            d3.select(this).raise().classed("active", true);
-        }
-              
+  
         function draggedText(d,i) {
-            if(that.xMap.invert(d3.mouse(this)[0])>=0 && that.xMap.invert(d3.mouse(this)[0])<=1 && that.yMap.invert(d3.mouse(this)[1])>=0 && that.yMap.invert(d3.mouse(this)[1])<=1){
+            if(that.ifInsideCanvas(d3.mouse(this))){
                 d3.select("#cp"+d.id)
                     .attr("x",(d)=>{
                         d.x = that.xMap.invert(d3.mouse(this)[0])
@@ -611,43 +635,11 @@ class anim{
             
         }
 
-        // draw frames (local minimum)
-        this.frameGroup.selectAll("line")
-            .data(this.frames)
-            .enter().append("line")
-            .attr("x1",(d)=>this.xMap(d[0]))
-            .attr("y1",(d)=>this.yMap(d[1]))
-            .attr("x2",(d)=>this.xMap(d[2]))
-            .attr("y2",(d)=>this.yMap(d[3]))
-            .attr("class","frame")
         
-        // let nodes = this.connNodesGroup.selectAll("circle").data(this.connNodes);
-        let nodes = this.connNodesGroup.selectAll("circle").data(edgelist);
-        nodes.exit().remove();
-        let newnodes = nodes.enter().append("circle");
-        nodes = newnodes.merge(nodes);
-        nodes
-            .attr("cx",(d)=>{
-                return this.xMap(d.value[1].x);
-            })
-            .attr("cy",(d)=>{
-                return this.yMap(d.value[1].y);
-            })
-            .attr("class","connNode")
-            .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", draggedNode)
-                .on("end", dragendedNode))
-            .on("mouseover",mouseover)
-            .on("mouseout",mouseout);
+        
+        
 
-        function mouseover(d) {
-            d3.select(this).classed("mouseover", true);
-        }
         
-        function mouseout(d){
-            d3.select(this).classed("mouseover", false);
-        }
 
         function draggedNode(d,i){
             if(that.xMap.invert(d3.mouse(this)[0])>=0 && that.xMap.invert(d3.mouse(this)[0])<=1 && that.yMap.invert(d3.mouse(this)[1])>=0 && that.yMap.invert(d3.mouse(this)[1])<=1){
@@ -699,50 +691,7 @@ class anim{
             }
         }
 
-        let terminalNodes = this.terminalNodesGroup.selectAll("circle").data(edgelist)
-        terminalNodes.exit().remove();
-        let newTerminalNodes = terminalNodes.enter().append("circle");
-        terminalNodes = newTerminalNodes.merge(terminalNodes);
-        terminalNodes
-            .attr("cx",(d)=>{
-                if(d.value[2].y===0 || d.value[2].y===1 || d.value[0].x===d.value[2].x){
-                    return this.xMap(d.value[2].x);
-                } else if(d.value[2].x===0){
-                    return this.xMap(d.value[2].x+0.005);
-                } else if(d.value[2].x===1){
-                    return this.xMap(d.value[2].x-0.005);
-                } else {
-                    return this.xMap(d.value[2].x + (d.value[0].x-d.value[2].x)/Math.abs(d.value[0].x-d.value[2].x)*0.015);
-                }
-            })
-            .attr("cy",(d)=>{
-                if(d.value[2].x===0 || d.value[2].x===1 || d.value[0].y===d.value[2].y){
-                    return this.yMap(d.value[2].y);
-                } else if(d.value[2].y===0){
-                    return this.yMap(d.value[2].y+0.005);
-
-                } else if(d.value[2].y===1){
-                    return this.yMap(d.value[2].y-0.005);
-                } else {
-                    return this.yMap(d.value[2].y + (d.value[0].y-d.value[2].y)/Math.abs(d.value[0].y-d.value[2].y)*0.015)
-                }
-            })
-            .attr("id",(d,i)=>"terminal"+i)
-            .attr("r",5)
-            .attr("fill","grey")
-            .attr("stroke","black")
-            .on("mouseover",(d,i)=>{
-                d3.select("#terminal"+i)
-                    .attr("r",10)
-            })
-            .on("mouseout",(d,i)=>{
-                d3.select("#terminal"+i)
-                    .attr("r",5)
-            })
-            .call(d3.drag()
-                    .on("start", dragstarted)
-                    .on("drag", draggedTerminal)
-                    .on("end", dragendedTerminal));
+        
 
         function draggedTerminal(d,i){
             d3.select("#terminal"+i)
@@ -938,6 +887,56 @@ class anim{
             }
         }
 
+        function dragstarted(d) {
+            d3.select(this).raise().classed("active", true);
+        }
+
+        function mouseover() {
+            d3.select(this).classed("active", true);
+        }
+        
+        function mouseout(){
+            d3.select(this).classed("active", false);
+        }
+
+    }
+
+    ifInsideCanvas(node_coord){
+        // When dragging a node, check whether it is still inside the canvas or not.
+        let xcoord = node_coord[0];
+        let ycoord = node_coord[1];
+        let x = this.xMap.invert(xcoord);
+        let y = this.yMap.invert(ycoord);
+        if(x>=0 && x<=1 && y>=0 && y<=1){
+            return true;
+        } else{ return false; }
+    }
+
+    terminalPosition(edge){
+        let tx;
+        let ty;
+        if(edge.value[2].y===0 || edge.value[2].y===1 || edge.value[0].x===edge.value[2].x){
+            tx = this.xMap(edge.value[2].x);
+        } else if(edge.value[2].x===0){
+            tx = this.xMap(edge.value[2].x+0.005);
+        } else if(edge.value[2].x===1){
+            tx = this.xMap(edge.value[2].x-0.005);
+        } else {
+            tx = this.xMap(edge.value[2].x + (edge.value[0].x-edge.value[2].x)/Math.abs(edge.value[0].x-edge.value[2].x)*0.015);
+        }
+
+        if(edge.value[2].x===0 || edge.value[2].x===1 || edge.value[0].y===edge.value[2].y){
+            ty = this.yMap(edge.value[2].y);
+        } else if(edge.value[2].y===0){
+            ty = this.yMap(edge.value[2].y+0.005);
+
+        } else if(edge.value[2].y===1){
+            ty = this.yMap(edge.value[2].y-0.005);
+        } else {
+            ty = this.yMap(edge.value[2].y + (edge.value[0].y-edge.value[2].y)/Math.abs(edge.value[0].y-edge.value[2].y)*0.015)
+        }
+
+        return [tx,ty];
     }
     
 
