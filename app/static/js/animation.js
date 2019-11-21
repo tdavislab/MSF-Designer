@@ -341,6 +341,7 @@ class anim{
         this.cp_max = cp_max;
         this.cp_min = cp_min;
         this.cp_saddle = cp_saddle;
+        console.log("cpmax",this.cp_max)
     }
 
     cpReassignID(){
@@ -452,6 +453,7 @@ class anim{
     }
 
     drawAnnotation(){
+
         let edgelist = d3.entries(this.edges);
         // draw frames (local minimum)
         this.frameGroup.selectAll("line")
@@ -596,29 +598,7 @@ class anim{
                         that.mapEdges(eid);
                     }
                     // check edge intersection
-                    let ifInter = false;
-                    for(let i=0; i<edgelist.length-1; i++){
-                        for(let j=i+1; j<edgelist.length; j++){
-                            let eid1 = edgelist[i].key;
-                            let eid2 = edgelist[j].key;
-                            if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
-                                that.highlightIntersection([eid1,eid2]);
-                                ifInter = true;
-                            }
-                        }
-                    }
-                    // check the line order
-                    if(!ifInter){
-                        that.cp.forEach(p=>{
-                            if(p.type === "saddle"){
-                                if(that.ifArcViolate(p)){
-                                    alert("Lines are not in correct order!")
-                                    ifInter = true;
-                                    that.highlightIntersection(Object.keys(p.edges));
-                                }
-                            }
-                        })
-                    }
+                    let ifInter = that.checkIntersection();
                     if(!ifInter){
                         that.drawAnnotation();
                         that.addedges();
@@ -658,27 +638,7 @@ class anim{
                 d.value[1].x = that.xMap.invert(d3.mouse(this)[0]);
                 d.value[1].y = that.yMap.invert(d3.mouse(this)[1]);
                 that.mapEdges(d.key);
-                let ifInter = false;
-                for(let eid in that.edges){
-                    if(eid!=d.key){
-                        if(that.ifCurvesIntersect(that.edgeMapper[eid], that.edgeMapper[d.key])){
-                            that.highlightIntersection([d.key, eid]);
-                            ifInter = true;
-                        }
-                    }
-                }
-                // check the line order
-                if(!ifInter){
-                    that.cp.forEach(p=>{
-                        if(p.type === "saddle"){
-                            if(that.ifArcViolate(p)){
-                                alert("Lines are not in correct order!");
-                                ifInter = true;
-                                that.highlightIntersection(Object.keys(p.edges));
-                            }
-                        }
-                    })
-                }
+                let ifInter = that.checkIntersection();
                 if(!ifInter){
                     that.drawAnnotation();
                     that.addedges();
@@ -793,6 +753,33 @@ class anim{
             d3.select(this).classed("active", false);
         }
 
+    }
+
+    checkIntersection(){
+        let ifInter = false;
+        let edgelist = d3.entries(this.edges);
+        for(let i=0; i<edgelist.length-1; i++){
+            for(let j=i+1; j<edgelist.length; j++){
+                let eid1 = edgelist[i].key;
+                let eid2 = edgelist[j].key;
+                if(this.ifCurvesIntersect(this.edgeMapper[eid1], this.edgeMapper[eid2])){
+                    this.highlightIntersection([eid1,eid2]);
+                    ifInter = true;
+                }
+            }
+        }
+        if(!ifInter){
+            this.cp.forEach(p=>{
+                if(p.type==="saddle"){
+                    if(this.ifArcViolate(p)){
+                        alert("Lines are not in correct order!");
+                        this.highlightIntersection(Object.keys(p.edges));
+                        ifInter = true;
+                    }
+                }
+            })
+        }
+        return ifInter;
     }
 
     drawFlow(){

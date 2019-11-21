@@ -78,14 +78,20 @@ class persistence{
                                 that.anim.cp = []
                                 for(let k=0; k<cp.length; k++){
                                     if(k!=birthid && k!= deathid){
+                                        console.log("k",k)
                                         that.anim.cp.push(cp[k])
                                     }
                                 }
+                                that.anim.cp.forEach(p=>{console.log(p)})
                                 that.anim.cpReorganize();
 
+
                                 that.anim.drawAnnotation();
-                                that.anim.assignEdge();
-                                that.anim.constructMesh(that.anim.sigma)
+                                if(!that.anim.checkIntersection()){
+                                    that.anim.assignEdge();
+                                    that.anim.constructMesh(that.anim.sigma)
+                                }
+                                
                                 that.anim.addedges();
                             })
                     }
