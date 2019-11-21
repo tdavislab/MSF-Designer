@@ -274,8 +274,10 @@ class anim{
     addNewEdge(startpoint, endpoint, type, that_cp = this.cp, that_edges = this.edges, that_edgeMapper = this.edgeMapper, midpoint = undefined){
         // console.log("adding!!", startpoint, endpoint, type)
         let edgeid = "edge"+startpoint.id+endpoint.id;
+        // console.log("edgeid",edgeid)
         // add to this.edges
         if(Object.keys(that_edges).indexOf(edgeid)!=-1){
+            // console.log(edgeid)
             // check if there has already been an edge between start and end points
             that_edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2-0.03, "y":(startpoint.y+endpoint.y)/2-0.03},endpoint,type];
             edgeid = edgeid + "_1";
@@ -356,8 +358,8 @@ class anim{
             let ed = this.edges[ed_key];
             let ed_key_new = "edge"+ed[0].id+ed[2].id;
             if(ed_key_new != ed_key){
-                this.addNewEdge(ed[0],ed[2],ed[3],this.cp,this.edges,this.edgeMapper,ed[1]);
                 this.deleteOldEdge(ed_key);
+                this.addNewEdge(ed[0],ed[2],ed[3],this.cp,this.edges,this.edgeMapper,ed[1]);
             }
         }
     }
@@ -584,8 +586,6 @@ class anim{
         }
 
         function dragendedText(d) {
-            console.log("dragging text")
-            // d3.event.stopPropagation();
             if(this.dragText){
                 if(that.ifTempEdge()){
                     alert("Please connect all edges first!")

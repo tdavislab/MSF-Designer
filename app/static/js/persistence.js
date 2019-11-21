@@ -44,6 +44,7 @@ class persistence{
                                     .style("stroke-width","10")
                             })
                             .on("click",()=>{
+                                that.anim.drawFlag = false;
                                 // delete saddle, saddle edges, and max/min
                                 let birthid;
                                 let deathid;
@@ -83,16 +84,17 @@ class persistence{
                                     }
                                 }
                                 that.anim.cp.forEach(p=>{console.log(p)})
+                                for(let eid in that.anim.edges){
+                                    console.log(eid)
+                                }
                                 that.anim.cpReorganize();
-
-
                                 that.anim.drawAnnotation();
+                                that.anim.addedges();
                                 if(!that.anim.checkIntersection()){
                                     that.anim.assignEdge();
-                                    that.anim.constructMesh(that.anim.sigma)
+                                    that.anim.constructMesh(that.anim.sigma);
+                                    that.anim.drawFlow();
                                 }
-                                
-                                that.anim.addedges();
                             })
                     }
                 }
