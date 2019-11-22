@@ -164,7 +164,7 @@ function init(){
         $.post("/detection",{
             grad_data: JSON.stringify(Anim.grad)
         }, function(res){
-            Anim.criticalPointsDetection(res);
+            Anim.drawRcpd(res.data);
         })
     })
 

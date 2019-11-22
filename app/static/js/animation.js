@@ -24,15 +24,15 @@ class criticalPoint{
         // }
         if(type === "max"){
             // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-            return -Math.pow(0,2) - Math.pow(0,2)+10;
+            return 10;
         } else if(type === "saddle"){
             // if(x_new<0){
             //     x_new = x - 0.25
             // } else{ x_new = x-0.75}
             // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-            return Math.pow(0,2) - Math.pow(0,2)+5;
+            return 5;
         } else if(type === "min"){
-            return Math.pow(0,2) + Math.pow(0,2);
+            return 0;
         }
         
     }
@@ -54,8 +54,10 @@ class anim{
         this.canvasWidth = document.getElementById('animation').offsetWidth;
         this.canvasHeight = document.getElementById('animation').offsetHeight;
         this.svg = d3.select("#annotation");
+        this.rcpdGroup = this.svg.append("g")
+            .attr("id","rcpdgroup");
         this.edgeGroup = this.svg.append("g")
-        .attr("id","edgegroup");
+            .attr("id","edgegroup");
         this.pointsGroup = this.svg.append("g")
             .attr("id","pointgroup");
         this.labelsGroup = this.svg.append("g")
@@ -126,7 +128,7 @@ class anim{
             .attr("fill", "none");
         
         this.drawFlag = true;
-        this.step = 0.01;
+        this.step = 0.025;
         // this.step = 0.05;
         this.numSeg = 10;
         this.sigma = 0.1;
@@ -184,7 +186,7 @@ class anim{
         this.addStep();
 
         // discretize the vfield coords
-        let N = 50;
+        let N = Math.round(1/this.step);
         this.xp = d3.range(N).map(
                 function (i) {
                     return i/N;
@@ -223,18 +225,21 @@ class anim{
         this.dragTerminal = false;
 
         // console.log(this.ifArcViolate(this.cp[1])) // false
-        // console.log("grad",this.grad)
+        console.log("grad",this.grad)
         console.log('cp', this.cp)
 
     }
 
-    criticalPointsDetection(cp_detection){
+    drawRcpd(cp_detection){ // draw robust critical points detection
         console.log(cp_detection)
-        if(cp_detection.length > this.cp.length){
-            console.log("more")
-        }
-
-
+        let rcp = this.rcpdGroup.selectAll("circle").data(cp_detection);
+        rcp.exit().remove();
+        rcp = rcp.enter().append("circle").merge(rcp)
+            .attr("id",(d,i)=>"rcp"+i)
+            .attr("cx", d=>this.xMap(d.x))
+            .attr("cy", d=>this.yMap(d.y))
+            .attr("r",5)
+            .attr("fill","red")
     }
 
     
@@ -1003,7 +1008,7 @@ class anim{
             // })
             for(let x=0;x<=1;x+=this.step){
                 for(let y=0;y<=1;y+=this.step){
-                    let gradid = Math.round(x/this.step*100+y/this.step);
+                    let gradid = Math.round(x/this.step*(1/this.step)+y/this.step);
                     let edpoint = this.findMinPt({"x":x,"y":y},edgepoints);
                     this.grad[gradid]["ed"] = edpoint;
                 }
@@ -1011,7 +1016,7 @@ class anim{
         } else {
             for(let x=0;x<=1;x+=this.step){
                 for(let y=0;y<=1;y+=this.step){
-                    let gradid = Math.round(x/this.step*100+y/this.step);
+                    let gradid = Math.round(x/this.step*(1/this.step)+y/this.step);
                     this.grad[gradid]["ed"] = undefined;
                 }
             }
@@ -1023,7 +1028,7 @@ class anim{
         for(let x=0;x<=1;x+=this.step){
             for(let y=0;y<=1;y+=this.step){
                 let cpt;
-                let gradid = Math.round(x/this.step*100+y/this.step);
+                let gradid = Math.round(x/this.step*(1/this.step)+y/this.step);
                 if(this.grad[gradid].ed!=undefined){
                     if (this.edges[this.grad[gradid].ed.edgeid][0].type === 'saddle'){
                         cpt = this.edges[this.grad[gradid].ed.edgeid][2]
@@ -1038,7 +1043,9 @@ class anim{
                                 cpCandi.push(p);
                             }
                         })
-                        cpt = this.findMinPt({"x":x, "y":y}, cpCandi)
+                        if(cpCandi.length>0){
+                            cpt = this.findMinPt({"x":x, "y":y}, cpCandi);
+                        }
                     }
 
                 } else {
@@ -1126,26 +1133,23 @@ class anim{
 
     calFV(x,y,cp){
         let w = 1;
-        let sigma = 0.1;
+        // let sigma = 0.1;
         let x_new = x-cp.x;
         let y_new = y-cp.y;
+        let fv = 0;
         if(cp.type === "max"){
-            // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-            return -Math.pow(x_new,2) - Math.pow(y_new,2)+cp.fv;
+            fv = -Math.pow(x_new,2) - Math.pow(y_new,2);
         } else if(cp.type === "saddle"){
-            // if(x_new<0){
-            //     x_new = x - 0.25
-            // } else{ x_new = x-0.75}
-            // return w*Math.exp(-(Math.pow(x_new,2)+Math.pow(y_new,2))/sigma);
-            return Math.pow(x_new,2) - Math.pow(y_new,2)+cp.fv;
+            fv = Math.pow(x_new,2) - Math.pow(y_new,2);
         } else if(cp.type === "min"){
-            return Math.pow(x_new,2) + Math.pow(y_new,2)+cp.fv;
+            fv = Math.pow(x_new,2) + Math.pow(y_new,2);
         }
+        return w*fv + cp.fv
         // return w*Math.exp(-(Math.pow(x,2)+Math.pow(y,2))/sigma)
     }
 
     animation(){            
-        let N = 50;
+        let N = Math.round(1/this.step);
         let dt = 0.001;
         let X0 = [], Y0 = []; // to store initial starting locations
         let X  = [], Y  = []; // to store current point for each curve

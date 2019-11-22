@@ -14,16 +14,21 @@ def constructSp(df): # construct simplices
     df = np.array(df)
     sp = []
     fmax = np.max(df[:,2])
-    for i in range(0,99):
-        for j in range(0,99):
+    dec = 1000
+    step = 0.025
+    N = int(1/step)
+    for i in range(0,N-1):
+        for j in range(0,N-1):
             # print(i,j)
-            idx = 100*j+i
+            idx = N*j+i
             pt1 = df[idx,:]
             pt2 = df[idx+1,:]
-            pt3 = df[idx+100,:]
-            pt4 = df[idx+101,:]
-            line1 = str(int(round(pt1[0]*100)))+" "+str(int(round(pt1[1]*100)))+" "+str(int(round(pt2[0]*100)))+" "+str(int(round(pt2[1]*100)))+" "+str(int(round(pt3[0]*100)))+" "+str(int(round(pt3[1]*100)))+" "+str(int(round((fmax-pt1[2])*100)+1))+"\n"
-            line2 = str(int(round(pt2[0]*100)))+" "+str(int(round(pt2[1]*100)))+" "+str(int(round(pt3[0]*100)))+" "+str(int(round(pt3[1]*100)))+" "+str(int(round(pt4[0]*100)))+" "+str(int(round(pt4[1]*100)))+" "+str(int(round((fmax-pt4[2])*100)+1))+"\n" 
+            pt3 = df[idx+N,:]
+            pt4 = df[idx+N+1,:]
+            # line1 = str(int(round(pt1[0]*100)))+" "+str(int(round(pt1[1]*100)))+" "+str(int(round(pt2[0]*100)))+" "+str(int(round(pt2[1]*100)))+" "+str(int(round(pt3[0]*100)))+" "+str(int(round(pt3[1]*100)))+" "+str(int(round((fmax-pt1[2])*100)+1))+"\n"
+            line1 = str(int(round(pt1[0]*dec)))+" "+str(int(round(pt1[1]*dec)))+" "+str(int(round(pt2[0]*dec)))+" "+str(int(round(pt2[1]*dec)))+" "+str(int(round(pt3[0]*dec)))+" "+str(int(round(pt3[1]*dec)))+" "+str(int(round((fmax-pt1[2])*dec)+1))+"\n"
+            # line2 = str(int(round(pt2[0]*100)))+" "+str(int(round(pt2[1]*100)))+" "+str(int(round(pt3[0]*100)))+" "+str(int(round(pt3[1]*100)))+" "+str(int(round(pt4[0]*100)))+" "+str(int(round(pt4[1]*100)))+" "+str(int(round((fmax-pt4[2])*100)+1))+"\n"
+            line2 = str(int(round(pt2[0]*dec)))+" "+str(int(round(pt2[1]*dec)))+" "+str(int(round(pt3[0]*dec)))+" "+str(int(round(pt3[1]*dec)))+" "+str(int(round(pt4[0]*dec)))+" "+str(int(round(pt4[1]*dec)))+" "+str(int(round((fmax-pt4[2])*dec)+1))+"\n" 
             sp.append(line1)
             sp.append(line2)
     return sp
@@ -59,7 +64,7 @@ def RobustCriticalPointDetection():
         for i in range(len(grad)):
             line = grad.iloc[i,:]
             f.write(str(line["x_new"])+" "+str(line["y_new"])+" "+str(line["dx"])+" "+str(line["dy"])+"\n")
-    os.system(APP_STATIC+"/assets/RobustCriticalPointDetection/build/./CriticalPointDetection "+APP_STATIC+"/assets/rcpd 100 100")
+    os.system(APP_STATIC+"/assets/RobustCriticalPointDetection/build/./CriticalPointDetection "+APP_STATIC+"/assets/rcpd 40 40")
     cp_detection = []
     with open(APP_STATIC+"/assets/rcpd.cp.txt") as f:
         for line in f:
@@ -113,13 +118,14 @@ def exportGrad():
     os.system(APP_STATIC+"/assets/./perseusMac simtop "+APP_STATIC+"/assets/grad.txt "+APP_STATIC+"/assets/grad")
     dim0 = pd.read_csv(path.join(APP_STATIC,"assets/grad_0.txt"),sep=" ",header=None)
     bar = []
+    dec = 1000
     # fmax = np.max(grad.iloc[:,2])
     for i in range(0,len(dim0)):
         # bar.append(list(dim0.iloc[i,:]))
         if len(list(dim0.iloc[i,:]))>=2:
             row = list(dim0.iloc[i,:])
-            birth = (row[0]-1)/100
-            death = (row[1]-1)/100
+            birth = (row[0]-1)/dec
+            death = (row[1]-1)/dec
             if death - birth > 0.01 or death < 0:
                 bar.append({"birth":birth,"death":death})
     return jsonify(data=bar)
