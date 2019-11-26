@@ -27,7 +27,7 @@ function init(){
         })
     d3.select("#ifskeleton")
         .on("click",()=>{
-            if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+            if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
                 d3.select("#ifskeleton").node().value = "Show Flow";
                 d3.select("#animation")
                     .style("visibility","hidden");
@@ -35,13 +35,14 @@ function init(){
                     .classed("disabled",true);
                 Anim.drawFlag = false;
             } else if(d3.select("#ifskeleton").node().value === "Show Flow"){
-                d3.select("#ifskeleton").node().value = "Only Display Skeleton";
+                d3.select("#ifskeleton").node().value = "Display Skeleton";
                 d3.select("#animation")
                     .style("visibility","visible");
                 d3.select("#ifflow")
                     .classed("disabled",false)
                     .attr("value","Disable Flow");
-                Anim.grad = Anim.constructMesh(Anim.sigma);
+                Anim.drawAnnotation();
+                Anim.constructMesh(Anim.sigma);
                 Anim.drawFlag = true;                
             }
         })
@@ -56,6 +57,17 @@ function init(){
                     d3.select("#ifflow").node().value = "Disable Flow";
                     Anim.drawFlag = true;
                 }
+            }
+        })
+
+    d3.select("#ifvf")
+        .on("click", ()=>{
+            if(d3.select("#ifvf").node().value === "Display Vector Fields"){
+                d3.select("#ifvf").node().value = "Show Skeleton";
+                d3.select("#annotation").style("visibility","hidden");
+            } else if (d3.select("#ifvf").node().value === "Show Skeleton"){
+                d3.select("#ifvf").node().value = "Display Vector Fields";
+                d3.select("#annotation").style("visibility","visible");
             }
         })
 

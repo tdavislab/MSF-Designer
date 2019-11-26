@@ -15,7 +15,7 @@ def constructSp(df): # construct simplices
     sp = []
     fmax = np.max(df[:,2])
     dec = 1000
-    step = 0.025
+    step = 0.02
     N = int(1/step)
     for i in range(0,N-1):
         for j in range(0,N-1):
@@ -126,7 +126,7 @@ def exportGrad():
             row = list(dim0.iloc[i,:])
             birth = (row[0]-1)/dec
             death = (row[1]-1)/dec
-            if death - birth > 0.01 or death < 0:
+            if death - birth > 0.02 or death < 0:
                 bar.append({"birth":birth,"death":death})
     return jsonify(data=bar)
 

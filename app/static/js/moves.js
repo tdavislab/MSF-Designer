@@ -68,7 +68,7 @@ class moves{
                         if(!ifInter){
                             this.anim.addStep();
                             this.anim.drawStep();
-                            if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                            if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
                                 this.anim.assignEdge();
                                 this.anim.constructMesh(this.anim.sigma);
                                 this.anim.drawFlag = true;
@@ -129,7 +129,7 @@ class moves{
                         if(!ifInter){
                             this.anim.addStep();
                             this.anim.drawStep();
-                            if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                            if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
                                 this.anim.assignEdge();
                                 this.anim.constructMesh(this.anim.sigma);
                                 this.anim.drawFlag = true;
@@ -192,7 +192,7 @@ class moves{
                             if(!ifInter){
                                 this.anim.addStep();
                                 this.anim.drawStep();
-                                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                                if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
                                     this.anim.assignEdge();
                                     this.anim.constructMesh(this.anim.sigma);
                                     this.anim.drawFlag = true;
@@ -256,7 +256,7 @@ class moves{
                             if(!ifInter){
                                 this.anim.addStep();
                                 this.anim.drawStep();
-                                if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                                if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
                                     this.anim.assignEdge();
                                     this.anim.constructMesh(this.anim.sigma);
                                     this.anim.drawFlag = true;
@@ -334,7 +334,7 @@ class moves{
                         if(!ifInter){
                             this.anim.addStep();
                             this.anim.drawStep();
-                            if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                            if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
                                 this.anim.assignEdge();
                                 this.anim.constructMesh(this.anim.sigma);
                                 this.anim.drawFlag = true;
@@ -398,7 +398,7 @@ class moves{
                         if(!ifInter){
                             this.anim.addStep();
                             this.anim.drawStep();
-                            if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                            if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
                                 this.anim.assignEdge();
                                 this.anim.constructMesh(this.anim.sigma);
                                 this.anim.drawFlag = true;

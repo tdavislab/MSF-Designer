@@ -128,7 +128,7 @@ class anim{
             .attr("fill", "none");
         
         this.drawFlag = true;
-        this.step = 0.025;
+        this.step = 0.02;
         // this.step = 0.05;
         this.numSeg = 10;
         this.sigma = 0.1;
@@ -276,7 +276,7 @@ class anim{
         }
     }
 
-    addNewEdge(startpoint, endpoint, type, that_cp = this.cp, that_edges = this.edges, that_edgeMapper = this.edgeMapper, midpoint = undefined){
+    addNewEdge(startpoint, endpoint, type, that_cp = this.cp, that_edges = this.edges, that_edgeMapper = this.edgeMapper, midpoint = undefined, forstep=false){
         // console.log("adding!!", startpoint, endpoint, type)
         let edgeid = "edge"+startpoint.id+endpoint.id;
         // console.log("edgeid",edgeid)
@@ -297,11 +297,17 @@ class anim{
         }
         // add this edge to corresponding critical points
         // startpoint is always a saddle point
-        this.cpReassignEdge();
-        // that_cp[startpoint.id].edges[edgeid] = that_edges[edgeid]
-        // if(that_cp[endpoint.id]!=undefined){
-        //     that_cp[endpoint.id].edges[edgeid] = that_edges[edgeid]
-        // }
+        if(forstep){
+            that_cp[startpoint.id].edges[edgeid] = that_edges[edgeid]
+            if(that_cp[endpoint.id]!=undefined){
+                that_cp[endpoint.id].edges[edgeid] = that_edges[edgeid]
+            }
+        }
+        else{
+            this.cpReassignEdge();
+
+        }
+        
         // add this edge to this.edgeMapper
         that_edgeMapper[edgeid] = this.initializeEdgeMapper(that_edges[edgeid])
     }
@@ -607,7 +613,7 @@ class anim{
                     if(!ifInter){
                         that.drawAnnotation();
                         that.addedges();
-                        if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
                             that.drawFlow();
@@ -647,7 +653,7 @@ class anim{
                 if(!ifInter){
                     that.drawAnnotation();
                     that.addedges();
-                    if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                    if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
                         that.assignEdge();
                         that.constructMesh(that.sigma);
                         that.drawFlow();
@@ -734,7 +740,7 @@ class anim{
                     if(!ifTemp && !ifInter && !ifInter1){
                         that.drawAnnotation();
                         that.addedges();
-                        if(d3.select("#ifskeleton").node().value === "Only Display Skeleton"){
+                        if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
                             that.drawFlow();
@@ -1335,7 +1341,7 @@ class anim{
                 type = "min";
             }
             let midpoint = {"x":this.edges[eid][1].x, "y":this.edges[eid][1].y};
-            this.addNewEdge(startpoint, endpoint, type, cp, edges, edgeMapper, midpoint);
+            this.addNewEdge(startpoint, endpoint, type, cp, edges, edgeMapper, midpoint, true);
             
         }
         let step = new editStep(cp, edges);
