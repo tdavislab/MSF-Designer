@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>VIS-MSVF</title>
+    <!-- <meta name="viewport" content="width=device-width"> -->
     <script src="https://d3js.org/d3.v5.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <link rel="shortcut icon" href="#" />
@@ -16,102 +17,174 @@
 </head>
 
 <body>
-    <div class="container-fluid" style="width: 95%; padding-top: 20px">
-
-        <!-- <h1>Visualization For Morse-Smale Vector Fields Design</h1> -->
-        <h1>Visualization For Morse Vector Fields Design</h1>
-        <!-- <hr style="margin-bottom: 0"> -->
-        <!-- <br> -->
-        <div id="mode" style="padding-top:10px;padding-bottom:10px">
-            <input type="radio" name="mode-type" value="manual" id="mode1" checked="checked">
-            <label for="mode1">Manual Mode</label>
-            <input type="radio" name="mode-type" value="semi-automatic" id="mode2" >
-            <label for="mode2">Semi-automatic Mode</label>
+    <div class="header_group">
+        <div id="main_title">
+            <h2>Visualization For Morse Vector Fields Design</h2>
         </div>
-        <table>
-            <tr>
-                <td id="container" width="1050px" height = "1050px" style="border: 2px solid grey; background-color: white" rowspan="2">
-                                            
-                        <canvas id="animation" style="position: absolute; top:160px; left:110px; z-index:1" width="1000" height="1000" ></canvas>
-                        <svg id="annotation" style="position: absolute; top:160px; left:110px; z-index:1" width="1000" height="1000"></svg>
-                    
-                </td>
-                <td id="button-group" style="vertical-align: top; padding: 20px; border: 2px solid grey">
-                        <h4>Building Block Panel</h4>
-                        <br>
-                        <p>                    
-                            <input type="button" id="amoveplus" class = "btn btn-danger" value="Face-max Move"></p>
-                            <p><input type="button" id="amoveminus" class = "btn btn-danger" value="Face-min Move">
-                        </p>
-                        <p>
-                            <input type="button" id="bmoveplus" class = "btn btn-warning" value="Edge-max Move"></p>
-                            <p><input type="button" id="bmoveminus" class = "btn btn-warning" value="Edge-min Move">
-                        </p>
-                        <p>
-                            <input type="button" id="dmoveplus" class = "btn btn-info" value="Vertex-max Move"></p>
-                            <p><input type="button" id="dmoveminus" class = "btn btn-info" value="Vertex-min Move">
-                        </p>
-                        <p><input type="button" id="reset" class="btn btn-primary btn-block"  value="Reset"></p>  
-                        <p><input type="button" id="ifflow" class="btn btn-primary btn-block"  value="Disable Flow"></p>  
-                        <p><input type="button" id="ifskeleton" class="btn btn-primary btn-block"  value="Only Display Skeleton"></p>       
-                </td>
-                <td rowspan="2" id="functionValues" style="padding: 20px; border: 1px solid black">
-                        <h4>Function Control Panel</h4>
-                        <br>
-                        <p><input type="button" id="enableFV" class="btn btn-outline-primary btn-block"  value="Enable Function Value Control"></p> 
+        <div id="mode">
+            <div style="padding-left:15px; padding-right:10px; display:inline-block">
+                <input type="radio" class="form-radio" name="mode-type" value="manual" id="mode1">
+                <label for="mode1" class="mode_label">Manual Mode</label>
+            </div>
+            <div style="padding-left:15px; padding-right:10px; display:inline-block">
+                <input type="radio" class="form-radio" name="mode-type" value="semi-automatic" id="mode2" checked="checked">
+                <label for="mode2" class="mode_label">Semi-automatic Mode</label>
+            </div>   
+        </div>
+    </div>
     
     
-                </td>
-                <td rowspan="3" id="undogroup" style="padding: 20px; border: 1px solid grey;">
-                    <div>
-                        <input type="button" class="btn btn-outline-primary" id="undobutton" value="Undo">
-                    </div>
+    <div class="control-container">
+        <div class="control-group" style="width:15%">
+            <div class="toggle-group">
+                <div class="toggle-label"> Skeleton </div>
+                <div class="onoffswitch">
+                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="ifskeleton" checked>
+                    <label class="onoffswitch-label" for="ifskeleton">
+                        <span class="onoffswitch-inner"></span>
+                        <span class="onoffswitch-switch"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="control-group" style="width:20%">
+            <div class="toggle-group">
+                <div class="toggle-label"> Flow Visualization </div>
+                <div class="onoffswitch">
+                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="ifvf">
+                    <label class="onoffswitch-label" for="ifvf">
+                        <span class="onoffswitch-inner"></span>
+                        <span class="onoffswitch-switch"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="control-group" style="width:15%">
+            <div class="toggle-group">
+                <div class="toggle-label"> Animation </div>
+                <div class="onoffswitch">
+                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="ifflow">
+                    <label class="onoffswitch-label" for="ifflow">
+                        <span class="onoffswitch-inner"></span>
+                        <span class="onoffswitch-switch"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="control-group" style="vertical-align: top; padding-top:4px;"> 
+            <input type="button" id="reset" class="btn btn-primary"  value="Reset">
+        </div>     
+        <div class="import-group">
+            <form method="post" id="upload" enctype="multipart/form-data" action="" >
+                <input type="file" style="display:none" id="files" name="files">
+                <input type="button" class="btn btn-outline-primary" id="import" value="Import A Configuration">
+            </form>
+        </div>
+        <div class="export-group">
+            <input class="form-control" type="text" placeholder="Input file name" id="exFilename">
+            <input style="position: relative; top:0px" type="button" class="btn btn-outline-primary" id="export" value="Export Current Configuration">
+        </div>
+    </div>
 
-                </td>
-            </tr>
-            <tr>
-                <td id="filegroup" style="padding: 20px; border: 1px solid grey">
-                    <p>
-                        <form method="post" id="upload" enctype="multipart/form-data" action="" >
-                            <input type="file" style="display:none" id="files" name="files">
-                            <input type="button" class="btn btn-outline-primary" id="import" value="Import A Configuration">
-                        </form>
-                    </p>
-                    <br>
-                    <p>
-                        <div>
-                            <label for="exFilename">File Name</label>
-                            <input class="form-control" type="text" placeholder="Input file name" id="exFilename">
-                            <small id="exHelp" class="form-text text-muted">The default name is "export"</small>
+
+    <div class="container-fluid" style="background-color: rgb(249,249,249);border: 1px solid rgb(224,224,224);">
+        <div class="row">
+            <div style="width:70%">
+                <div class="row">
+                        <div class="col-md-9" style="padding:0px;">
+                                <div class="content-main" id="content_main_drawing">
+                                    <canvas id="animation" style="position: absolute;" width="420px" height="420px" ></canvas>
+                                    <svg id="annotation" style="position: absolute; z-index:1;" width="420px" height="420px"></svg>
+                                </div> 
+                            </div>
+                            <div class="col-md-3" style="padding:0; border-left: 1px solid rgb(224,224,224);">
+                                <div class="content-sub" style="height:430px">
+                                        <h4>Elementary Moves</h4>
+                                        <div class="move-button-group">                    
+                                            <input type="button" id="amoveplus" class = "btn-sm btn-danger move-button"  value="Face-Max" style="background-color:rgb(249, 167, 167); border: none; color: rgb(58,58,58);">
+                                            <img src="../static/assets/move_img/fa.png">
+                                        </div>
+                                        <div class="move-button-group">
+                                            <input type="button" id="amoveminus" class = "btn-sm btn-danger move-button" value="Face-Min" style="background-color:rgb(249, 167, 167); border: none; color: rgb(58,58,58);">
+                                            <img src="../static/assets/move_img/fb.png">
+                                        </div>
+                                        <div class="move-button-group">
+                                            <input type="button" id="bmoveplus" class = "btn-sm btn-warning move-button" value="Edge-Max" style="background-color:rgb(170,209,245); border: none;color: rgb(58,58,58); ">
+                                            <img src="../static/assets/move_img/ea.png">
+                                        </div>
+                                        <div class="move-button-group">
+                                            <input type="button" id="bmoveminus" class = "btn-sm btn-warning move-button" value="Edge-Min" style="background-color:rgb(170,209,245); border: none;color: rgb(58,58,58);">
+                                            <img src="../static/assets/move_img/eb.png">
+                                        </div>
+                                        <div class="move-button-group">
+                                            <input type="button" id="dmoveplus" class = "btn-sm btn-info move-button" value="Vertex-Max" style="background-color:rgb(155, 225, 147); border: none; color: rgb(58,58,58);">
+                                            <img src="../static/assets/move_img/va.png">
+                                        </div>
+                
+                                        <div class="move-button-group">
+                                            <input type="button" id="dmoveminus" class = "btn-sm btn-info move-button" value="Vertex-Min" style="background-color:rgb(155, 225, 147); border: none; color: rgb(58,58,58);">
+                                            <img src="../static/assets/move_img/vb.png">
+                                        </div>
+                                </div>
+                            </div>
+                </div>
+                <div class="row" style="padding:0; border-top: 1px solid rgb(224,224,224)">
+                        <div class="col-md-12" style="padding-right:5px;">
+                            <div class="content-sub" style="height:100px;padding-top: 5px; ">
+                                <div class="scrollable" style="height: 100px;">
+                                    <div style="display:inline-block; width:12%; vertical-align:middle; padding-top:6px;">
+                                        <h4>Barcode</h4>
+                                    </div>
+                                    <div style="display:inline-block; width:65%; padding-bottom:5px;">
+                                            <input type="button" class="btn btn-outline-primary barcode-button" id="computeBarcode" value="Compute Barcode">
+                                            <input type="button" class="btn btn-outline-primary barcode-button" id="simplifyBarcode" value="Simplification">
+                                            <!-- <input type="button" id="cpdetection" class="btn btn-outline-primary barcode-button"  value="Singularities Detection"> -->
+                                    </div>
+                                    
+                                    <div id="persistencegroup">
+                                        <div style="position: relative; top: 15px; left: 200px;" id="loadergroup"></div>
+                                    </div> 
+                                </div>
+                            </div>
                         </div>
-                            <input style="position: relative; top:5px" type="button" class="btn btn-outline-primary" id="export" value="Export Current Configuration">
-                    </p> 
-                </td>
-            </tr>
-            <!-- <tr>
-                    <td id="undogroup" style="padding: 20px; border: 1px solid grey;" colspan="3">
-                        <div>
+                    </div>
+                
+            </div>
+            
+            <div style="padding:0; border-left: 1px solid rgb(224,224,224); width:15%">
+                <div class="content-sub" style="height:520px" id="functionValues">
+                        <h4>Function Adjustment</h4>
+                        <div class="toggle-group">
+                            <div class="onoffswitch" style="float:left">
+                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="iffv">
+                                <label class="onoffswitch-label" for="iffv">
+                                    <span class="onoffswitch-inner"></span>
+                                    <span class="onoffswitch-switch"></span>
+                                </label>
+                            </div>
+                        </div>
+                            <!-- <br>
+                            <p><input type="button" id="enableFV" class="btn btn-outline-primary btn-block"  value="Enable Function Value Control"></p>   -->
+
+                </div>
+            </div>
+            <div style="padding:0; border-left: 1px solid rgb(224,224,224);width:15%">
+                    <div class="content-sub scrollable" style="height:520px;padding-top: 10px;padding-left: 10px;">
+                        <div id="undo-group">
                             <input type="button" class="btn btn-outline-primary" id="undobutton" value="Undo">
                         </div>
-                    </td>
-            </tr> -->
-            <tr>
-                <td id="phgroup" style="padding: 20px; border: 1px solid grey;" colspan="3">
-                    <div class="scrollable" style="height: 350px;">
-                        <h4>Barcode Panel</h4>
-                        <br>
-                        <input type="button" class="btn btn-outline-primary" id="computeBarcode" value="Compute Barcode">
-                        <input type="button" class="btn btn-outline-primary" id="simplifyBarcode" value="Simplification">
-                        <input type="button" id="cpdetection" class="btn btn-outline-primary"  value="Singularities Detection">
-                        <div id="persistencegroup">
-                            <div style="position: relative; top: 50px; left: 700px;" id="loadergroup"></div>
-                        </div> 
-                        
+                        <div id="redo-group" style="float:right">
+                            <input type="button" class="btn btn-outline-primary" id="redobutton" value="Redo">
+                        </div>
+                        <svg id="stepSVG"></svg>
                     </div>
-                </td>
-            </tr>
-            
-        </table>
-    </div>
+            </div>
+        </div>
+        
+
+    </div> 
+
+
+     
 </body>
 </html>

@@ -54,6 +54,8 @@ class anim{
         this.canvasWidth = document.getElementById('animation').offsetWidth;
         this.canvasHeight = document.getElementById('animation').offsetHeight;
         this.svg = d3.select("#annotation");
+        this.svgWidth = 420;
+        this.svgHeight = 420;
         this.rcpdGroup = this.svg.append("g")
             .attr("id","rcpdgroup");
         this.edgeGroup = this.svg.append("g")
@@ -75,21 +77,20 @@ class anim{
         this.frames = [[0,0,0,1],[0,1,1,1],[0,0,1,0],[1,0,1,1,]]; //used for drawing frames
 
         // initialize step legend
-        this.margin = {"top":20,"bottom":20,"left":20,"right":20,"betweenstep":50};
-        this.step_svgWidth = 350;
-        this.step_svgHeight = 1210;
-        this.step_frameWidth = 300;
-        this.step_frameHeight = 300;
-        this.step_svg = d3.select("#undogroup").append("svg")
-            .attr("id","undoSVG")
+        this.margin = {"top":10,"bottom":10,"left":15,"right":10,"betweenstep":20};
+        this.step_svgWidth = 160;
+        this.step_svgHeight = 600;
+        this.step_frameWidth = 120;
+        this.step_frameHeight = 120;
+        this.step_svg = d3.select("#stepSVG")
             .attr("width", this.step_svgWidth)
             .attr("height", this.step_svgHeight);
-        this.recordgroup1 = this.step_svg.append("g")
-            .attr("id","record1");
-        this.recordgroup2 = this.step_svg.append("g")
-            .attr("id","record2");
-        this.recordgroup3 = this.step_svg.append("g")
-            .attr("id","record3");
+        // this.recordgroup1 = this.step_svg.append("g")
+        //     .attr("id","record1");
+        // this.recordgroup2 = this.step_svg.append("g")
+        //     .attr("id","record2");
+        // this.recordgroup3 = this.step_svg.append("g")
+        //     .attr("id","record3");
         
         this.step_xMap = d3.scaleLinear()
             .domain([0, 1])
@@ -103,32 +104,8 @@ class anim{
             .y(d=>this.step_yMap(d.y))
             .curve(d3.curveCardinal.tension(0));
         
-        this.recordgroup1.append("rect")
-            .attr("x",this.margin.left)
-            .attr("y",this.margin.top)
-            .attr("width",this.step_frameWidth)
-            .attr("height",this.step_frameHeight)
-            .attr("stroke","white")
-            .attr("fill", "none");
-        
-        this.recordgroup2.append("rect")
-            .attr("x",this.margin.left)
-            .attr("y",this.margin.top+this.step_frameHeight+this.margin.betweenstep)
-            .attr("width",this.step_frameWidth)
-            .attr("height",this.step_frameHeight)
-            .attr("stroke","white")
-            .attr("fill", "none");
-        
-        this.recordgroup3.append("rect")
-            .attr("x",this.margin.left)
-            .attr("y",this.margin.top+2*this.step_frameHeight+2*this.margin.betweenstep)
-            .attr("width",this.step_frameWidth)
-            .attr("height",this.step_frameHeight)
-            .attr("stroke","white")
-            .attr("fill", "none");
-        
-        this.drawFlag = true;
-        this.step = 0.02;
+        this.drawFlag = false;
+        this.step = 0.025;
         // this.step = 0.05;
         this.numSeg = 10;
         this.sigma = 0.1;
@@ -183,6 +160,7 @@ class anim{
         console.log(this.edgeMapper)
 
         this.stepRecorder = [];
+        // this.stepRecorder_Idx = 0;
         this.addStep();
 
         // discretize the vfield coords
@@ -198,15 +176,15 @@ class anim{
 
         this.xMap = d3.scaleLinear()
             .domain([0, 1])
-            .range([0, this.canvasWidth]);
+            .range([0, this.svgWidth]);
         this.yMap = d3.scaleLinear()
             .domain([0, 1])
-            .range([0, this.canvasHeight]);
+            .range([0, this.svgHeight]);
         this.xMapReverse = d3.scaleLinear()
-            .domain([0, this.canvasWidth])
+            .domain([0, this.svgWidth])
             .range([0, 1]);
         this.yMapReverse = d3.scaleLinear()
-            .domain([0, this.canvasHeight])
+            .domain([0, this.svgHeight])
             .range([0, 1]);
         this.curve0 = d3.line()
             .x(d=>this.xMap(d.x))
@@ -466,7 +444,7 @@ class anim{
     }
 
     drawAnnotation(){
-
+        console.log("drawing")
         let edgelist = d3.entries(this.edges);
         // draw frames (local minimum)
         this.frameGroup.selectAll("line")
@@ -484,7 +462,7 @@ class anim{
             .attr("id",(d)=>"cpbackground"+d.id)
             .attr("cx",(d)=>this.xMap(d.x))
             .attr("cy",(d)=>this.yMap(d.y))
-            .attr("r",15)
+            .attr("r",7)
             .attr("fill","white")
         
         let circletext = this.pointsGroup.selectAll("text").data(this.cp);
@@ -492,7 +470,7 @@ class anim{
         circletext = circletext.enter().append("text").merge(circletext)
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
-            .attr('font-size', '35px')
+            .attr('font-size', '15px')
             .attr("x",(d)=>this.xMap(d.x))
             .attr("y",(d)=>this.yMap(d.y))
             .attr("class",(d)=>{
@@ -525,8 +503,8 @@ class anim{
         labels.exit().remove();
         labels = labels.enter().append("text").merge(labels)
             .attr("id",(d)=>"cplabel"+d.id)
-            .attr("x",(d)=>this.xMap(d.x)-20)
-            .attr("y",(d)=>this.yMap(d.y)-20)
+            .attr("x",(d)=>this.xMap(d.x)-8)
+            .attr("y",(d)=>this.yMap(d.y)-8)
             .text((d,i)=>i+1)
             .attr("class",(d)=>"label "+d.type)
             .style("font-weight","bold");
@@ -613,7 +591,7 @@ class anim{
                     if(!ifInter){
                         that.drawAnnotation();
                         that.addedges();
-                        if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
+                        if(d3.select("#ifvf").property("checked")){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
                             that.drawFlow();
@@ -653,7 +631,7 @@ class anim{
                 if(!ifInter){
                     that.drawAnnotation();
                     that.addedges();
-                    if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
+                    if(d3.select("#ifvf").property("checked")){
                         that.assignEdge();
                         that.constructMesh(that.sigma);
                         that.drawFlow();
@@ -740,7 +718,7 @@ class anim{
                     if(!ifTemp && !ifInter && !ifInter1){
                         that.drawAnnotation();
                         that.addedges();
-                        if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
+                        if(d3.select("#ifvf").property("checked")){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
                             that.drawFlow();
@@ -967,21 +945,21 @@ class anim{
             .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
             .attr("id",(d)=>d.key)
             .style("fill", "none")
-            .style("stroke", "black")
-            .style("stroke-width",2)
+            .style("stroke", "dimgray")
+            .style("stroke-width",1)
             .style("stroke-dasharray",(d)=>{
                 if(d.value[3]==="max"){
-                    return "5,5";
+                    return "3,1";
                 } else {return "";}
             })
             .style("opacity",0.8)
             .on("mouseover",(d,i)=>{
                 d3.select("#"+d.key)
-                    .style("stroke-width",5)
+                    .style("stroke-width",2.5)
             })
             .on("mouseout",(d,i)=>{
                 d3.select("#"+d.key)
-                    .style("stroke-width",2)
+                    .style("stroke-width",1)
             })
     }
 
@@ -1173,10 +1151,13 @@ class anim{
         }
 
         let g = d3.select("#animation").node().getContext("2d"); // initialize a "canvas" element
+        console.log(g)
+        // g.scale(0.72,0.38)
+        // g.translate(10,10)
         let that = this;
 
         //// animation setup
-        let frameRate = 500; // ms per timestep (yeah I know it's not really a rate)
+        let frameRate = 1000; // ms per timestep (yeah I know it's not really a rate)
         let M = X.length;
         let MaxAge = 200; // # timesteps before restart
         var age = [];
@@ -1191,17 +1172,24 @@ class anim{
         //     .on("click", function() {that.drawFlag = (that.drawFlag) ? false : true;});
             
         g.globalCompositeOperation = "source-over";
+        console.log(that.xMap.range())
+        console.log(that.svgWidth)
+        console.log(that.yMap.range())
+
         
         function draw() {
+            console.log("drawing")
             let width = document.getElementById('animation').offsetWidth;
             let height = document.getElementById('animation').offsetHeight;
             g.fillStyle = "rgba(255,255, 255, 0.05)";
             g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba   
 
+
             
             for (let i=0; i<M; i++) { // draw a single timestep for every curve
-                let dr = that.findV(X[i],Y[i],that.grad)[0]
-                let pt_new = that.findV(X[i],Y[i],that.grad)[1]
+                let V = that.findV(X[i],Y[i],that.grad)
+                let dr = V[0]
+                let pt_new = V[1]
                 let X_new = pt_new[0];
                 let Y_new = pt_new[1];
 
@@ -1325,40 +1313,79 @@ class anim{
             new_p.fv_perb = p.fv_perb;
             new_p.lvalue = p.lvalue;
             new_p.uvalue = p.uvalue;
+            // let new_p = {"id":p.id, "x":p.x, "y":p.y, "type":p.type};
             cp.push(new_p);
         })
         let edges = {};
         let edgeMapper = {};
         for(let eid in this.edges){
-            let startpoint = cp[this.edges[eid][0].id];
+            let startId = this.edges[eid][0].id;
+            let startpoint = cp[startId];
+            // cp[this.edges[eid][0].id];
+            let midpoint = {"x":this.edges[eid][1].x, "y":this.edges[eid][1].y}
             let endpoint;
-            let type;
-            if(cp[this.edges[eid][2].id]!=undefined){
-                endpoint = cp[this.edges[eid][2].id];
-                type = endpoint.type;
-            } else {
-                endpoint = this.minBound_dict[this.edges[eid][2].id];
-                type = "min";
+            
+            let type = this.edges[eid][3];
+            if(this.edges[eid][2].ifBound){
+                endpoint = {"x":this.edges[eid][2].x, "y":this.edges[eid][2].y, "id":this.edges[eid][2].id, "type":this.edges[eid][2].type, "ifBound":true};
+            } else{
+                let endId = this.edges[eid][2].id;
+                endpoint = cp[endId];
             }
-            let midpoint = {"x":this.edges[eid][1].x, "y":this.edges[eid][1].y};
-            this.addNewEdge(startpoint, endpoint, type, cp, edges, edgeMapper, midpoint, true);
+            // if(cp[this.edges[eid][2].id]!=undefined){
+            //     endpoint = cp[this.edges[eid][2].id];
+            //     type = endpoint.type;
+            // } else {
+            //     endpoint = this.minBound_dict[this.edges[eid][2].id];
+            //     type = "min";
+            // }
+            // let midpoint = {"x":this.edges[eid][1].x, "y":this.edges[eid][1].y};
+            edges[eid] = [startpoint, midpoint, endpoint,type];
+            // edgeMapper[eid] = [];
+            // this.edgeMapper[eid].forEach(p=>{
+            //     let new_mapper = {"x":p.x, "y":p.y, "x_new":p.x_new, "y_new":p.y_new};
+            //     if(p.direction){ new_mapper.direction = p.direction; };
+            //     edgeMapper[eid].push(new_mapper);
+            // })
+            // this.addNewEdge(startpoint, endpoint, type, cp, edges, edgeMapper, midpoint, true);
             
         }
         let step = new editStep(cp, edges);
-        this.stepRecorder.push(step);
+        this.stepRecorder = this.stepRecorder.slice(this.stepRecorder_Idx)
+        this.stepRecorder.unshift(step);
+        this.stepRecorder_Idx =  0;
     }
 
     drawStep(){
         // draw legend
-        console.log(this.stepRecorder)
-        for(let j=1;j<=3;j++){
-            let idx = this.stepRecorder.length-j;
-            if(this.stepRecorder[idx]!=undefined){
-                d3.select("#record"+j)
-                    .style("visibility","visible");
-                d3.select("#record"+j).select("rect")
-                    .attr("stroke","rgb(44,123,246)")
-                let step = this.stepRecorder[idx]
+        let current_stepRecorder = this.stepRecorder.slice(this.stepRecorder_Idx)
+        console.log(this.stepRecorder_Idx)
+        console.log(current_stepRecorder)
+
+        let stepGroup = this.step_svg.selectAll('g')
+            .data(current_stepRecorder)
+        stepGroup.exit().remove();
+        stepGroup = stepGroup.enter().append('g').merge(stepGroup)
+            .attr("id",(d,i)=>"record"+i);
+        
+        
+        for(let j=0;j<=current_stepRecorder.length;j++){
+            let idx = j;
+            if(current_stepRecorder[j]!=undefined){
+                // d3.select("#record"+j)
+                //     .style("visibility","visible");
+                let stepRect = d3.select("#record"+j).selectAll('rect')
+                        .data([j])
+                stepRect.exit().remove();
+                stepRect = stepRect.enter().append('rect').merge(stepRect)
+                    .attr("x",this.margin.left)
+                    .attr("y",d=>this.margin.top+d*this.step_frameHeight+d*this.margin.betweenstep)
+                    .attr("width",this.step_frameWidth)
+                    .attr("height",this.step_frameHeight)
+                    .attr("stroke","rgb(170,209,245)")
+                    .attr("fill", "none");
+
+                let step = current_stepRecorder[idx]
                 let edgelist = d3.entries(step.edges);
                 let edges = d3.select("#record"+j).selectAll("path").data(edgelist);
                 edges.exit().remove();
@@ -1371,10 +1398,10 @@ class anim{
                     })
                     .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
                     // .attr("transform","translate("+(this.margin.left+(j-1)*this.step_frameWidth + (j-1)*this.margin.betweenstep)+","+this.margin.top+")")
-                    .attr("transform","translate("+this.margin.left+","+(this.margin.top+(j-1)*this.step_frameHeight + (j-1)*this.margin.betweenstep)+")")
+                    .attr("transform","translate("+this.margin.left+","+(this.margin.top+(j)*this.step_frameHeight + (j)*this.margin.betweenstep)+")")
                     .style("fill", "none")
-                    .style("stroke", "black")
-                    .style("stroke-width",2)
+                    .style("stroke", "dimgray")
+                    .style("stroke-width",1)
                     .style("stroke-dasharray",(d)=>{
                         if(d.value[3]==="max"){
                             return "5,5";
@@ -1387,8 +1414,8 @@ class anim{
                 circles = newcircles.merge(circles);
                 circles
                     .attr("cx",(d)=>this.step_xMap(d.x)+this.margin.left)
-                    .attr("cy",(d)=>this.step_yMap(d.y)+this.margin.top+(j-1)*this.step_frameHeight + (j-1)*this.margin.betweenstep)
-                    .attr("r",15)
+                    .attr("cy",(d)=>this.step_yMap(d.y)+this.margin.top+(j)*this.step_frameHeight + (j)*this.margin.betweenstep)
+                    .attr("r",5)
                     .attr("fill","white");
             
                 let circletext = d3.select("#record"+j).selectAll("text").data(step.cp);
@@ -1398,9 +1425,9 @@ class anim{
                 circletext
                     .attr('text-anchor', 'middle')
                     .attr('dominant-baseline', 'central')
-                    .attr('font-size', '35px')
+                    .attr('font-size', '12px')
                     .attr("x",(d)=>this.step_xMap(d.x)+this.margin.left)
-                    .attr("y",(d)=>this.step_yMap(d.y)+this.margin.top+(j-1)*this.step_frameHeight + (j-1)*this.margin.betweenstep)
+                    .attr("y",(d)=>this.step_yMap(d.y)+this.margin.top+(j)*this.step_frameHeight + (j)*this.margin.betweenstep)
                     .attr("class",(d)=>{
                         if(d.type==="max"){
                             return "far max"
@@ -1419,9 +1446,10 @@ class anim{
                             return "\uf140"
                         }
                     })
-            }else{
-                d3.select("#record"+j)
-                    .style("visibility","hidden");
+            // }
+            // else{
+                // d3.select("#record"+j)
+                    // .style("visibility","hidden");
                 
             }
 
@@ -1460,13 +1488,14 @@ class anim{
 
     clearCanvas(){
         // clear both canvas and svg
+
         this.drawFlag = false;
         $('#animation').remove();
         $('#annotation').remove();
         $('#slidersSVG').remove();
         $('#phSVG').remove();
         $('#undoSVG').remove();
-        $('#container').append('<canvas id="animation" style="position: absolute; top:160px; left:90px; z-index:1" width="1000" height="1000" ></canvas>');
-        $('#container').append('<svg id="annotation" style="position: absolute; top:160px; left:90px; z-index:1" width="1000" height="1000"></svg>');
+        $('#content_main_drawing').append('<canvas id="animation" style="position: absolute;" width="420px" height="420px" ></canvas>');
+        $('#content_main_drawing').append('<svg id="annotation" style="position: absolute; z-index:1;" width="420px" height="420px"></svg>');
     }  
 }

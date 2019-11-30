@@ -4,9 +4,9 @@ class persistence{
         this.local_max = 10;
         this.local_min = 0;
         this.barcode = barcode;
-        this.margin = {"top":20,"bottom":20,"left":10,"right":10};
-        this.svgWidth = 1200;
-        this.svgHeight = 250;
+        this.margin = {"top":5,"bottom":5,"left":10,"right":10};
+        this.svgWidth = 600;
+        this.svgHeight = 200;
         this.svg = d3.select("#persistencegroup").append("svg")
             .attr("id","phSVG")
             .attr("width", this.svgWidth)
@@ -20,6 +20,7 @@ class persistence{
             .domain([this.local_min, this.local_max])
             .range([this.margin.left,this.svgWidth-this.margin.right]);
 
+        // this.sortBarcode();
         this.drawPersistence();
         this.recoverPairs();
         this.recoverPersisitence();
@@ -34,14 +35,14 @@ class persistence{
                     if(that.barcode[i].edge){
                         d3.select("#"+that.barcode[i].edge.key)
                             .style("stroke","red")
-                            .style("stroke-width","10")
+                            .style("stroke-width","3")
                             .on("mouseover",()=>{
                                 d3.select("#"+that.barcode[i].edge.key)
-                                    .style("stroke-width","15")
+                                    .style("stroke-width","6")
                             })
                             .on("mouseout",()=>{
                                 d3.select("#"+that.barcode[i].edge.key)
-                                    .style("stroke-width","10")
+                                    .style("stroke-width","3")
                             })
                             .on("click",()=>{
                                 that.anim.drawFlag = false;
@@ -146,13 +147,14 @@ class persistence{
     
     drawPersistence(){
         this.sortBarcode();
-        let barHeight = 20;
+        let barHeight = 8;
         let barGap = 5;
 
         let xAxis = d3.axisBottom(this.xScale);
         this.xAxisGroup
             .classed("axis", true)
-            .style("font-size","15px")
+            .style("font-size","7px")
+            .style("color","dimgray")
             .attr("transform", "translate(0, "+ this.margin.top + ")")
             .call(xAxis);
         let bars = this.persistenceBarGroup.selectAll("rect").data(this.barcode);
@@ -171,7 +173,7 @@ class persistence{
             })
             .attr("height",barHeight)
             .attr("id",(d,i)=>"barcode"+i)
-            .attr("fill","rgb(187,160,203)")
+            .attr("fill","rgba(187,160,203,1)")
             .on("mouseover",mouseover)
             .on("mouseout",mouseout)
 
@@ -208,6 +210,7 @@ class persistence{
                 let barId = this.barcode.length-1-k;
                 d3.select("#barcode"+barId)
                     .attr("fill","rgb(212,58,129)")
+                    .style("visibility","hidden")
             }
 
         }

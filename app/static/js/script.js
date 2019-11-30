@@ -9,69 +9,127 @@ function init(){
 
     d3.select("#undobutton")
         .on("click",()=>{
-            if(Anim.stepRecorder.length>1){
-                Anim.stepRecorder.pop();
-            }
-            let currentStep = Anim.stepRecorder[Anim.stepRecorder.length-1];
-            Anim.cp = currentStep.cp;
-            Anim.edges = currentStep.edges;
-            Anim.edgeMapper = {};
-            Object.keys(Anim.edges).forEach(eid=>{
-                Anim.edgeMapper[eid] = Anim.initializeEdgeMapper(Anim.edges[eid]);
-            })
-            Anim.assignEdge();
-            Anim.constructMesh(Anim.sigma);
-            Anim.drawAnnotation();
-            Anim.addedges();
-            Anim.drawStep();
-        })
-    d3.select("#ifskeleton")
-        .on("click",()=>{
-            if(d3.select("#ifskeleton").node().value === "Display Skeleton"){
-                d3.select("#ifskeleton").node().value = "Show Flow";
-                d3.select("#animation")
-                    .style("visibility","hidden");
-                d3.select("#ifflow")
-                    .classed("disabled",true);
-                Anim.drawFlag = false;
-            } else if(d3.select("#ifskeleton").node().value === "Show Flow"){
-                d3.select("#ifskeleton").node().value = "Display Skeleton";
-                d3.select("#animation")
-                    .style("visibility","visible");
-                d3.select("#ifflow")
-                    .classed("disabled",false)
-                    .attr("value","Disable Flow");
-                Anim.drawAnnotation();
+            if(Anim.stepRecorder_Idx<Anim.stepRecorder.length-1){
+                Anim.stepRecorder_Idx += 1;
+                let currentStep = Anim.stepRecorder[Anim.stepRecorder_Idx];
+                Anim.cp = [];
+                currentStep.cp.forEach(p=>{
+                    let new_p = new criticalPoint(p.id, p.x, p.y, p.type);
+                    new_p.fv = p.fv;
+                    new_p.fv_perb = p.fv_perb;
+                    new_p.lvalue = p.lvalue;
+                    new_p.uvalue = p.uvalue;
+                    Anim.cp.push(new_p);
+                })
+                Anim.edges = {};
+                for(let eid in currentStep.edges){
+                    let ed = currentStep.edges[eid];
+                    let startId = ed[0].id;
+                    let startpoint = Anim.cp[startId];
+                    let midpoint = {"x":ed[1].x, "y":ed[1].y}
+                    let endpoint;
+                    let type = ed[3];
+                    if(ed[2].ifBound){
+                        endpoint = {"x":ed[2].x, "y":ed[2].y, "id":ed[2].id, "type":ed[2].type, "ifBound":true};
+                    } else{
+                        let endId = ed[2].id;
+                        endpoint = Anim.cp[endId];
+                    }
+                    Anim.edges[eid] = [startpoint, midpoint, endpoint,type];
+                }
+                Anim.cpReassignEdge();
+                Anim.edgeMapper = {};
+                Object.keys(Anim.edges).forEach(eid=>{
+                    Anim.edgeMapper[eid] = Anim.initializeEdgeMapper(Anim.edges[eid]);
+                })
+                Anim.assignEdge();
                 Anim.constructMesh(Anim.sigma);
-                Anim.drawFlag = true;                
+                Anim.drawAnnotation();
+                Anim.addedges();
+                Anim.drawStep();
             }
         })
 
-    d3.select("#ifflow")
-        .on("click", ()=>{
-            if(!d3.select("#ifflow").classed("disabled")){
-                if(d3.select("#ifflow").node().value === "Disable Flow"){
-                    d3.select("#ifflow").node().value = "Enable Flow";
-                    Anim.drawFlag = false;
-                } else if (d3.select("#ifflow").node().value === "Enable Flow"){
-                    d3.select("#ifflow").node().value = "Disable Flow";
-                    Anim.drawFlag = true;
+    d3.select("#redobutton")
+        .on("click",()=>{
+            if(Anim.stepRecorder_Idx>0){
+                Anim.stepRecorder_Idx -= 1;
+                let currentStep = Anim.stepRecorder[Anim.stepRecorder_Idx];
+                Anim.cp = [];
+                currentStep.cp.forEach(p=>{
+                    let new_p = new criticalPoint(p.id, p.x, p.y, p.type);
+                    new_p.fv = p.fv;
+                    new_p.fv_perb = p.fv_perb;
+                    new_p.lvalue = p.lvalue;
+                    new_p.uvalue = p.uvalue;
+                    Anim.cp.push(new_p);
+                })
+                Anim.edges = {};
+                for(let eid in currentStep.edges){
+                    let ed = currentStep.edges[eid];
+                    let startId = ed[0].id;
+                    let startpoint = Anim.cp[startId];
+                    let midpoint = {"x":ed[1].x, "y":ed[1].y}
+                    let endpoint;
+                    let type = ed[3];
+                    if(ed[2].ifBound){
+                        endpoint = {"x":ed[2].x, "y":ed[2].y, "id":ed[2].id, "type":ed[2].type, "ifBound":true};
+                    } else{
+                        let endId = ed[2].id;
+                        endpoint = Anim.cp[endId];
+                    }
+                    Anim.edges[eid] = [startpoint, midpoint, endpoint,type];
                 }
+                Anim.cpReassignEdge();
+                Anim.edgeMapper = {};
+                Object.keys(Anim.edges).forEach(eid=>{
+                    Anim.edgeMapper[eid] = Anim.initializeEdgeMapper(Anim.edges[eid]);
+                })
+                Anim.assignEdge();
+                Anim.constructMesh(Anim.sigma);
+                Anim.drawAnnotation();
+                Anim.addedges();
+                Anim.drawStep();
+            }
+        })
+
+    d3.select("#ifskeleton")
+        .on("change", ()=>{
+            if(d3.select("#ifskeleton").property("checked")){
+                d3.select("#annotation").style("visibility", "visible");
+            } else{
+                d3.select("#annotation").style("visibility", "hidden");
             }
         })
 
     d3.select("#ifvf")
-        .on("click", ()=>{
-            if(d3.select("#ifvf").node().value === "Display Vector Fields"){
-                d3.select("#ifvf").node().value = "Show Skeleton";
-                d3.select("#annotation").style("visibility","hidden");
-            } else if (d3.select("#ifvf").node().value === "Show Skeleton"){
-                d3.select("#ifvf").node().value = "Display Vector Fields";
-                d3.select("#annotation").style("visibility","visible");
+        .on("change", ()=>{
+            if(d3.select("#ifvf").property("checked")){
+                Anim.assignEdge();
+                Anim.drawAnnotation();
+                Anim.constructMesh(Anim.sigma);
+                Anim.drawFlag = true;
+                d3.select("#animation").style("visibility","visible");
+                d3.select("#ifflow").property("checked", true);
+
+            } else {
+                Anim.drawFlag = false;
+                d3.select("#animation").style("visibility","hidden");
+                d3.select("#ifflow").property("checked", false);
             }
         })
 
-
+    d3.select("#ifflow")
+        .on("change",()=>{
+            if(d3.select("#ifflow").property("checked")){
+                Anim.assignEdge();
+                Anim.drawAnnotation();
+                Anim.constructMesh(Anim.sigma);
+                Anim.drawFlag = true;
+            } else {
+                Anim.drawFlag = false;
+            }
+        })
     
     $("#import").click(function(){
         $("#files").click();
@@ -80,6 +138,16 @@ function init(){
         .on("change",()=>{
             let form = $('#upload')[0];
             let content = new FormData(form);
+    //         let files = $('#files')[0].files[0]
+    //         let fileReader = new FileReader();
+    //         fileReader.onload = function(fileLoadedEvent) 
+	// {
+    //     var textFromFileLoaded = fileLoadedEvent.target.result;
+    //     console.log(textFromFileLoaded)
+	// };
+    //         fileReader.readAsText(files, "UTF-8");
+
+    //         console.log(files.target)
             $.ajax({
                 type: "POST",
                 enctype: 'multipart/form-data',
@@ -127,6 +195,7 @@ function init(){
 
         })
     $("#export").click(function(){
+        $("#export-dict").click();
         console.log("cp",Anim.cp)
         let v = $("#exFilename").val();
         console.log(v)
@@ -153,8 +222,15 @@ function init(){
         $.post( "/export", {
             javascript_data: JSON.stringify(anim_info)
         });
-        alert("Configuration saved");
+       
+        // alert("Configuration saved");
     })
+
+    d3.select("#export-dict")
+        .on("change",(e)=>{
+            console.log(e)
+        })
+
 
     $("#computeBarcode").click(function(){
         d3.select("#loadergroup").classed("loader",true)

@@ -15,7 +15,7 @@ def constructSp(df): # construct simplices
     sp = []
     fmax = np.max(df[:,2])
     dec = 1000
-    step = 0.02
+    step = 0.025
     N = int(1/step)
     for i in range(0,N-1):
         for j in range(0,N-1):
@@ -75,6 +75,7 @@ def RobustCriticalPointDetection():
 @app.route('/import', methods=['POST','GET'])
 def importFile():
     jsdata = request.files['files']
+    print(jsdata)
     filename = path.join(APP_STATIC,"assets/",jsdata.filename)
     with open(filename) as f:
         data = json.load(f)
