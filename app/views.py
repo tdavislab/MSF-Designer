@@ -34,7 +34,7 @@ def constructSp(df): # construct simplices
     return sp
 
 
-# @app.route('/')
+@app.route('/')
 @app.route('/vis_msvf')
 def index():
     return render_template('vis_msvf.html')
