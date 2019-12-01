@@ -45,7 +45,6 @@ function init(){
                 Anim.assignEdge();
                 Anim.constructMesh(Anim.sigma);
                 Anim.drawAnnotation();
-                Anim.addedges();
                 Anim.drawStep();
             }
         })
@@ -88,7 +87,6 @@ function init(){
                 Anim.assignEdge();
                 Anim.constructMesh(Anim.sigma);
                 Anim.drawAnnotation();
-                Anim.addedges();
                 Anim.drawStep();
             }
         })

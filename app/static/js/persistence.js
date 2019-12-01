@@ -90,7 +90,6 @@ class persistence{
                                 }
                                 that.anim.cpReorganize();
                                 that.anim.drawAnnotation();
-                                that.anim.addedges();
                                 if(!that.anim.checkIntersection()){
                                     that.anim.assignEdge();
                                     that.anim.constructMesh(that.anim.sigma);

@@ -190,7 +190,6 @@ class anim{
         this.animation();
         this.findRange();
         this.drawAnnotation();
-        this.addedges();
         this.drawStep();
 
         this.dragTerminal = false;
@@ -437,6 +436,7 @@ class anim{
     }
 
     drawAnnotation(){
+        this.addedges();
         let edgelist = d3.entries(this.edges);
         // draw frames (local minimum)
         this.frameGroup.selectAll("line")
@@ -521,8 +521,8 @@ class anim{
         terminalNodes.exit().remove();
         terminalNodes = terminalNodes.enter().append("circle").merge(terminalNodes)
             .attr("id",(d,i)=>"terminal_"+d.key)
-            .attr("cx",(d)=>this.terminalPosition(d.value)[0])
-            .attr("cy",(d)=>this.terminalPosition(d.value)[1])
+            .attr("cx",(d)=>this.terminalPosition(d.key)[0])
+            .attr("cy",(d)=>this.terminalPosition(d.key)[1])
             .attr("class","terminalNode")
             .on("mouseover",mouseover)
             .on("mouseout",mouseout)
@@ -560,8 +560,7 @@ class anim{
                     d3.select("#"+eid)
                         .attr("d",that.curve0(ed_new))
                     d3.select("#terminal_"+eid)
-                        .attr("cx",that.terminalPosition(ed_new)[0])
-                        .attr("cy",that.terminalPosition(ed_new)[1])
+                        .style("visibility","hidden");
                 }
             }
         }
@@ -571,7 +570,6 @@ class anim{
                 if(that.ifTempEdge()){
                     alert("Please connect all edges first!")
                     that.drawAnnotation();
-                    that.addedges();
                 } else if(that.ifInsideCanvas(d3.mouse(this))){
                     d.x = that.xMap.invert(d3.mouse(this)[0]);
                     d.y = that.yMap.invert(d3.mouse(this)[1]);
@@ -582,7 +580,6 @@ class anim{
                     let ifInter = that.checkIntersection();
                     if(!ifInter){
                         that.drawAnnotation();
-                        that.addedges();
                         if(d3.select("#ifvf").property("checked")){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
@@ -591,9 +588,12 @@ class anim{
                         that.addStep();
                     } else { that.drawFlag = false; }
                 }
+                for(let eid in d.edges){
+                    d3.select("#terminal_"+eid)
+                        .style("visibility","visible");
+                }
                 this.dragText = false;
             }
-            
         }
 
         function draggedConnNode(d){
@@ -613,7 +613,6 @@ class anim{
             if(that.ifTempEdge()){
                 alert("Please connect all edges first!")
                 that.drawAnnotation();
-                that.addedges();
             } else if(that.ifInsideCanvas(d3.mouse(this))){
                 d.value[1].x = that.xMap.invert(d3.mouse(this)[0]);
                 d.value[1].y = that.yMap.invert(d3.mouse(this)[1]);
@@ -621,7 +620,6 @@ class anim{
                 let ifInter = that.checkIntersection();
                 if(!ifInter){
                     that.drawAnnotation();
-                    that.addedges();
                     if(d3.select("#ifvf").property("checked")){
                         that.assignEdge();
                         that.constructMesh(that.sigma);
@@ -634,12 +632,19 @@ class anim{
 
         function draggedTerminal(d){
             // just draw, do not actually change values
-            d3.select(this)
-                .attr("cx",d3.mouse(this)[0])
-                .attr("cy",d3.mouse(this)[1])
-            let edgeid = d.key;
-            d3.select("#"+edgeid)
-                .attr("d",(d)=>that.curve0([d.value[0],d.value[1],{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])}]))
+            if(that.ifInsideCanvas(d3.mouse(this))){
+                d3.select(this)
+                    .attr("cx",d3.mouse(this)[0])
+                    .attr("cy",d3.mouse(this)[1])
+                let edgeid = d.key;
+                let endPt = {"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])};
+                let midPt = {"x":(d.value[0].x+endPt.x)/2,"y":(d.value[0].y+endPt.y)/2};
+                d3.select("#"+edgeid)
+                    .attr("d",(d)=>that.curve0([d.value[0],midPt,endPt]));
+                d3.select("#conn_"+d.key)
+                    .attr("cx",that.xMap(midPt.x))
+                    .attr("cy",that.yMap(midPt.y));
+            }
         }
 
         function dragendedTerminal(d,i) {
@@ -655,13 +660,13 @@ class anim{
                 } else if (d.value[3]==="min"){
                     cpm = that.findMinPt(pt,that.cp_min);
                 }
-                if(that.calDist(pt,cpm)<0.03){
+                if(that.calDist(pt,cpm)<0.05){
                     // check intersection
                     // ifinter: if this edge does not intersect with other edges, draw this edge
                     for(let eid in that.edges){
                         if(eid!=d.key && ["temp1","temp2","temp3","temp4"].indexOf(eid)===-1){
                             let curve1 = that.edgeMapper[eid];
-                            let curve2 = that.initializeEdgeMapper([d.value[0],{"x":(d.value[0].x+cpm.x)/2, "y":(d.value[0].y+cpm.y)/2},cpm,"max"]);
+                            let curve2 = that.initializeEdgeMapper([d.value[0],{"x":(d.value[0].x+cpm.x)/2, "y":(d.value[0].y+cpm.y)/2},cpm,cpm.type]);
                             if(that.ifCurvesIntersect(curve1,curve2)){
                                 that.highlightIntersection([d.key, eid]);
                                 ifInter=true;
@@ -672,7 +677,6 @@ class anim{
                         that.addNewEdge(d.value[0],cpm,d.value[3]);
                         that.deleteOldEdge(d.key);
                         that.drawAnnotation();
-                        that.addedges();
 
                     }
                     
@@ -707,7 +711,6 @@ class anim{
                     
                     if(!ifTemp && !ifInter && !ifInter1){
                         that.drawAnnotation();
-                        that.addedges();
                         if(d3.select("#ifvf").property("checked")){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
@@ -715,6 +718,16 @@ class anim{
                         }
                         that.addStep();
                     }
+                }
+                else{
+                    d3.select(this)
+                        .attr("cx",(d)=>that.terminalPosition(d.key)[0])
+                        .attr("cy",(d)=>that.terminalPosition(d.key)[1])
+                    d3.select("#"+d.key)
+                        .attr("d",(d)=>that.curve0([d.value[0],d.value[1],d.value[2]]))
+                    d3.select("#conn_"+d.key)
+                        .attr("cx",(d)=>that.xMap(d.value[1].x))
+                        .attr("cy",(d)=>that.yMap(d.value[1].y))
                 }
             }
         }
@@ -792,28 +805,69 @@ class anim{
         return false;
     }
 
-    terminalPosition(edge){
-        let tx;
-        let ty;
-        if(edge[2].y===0 || edge[2].y===1 || edge[0].x===edge[2].x){
-            tx = this.xMap(edge[2].x);
-        } else if(edge[2].x===0){
-            tx = this.xMap(edge[2].x+0.005);
-        } else if(edge[2].x===1){
-            tx = this.xMap(edge[2].x-0.005);
-        } else {
-            tx = this.xMap(edge[2].x + (edge[0].x-edge[2].x)/Math.abs(edge[0].x-edge[2].x)*0.015);
-        }
+    terminalPosition(eid){
 
-        if(edge[2].x===0 || edge[2].x===1 || edge[0].y===edge[2].y){
-            ty = this.yMap(edge[2].y);
-        } else if(edge[2].y===0){
-            ty = this.yMap(edge[2].y+0.005);
-        } else if(edge[2].y===1){
-            ty = this.yMap(edge[2].y-0.005);
-        } else {
-            ty = this.yMap(edge[2].y + (edge[0].y-edge[2].y)/Math.abs(edge[0].y-edge[2].y)*0.015)
+        let ed = this.edges[eid];
+        let edMapper = this.edgeMapper[eid];
+        let tx = 0.95*ed[2].x+0.05*ed[0].x;
+        let ty = 0.95*ed[2].y+0.05*ed[0].y;
+        if(edMapper){
+            if(ed[2].ifBound){
+                ty = 0.995*ed[2].y+0.005*ed[0].y;
+            }
+            let pt1;
+            let pt2;
+            if(ed[2].x === edMapper[0].x_new && ed[2].y === edMapper[0].y_new){
+                pt1 = edMapper[0];
+                pt2 = edMapper[1];
+                if(ed[2].ifBound){
+                    tx = 0.8*pt1.x_new+0.2*pt2.x_new
+                    ty = 0.8*pt1.y_new+0.2*pt2.y_new;
+                }
+                else{ 
+                    tx = pt2.x_new;
+                    ty = pt2.y_new;
+                }
+            }
+            if(ed[2].x === edMapper[this.numSeg].x_new && ed[2].y === edMapper[this.numSeg].y_new){
+                pt1 = edMapper[this.numSeg];
+                pt2 = edMapper[this.numSeg-1];
+                if(ed[2].ifBound){
+                    tx = 0.8*pt1.x_new+0.2*pt2.x_new
+                    ty = 0.8*pt1.y_new+0.2*pt2.y_new;
+                }
+                else{ 
+                    tx = pt2.x_new;
+                    ty = pt2.y_new;
+                }
+            }
+
         }
+        
+        
+        
+        // if(edge[2].y===0 || edge[2].y===1 || edge[0].x===edge[2].x){
+        //     tx = this.xMap(edge[2].x);
+        // } else if(edge[2].x===0){
+        //     tx = this.xMap(edge[2].x+0.005);
+        // } else if(edge[2].x===1){
+        //     tx = this.xMap(edge[2].x-0.005);
+        // } else {
+        //     tx = this.xMap(edge[2].x + (edge[0].x-edge[2].x)/Math.abs(edge[0].x-edge[2].x)*0.015);
+        // }
+
+        // if(edge[2].x===0 || edge[2].x===1 || edge[0].y===edge[2].y){
+        //     ty = this.yMap(edge[2].y);
+        // } else if(edge[2].y===0){
+        //     ty = this.yMap(edge[2].y+0.005);
+        // } else if(edge[2].y===1){
+        //     ty = this.yMap(edge[2].y-0.005);
+        // } else {
+        //     ty = this.yMap(edge[2].y + (edge[0].y-edge[2].y)/Math.abs(edge[0].y-edge[2].y)*0.015)
+        // }
+
+        tx = this.xMap(tx);
+        ty = this.yMap(ty);
 
         return [tx,ty];
     }
