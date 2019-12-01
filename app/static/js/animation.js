@@ -246,7 +246,7 @@ class anim{
         }
     }
 
-    addNewEdge(startpoint, endpoint, type, that_cp = this.cp, that_edges = this.edges, that_edgeMapper = this.edgeMapper, midpoint = undefined, forstep=false){
+    addNewEdge(startpoint, endpoint, type, that_cp = this.cp, that_edges = this.edges, that_edgeMapper = this.edgeMapper, midpoint = undefined){
         // console.log("adding!!", startpoint, endpoint, type)
         let edgeid = "edge"+startpoint.id+endpoint.id;
         // console.log("edgeid",edgeid)
@@ -265,21 +265,16 @@ class anim{
             }
             
         }
-        // add this edge to corresponding critical points
-        // startpoint is always a saddle point
-        if(forstep){
-            that_cp[startpoint.id].edges[edgeid] = that_edges[edgeid]
-            if(that_cp[endpoint.id]!=undefined){
-                that_cp[endpoint.id].edges[edgeid] = that_edges[edgeid]
-            }
-        }
-        else{
-            this.cpReassignEdge();
+        this.cpReassignEdge();
 
-        }
         
         // add this edge to this.edgeMapper
-        that_edgeMapper[edgeid] = this.initializeEdgeMapper(that_edges[edgeid])
+        that_edgeMapper[edgeid] = this.initializeEdgeMapper(that_edges[edgeid]);
+        if(edgeid!="edge"+startpoint.id+endpoint.id){
+            this.addedges();
+            this.mapEdges(edgeid);
+            this.mapEdges("edge"+startpoint.id+endpoint.id);
+        }
     }
 
     deleteOldEdge(edgeid){
@@ -754,6 +749,7 @@ class anim{
                 let eid1 = edgelist[i].key;
                 let eid2 = edgelist[j].key;
                 if(this.ifCurvesIntersect(this.edgeMapper[eid1], this.edgeMapper[eid2])){
+                    console.log(eid1, eid2)
                     this.highlightIntersection([eid1,eid2]);
                     ifInter = true;
                 }
@@ -999,6 +995,7 @@ class anim{
                 let line1 = [pt1, pt2];
                 let line2 = [pt3, pt4];
                 if(this.ifLinesIntersect(line1,line2)){
+                    console.log(i,j,line1,line2)
                     return true;
                 }
             }
