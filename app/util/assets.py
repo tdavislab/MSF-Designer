@@ -4,6 +4,7 @@ from .. import app
 
 bundles = {
     'js': Bundle(
+        'js/jquery-3.4.1.min.js'
         'js/animation.js',
         'js/moves.js',
         'js/sliders.js',
