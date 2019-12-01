@@ -15,7 +15,10 @@ class moves{
     }
 
     resetAllMoves(){
-
+        let move_list = ["amoveplus", "amoveminus", "bmoveplus", "bmoveminus", "dmoveplus", "dmoveminus"];
+        move_list.forEach(mv=>{
+            this.resetMove(mv);
+        })
     }
 
     resetMove(moveId){

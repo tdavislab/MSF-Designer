@@ -338,4 +338,9 @@ function init(){
                 Moves.dmoveMinus();
             } 
         })
+
+    d3.select("#cancelmove")
+        .on("click",()=>{
+            Moves.resetAllMoves();
+        })
 } init();
