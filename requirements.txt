@@ -1,4 +1,6 @@
 Flask==0.12.2
 Flask-Assets==0.12
 Flask-Uploads==0.2.1
-gunicorn== 19.9.0
+gunicorn==19.9.0
+numpy==1.16.4
+pandas==0.23.4
