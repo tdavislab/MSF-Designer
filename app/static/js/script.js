@@ -270,9 +270,10 @@ function init(){
             if(Moves.apType===""){
                 Anim.drawFlag=false;
                 Moves.apType = "max";
-                Moves.amovePlus();
                 d3.select("#amoveplus")
-                    .attr("value","Add a max point")
+                    .attr("value","Select a face")
+                    .classed("small-label", true);
+                Moves.amovePlus();
             }
         })
 
@@ -281,9 +282,11 @@ function init(){
             if(Moves.amType===""){
                 Anim.drawFlag=false;
                 Moves.amType = "min";
-                Moves.amoveMinus();
                 d3.select("#amoveminus")
-                    .attr("value","Add a min point")
+                    .attr("value","Select a face")
+                    .classed("small-label", true);
+                Moves.amoveMinus();
+
             }
         })
 
@@ -292,9 +295,10 @@ function init(){
             if(Moves.bpType===""){
                 Anim.drawFlag=false;
                 Moves.bpType = "max";
-                Moves.bmovePlus();
                 d3.select("#bmoveplus")
-                    .attr("value","Add a max point");    
+                    .attr("value","Select an edge")
+                    .classed("small-label", true);   
+                Moves.bmovePlus();
             }  
         })
 
@@ -303,9 +307,10 @@ function init(){
             if(Moves.bmType===""){
                 Anim.drawFlag=false;
                 Moves.bmType = "min";
-                Moves.bmoveMinus();
                 d3.select("#bmoveminus")
-                    .attr("value","Add a min point");
+                    .attr("value","Select an edge")
+                    .classed("small-label", true); 
+                Moves.bmoveMinus();   
             }
         })
 
@@ -314,9 +319,10 @@ function init(){
             if(Moves.dpType===""){
                 Anim.drawFlag=false;
                 Moves.dpType = "add";
-                Moves.dmovePlus();
                 d3.select("#dmoveplus")
-                    .attr("value","Click a max point");
+                    .attr("value","select a max point")
+                    .classed("small-label", true);
+                Moves.dmovePlus();
             }
         })
 
@@ -325,9 +331,10 @@ function init(){
             if(Moves.dmType===""){
                 Anim.drawFlag=false;
                 Moves.dmType = "add";
-                Moves.dmoveMinus();
                 d3.select("#dmoveminus")
-                    .attr("value","Click a min point");
+                    .attr("value","select a min point")
+                    .classed("small-label", true);
+                Moves.dmoveMinus();
             } 
         })
 } init();

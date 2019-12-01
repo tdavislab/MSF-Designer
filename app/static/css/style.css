@@ -34,7 +34,7 @@ html, body {
 } */
 
 .mode_label{
-    font-size:10px;
+    font-size:12px;
 }
 
 
@@ -45,7 +45,7 @@ h2 {
 }
 
 h4 {
-    font-size:10px;
+    font-size:12px;
     text-align:left;
 }
 
@@ -67,19 +67,20 @@ h4 {
 }
 
 .content-main {
-    padding-top: 5px;
-    padding-left: 50px;
+    padding-top: 10px;
+    padding-left: 60px;
     background-color: #FFF;
     position: relative;
     width: 100%;
-    height: 430px;
+    height: 590px;
     border-radius: 5px;
   }
 
 .content-sub {
-    padding-top: 10px;
+    /* padding-top: 10px;
     padding-left: 10px;
-    border-radius: 5px;
+    border-radius: 5px; */
+    padding:15px;
   }
 
 
@@ -275,7 +276,7 @@ div.scrollable {
   }
 
   #import, #export, #exFilename {
-    font-size: 8px;
+    font-size: 10px;
     height: 20px;
     line-height: 4px;
     color: rgb(110,123,196);
@@ -302,13 +303,18 @@ div.scrollable {
 
   /* Buttons */
 .move-button {
-      width: 28%;
+      width: 30%;
       height: 40%;
-      font-size: 9px;
+      font-size: 10px;
+  }
+
+.small-label {
+    padding-left:2px;
+    font-size: 8px;
+    text-align:center;
   }
 
   .move-button-group {
-    padding-left:0;
     padding-top: 5px;
     padding-bottom: 5px;
     width:100%;
@@ -318,8 +324,8 @@ div.scrollable {
 
   img {
       padding-left: 5%;
-      height: 90%;
-      width: 68%;
+      height: 80%;
+      width: 67%;
   }
 
   .control-button-group {
@@ -341,6 +347,7 @@ div.scrollable {
 
 #undo-group, #redo-group {
     display: inline-block;
+    padding-top:2px;
     width: 45%;
     height: 50px;
 }
@@ -364,7 +371,7 @@ div.scrollable {
 
 #reset {
     height: 20px;
-    font-size: 10px;
+    font-size: 12px;
     line-height: 4px;
     background-color:rgb(110,123,196);
     border: none;    
@@ -397,11 +404,10 @@ div.scrollable {
     display: inline-block;
     position:relative;
     padding-right:5px;
-    padding-top:3px;
-    font-size:10px;
+    font-size:12px;
     text-align: left;
     vertical-align: top;
-    padding-top:8px;
+    padding-top:6px;
 }
 
 .onoffswitch {

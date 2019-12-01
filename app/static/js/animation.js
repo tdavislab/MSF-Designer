@@ -48,14 +48,11 @@ class editStep{
 
 class anim{
     constructor(cp=undefined, edges=undefined, edgeMapper=undefined) {
-        console.log("anim")
-        console.log(cp)
-        console.log(edges)
         this.canvasWidth = document.getElementById('animation').offsetWidth;
         this.canvasHeight = document.getElementById('animation').offsetHeight;
         this.svg = d3.select("#annotation");
-        this.svgWidth = 420;
-        this.svgHeight = 420;
+        this.svgWidth = 570;
+        this.svgHeight = 570;
         this.rcpdGroup = this.svg.append("g")
             .attr("id","rcpdgroup");
         this.edgeGroup = this.svg.append("g")
@@ -78,19 +75,13 @@ class anim{
 
         // initialize step legend
         this.margin = {"top":10,"bottom":10,"left":15,"right":10,"betweenstep":20};
-        this.step_svgWidth = 160;
-        this.step_svgHeight = 600;
-        this.step_frameWidth = 120;
-        this.step_frameHeight = 120;
+        this.step_svgWidth = 180;
+        this.step_svgHeight = 300;
+        this.step_frameWidth = 160;
+        this.step_frameHeight = 160;
         this.step_svg = d3.select("#stepSVG")
             .attr("width", this.step_svgWidth)
             .attr("height", this.step_svgHeight);
-        // this.recordgroup1 = this.step_svg.append("g")
-        //     .attr("id","record1");
-        // this.recordgroup2 = this.step_svg.append("g")
-        //     .attr("id","record2");
-        // this.recordgroup3 = this.step_svg.append("g")
-        //     .attr("id","record3");
         
         this.step_xMap = d3.scaleLinear()
             .domain([0, 1])
@@ -107,7 +98,7 @@ class anim{
         this.drawFlag = false;
         this.step = 0.025;
         // this.step = 0.05;
-        this.numSeg = 10;
+        this.numSeg = 20;
         this.sigma = 0.1;
         if(cp===undefined){
             this.cp = [];
@@ -139,10 +130,13 @@ class anim{
         }
         this.minBound_dict = {};
         this.minBound.forEach(p=>this.minBound_dict[p.id] = p);
-
-        // console.log("minBound", this.minBound)
-
         this.cp_min = this.cp_min.concat(this.minBound);
+
+        console.log("cp_max", this.cp_max)
+        console.log("cp_min", this.cp_min)
+        console.log("cp_saddle", this.cp_saddle)
+
+
         this.edges = {};
         this.edgeMapper = {};
         // edge id: edge+start_point_id+end_point_id
@@ -160,7 +154,6 @@ class anim{
         console.log(this.edgeMapper)
 
         this.stepRecorder = [];
-        // this.stepRecorder_Idx = 0;
         this.addStep();
 
         // discretize the vfield coords
@@ -360,7 +353,7 @@ class anim{
         let stepLength = totalLength/this.numSeg;
         let newPoints = [];
         let pt;
-        for(let i=0;i<this.numSeg;i++){
+        for(let i=0;i<this.numSeg+1;i++){
             if(ed[3]==="max"){
                 if(this.edgeMapper[edgeid][0]["direction"]==="in"){
                     pt = d3.select("#"+edgeid).node().getPointAtLength(i*stepLength);
@@ -390,7 +383,7 @@ class anim{
         //         return d3.ascending(a.y,b.y) || d3.ascending(a.x,b.x);
         //     })
         // }
-        for(let i=0;i<this.numSeg;i++){
+        for(let i=0;i<this.numSeg+1;i++){
             // let pt = this.findMinPt([this.edgeMapper[edgeid][i].x, this.edgeMapper[edgeid][i].y], newPoints);
             let pt = newPoints[i]
             this.edgeMapper[edgeid][i].x_new = pt.x;
@@ -444,7 +437,6 @@ class anim{
     }
 
     drawAnnotation(){
-        console.log("drawing")
         let edgelist = d3.entries(this.edges);
         // draw frames (local minimum)
         this.frameGroup.selectAll("line")
@@ -597,7 +589,6 @@ class anim{
                             that.drawFlow();
                         }
                         that.addStep();
-                        that.drawStep();
                     } else { that.drawFlag = false; }
                 }
                 this.dragText = false;
@@ -637,7 +628,6 @@ class anim{
                         that.drawFlow();
                     }
                     that.addStep();
-                    that.drawStep();
                 } else { that.drawFlag = false; }
             } 
         }
@@ -724,7 +714,6 @@ class anim{
                             that.drawFlow();
                         }
                         that.addStep();
-                        that.drawStep();
                     }
                 }
             }
@@ -773,7 +762,7 @@ class anim{
 
     drawFlow(){
         this.drawFlag = true;
-        d3.select("#ifflow").node().value = "Disable Flow";
+        // d3.select("#ifflow").node().value = "Disable Flow";
     }
 
     highlightIntersection(eid_list){
@@ -838,7 +827,7 @@ class anim{
         })
         let xRange = ed[2].x-ed[0].x;
         let yRange = ed[2].y-ed[0].y;
-        for(let j=0;j<this.numSeg;j++){
+        for(let j=0;j<this.numSeg+1;j++){
             em.push({"x":ed[0].x+j*xRange/this.numSeg, "y":ed[0].y+j*yRange/this.numSeg, "x_new":ed[0].x+j*xRange/this.numSeg, "y_new":ed[0].y+j*yRange/this.numSeg});
         }
         if(edge[2].type==="max"){
@@ -875,10 +864,6 @@ class anim{
         let pt4 = line2[1];
         let x;
         let y;
-        // if they share the same endpoint, they do not intersect
-        if((pt1.x===pt3.x && pt1.y===pt3.y)||(pt1.x===pt4.x && pt1.y===pt4.y)||(pt2.x===pt3.x && pt2.y===pt3.y)||(pt2.x===pt4.x && pt2.y===pt4.y)){
-            return false;
-        }
         if(pt1.x===pt2.x&&pt3.x===pt4.x){ // if two lines are both vertical
             if(pt1.x===pt3.x){
                 if((pt3.y<=Math.max(pt1.y,pt2.y) && pt3.y>=Math.min(pt1.y,pt2.y))||(pt4.y<=Math.max(pt1.y,pt2.y) && pt4.y>=Math.min(pt1.y,pt2.y))){
@@ -891,21 +876,29 @@ class anim{
             }
         } else if(pt1.x===pt2.x){ // if line1 is vertical
             let a2 = (pt3.y-pt4.y)/(pt3.x-pt4.x);
-            let b2 = (pt3.x*pt4.y-pt4.x*pt3.y)/(pt3.x-pt4.x);
+            let b2 = pt3.y - a2*pt3.x;
             x = pt1.x;
             y = a2*x+b2;
         } else if(pt3.x===pt4.x){ // if line2 is vertical
             let a1 = (pt1.y-pt2.y)/(pt1.x-pt2.x);
-            let b1 = (pt1.x*pt2.y-pt2.x*pt1.y)/(pt1.x-pt2.x);
+            let b1 = pt1.y - a1*pt1.x;
             x = pt3.x;
             y = a1*x+b1;
         } else {
             let a1 = (pt1.y-pt2.y)/(pt1.x-pt2.x);
-            let b1 = (pt1.x*pt2.y-pt2.x*pt1.y)/(pt1.x-pt2.x);
+            let b1 = pt1.y - a1*pt1.x;
             let a2 = (pt3.y-pt4.y)/(pt3.x-pt4.x);
-            let b2 = (pt3.x*pt4.y-pt4.x*pt3.y)/(pt3.x-pt4.x);
+            let b2 = pt3.y - a2*pt3.x;
             if(a1===a2){
-                return false;
+                if(b1 === b2){ // if two lines are identical
+                    if(pt3.x<=Math.max(pt1.x, pt2.x) && pt3.x>=Math.min(pt1.x, pt2.x)){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                } else{
+                    return false;
+                }
             } else {
                 x = (b2-b1)/(a1-a2);
                 y = (a1*b2-a2*b1)/(a1-a2);
@@ -921,8 +914,36 @@ class anim{
         // console.log("checking")
         for(let i=1; i<curve1.length; i++){
             for(let j=1; j<curve2.length; j++){
-                let line1 = [{"x":curve1[i-1].x_new,"y":curve1[i-1].y_new}, {"x":curve1[i].x_new,"y":curve1[i].y_new}];
-                let line2 = [{"x":curve2[j-1].x_new,"y":curve2[j-1].y_new}, {"x":curve2[j].x_new,"y":curve2[j].y_new}];
+                let pt1 = {"x":curve1[i-1].x_new,"y":curve1[i-1].y_new};
+                let pt2 = {"x":curve1[i].x_new,"y":curve1[i].y_new};
+                let pt3 = {"x":curve2[j-1].x_new,"y":curve2[j-1].y_new};
+                let pt4 = {"x":curve2[j].x_new,"y":curve2[j].y_new};
+                if(i===1 && j===1){
+                    pt1.x = 0.999*pt1.x + 0.001*pt2.x;
+                    pt1.y = 0.999*pt1.y + 0.001*pt2.y;
+                    pt3.x = 0.999*pt3.x + 0.001*pt4.x;
+                    pt3.y = 0.999*pt3.y + 0.001*pt4.y;
+                }
+                if(i===1 && j===(curve2.length-1)){
+                    pt1.x = 0.999*pt1.x + 0.001*pt2.x;
+                    pt1.y = 0.999*pt1.y + 0.001*pt2.y;
+                    pt4.x = 0.001*pt3.x + 0.999*pt4.x;
+                    pt4.y = 0.001*pt3.y + 0.999*pt4.y;
+                }
+                if(i===(curve1.length-1) && j===1){
+                    pt2.x = 0.001*pt1.x + 0.999*pt2.x;
+                    pt2.y = 0.001*pt1.y + 0.999*pt2.y;
+                    pt3.x = 0.999*pt3.x + 0.001*pt4.x;
+                    pt3.y = 0.999*pt3.y + 0.001*pt4.y;
+                }
+                if(i===(curve1.length-1) && j===(curve2.length-1)){
+                    pt2.x = 0.001*pt1.x + 0.999*pt2.x;
+                    pt2.y = 0.001*pt1.y + 0.999*pt2.y;
+                    pt4.x = 0.001*pt3.x + 0.999*pt4.x;
+                    pt4.y = 0.001*pt3.y + 0.999*pt4.y;
+                }
+                let line1 = [pt1, pt2];
+                let line2 = [pt3, pt4];
                 if(this.ifLinesIntersect(line1,line2)){
                     return true;
                 }
@@ -1165,18 +1186,10 @@ class anim{
             age.push(randage());
         }
 
-        // let drawFlag = this.drawFlag
         setInterval(function () {if (that.drawFlag) {draw();}}, frameRate);
         d3.timer(function () {if (that.drawFlag) {draw();}}, frameRate);
-        // d3.select("#annotation")
-        //     .on("click", function() {that.drawFlag = (that.drawFlag) ? false : true;});
             
         g.globalCompositeOperation = "source-over";
-        console.log(that.xMap.range())
-        console.log(that.svgWidth)
-        console.log(that.yMap.range())
-
-        
         function draw() {
             console.log("drawing")
             let width = document.getElementById('animation').offsetWidth;
@@ -1184,8 +1197,6 @@ class anim{
             g.fillStyle = "rgba(255,255, 255, 0.05)";
             g.fillRect(0, 0, width, height); // fades all existing curves by a set amount determined by fillStyle (above), which sets opacity using rgba   
 
-
-            
             for (let i=0; i<M; i++) { // draw a single timestep for every curve
                 let V = that.findV(X[i],Y[i],that.grad)
                 let dr = V[0]
@@ -1240,6 +1251,10 @@ class anim{
     // **************** This is only for "semi-auto" mode ****************
 
     findEdges(){
+        console.log("finding edges")
+        console.log(this.cp_max)
+        console.log(this.cp_min)
+        console.log(this.cp_saddle);
         // automatically find edges, only for "expert mode"
         for(let i=0;i<this.cp.length;i++){
             if(this.cp[i].type==="saddle"){
@@ -1301,7 +1316,7 @@ class anim{
         
     }
 
-    // **************** Draw "undo" sketch ****************
+    // **************** Draw "undo/redo" sketch ****************
 
     addStep(){
         // modiType: cp, connNode, terminalNode, move, simplification
@@ -1313,15 +1328,12 @@ class anim{
             new_p.fv_perb = p.fv_perb;
             new_p.lvalue = p.lvalue;
             new_p.uvalue = p.uvalue;
-            // let new_p = {"id":p.id, "x":p.x, "y":p.y, "type":p.type};
             cp.push(new_p);
         })
         let edges = {};
-        let edgeMapper = {};
         for(let eid in this.edges){
             let startId = this.edges[eid][0].id;
             let startpoint = cp[startId];
-            // cp[this.edges[eid][0].id];
             let midpoint = {"x":this.edges[eid][1].x, "y":this.edges[eid][1].y}
             let endpoint;
             
@@ -1332,36 +1344,25 @@ class anim{
                 let endId = this.edges[eid][2].id;
                 endpoint = cp[endId];
             }
-            // if(cp[this.edges[eid][2].id]!=undefined){
-            //     endpoint = cp[this.edges[eid][2].id];
-            //     type = endpoint.type;
-            // } else {
-            //     endpoint = this.minBound_dict[this.edges[eid][2].id];
-            //     type = "min";
-            // }
-            // let midpoint = {"x":this.edges[eid][1].x, "y":this.edges[eid][1].y};
             edges[eid] = [startpoint, midpoint, endpoint,type];
-            // edgeMapper[eid] = [];
-            // this.edgeMapper[eid].forEach(p=>{
-            //     let new_mapper = {"x":p.x, "y":p.y, "x_new":p.x_new, "y_new":p.y_new};
-            //     if(p.direction){ new_mapper.direction = p.direction; };
-            //     edgeMapper[eid].push(new_mapper);
-            // })
-            // this.addNewEdge(startpoint, endpoint, type, cp, edges, edgeMapper, midpoint, true);
-            
         }
         let step = new editStep(cp, edges);
         this.stepRecorder = this.stepRecorder.slice(this.stepRecorder_Idx)
         this.stepRecorder.unshift(step);
         this.stepRecorder_Idx =  0;
+        this.drawStep();
     }
 
     drawStep(){
         // draw legend
+        
         let current_stepRecorder = this.stepRecorder.slice(this.stepRecorder_Idx)
-        console.log(this.stepRecorder_Idx)
-        console.log(current_stepRecorder)
 
+        this.step_svgHeight = (this.step_frameHeight+this.margin.betweenstep)*current_stepRecorder.length + this.margin.top*2 + this.margin.bottom*2;
+
+        d3.select("#stepSVG")
+            .attr("height",this.step_svgHeight);
+        
         let stepGroup = this.step_svg.selectAll('g')
             .data(current_stepRecorder)
         stepGroup.exit().remove();
@@ -1397,10 +1398,14 @@ class anim{
                         return this.step_curveMap(d_new);
                     })
                     .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
-                    // .attr("transform","translate("+(this.margin.left+(j-1)*this.step_frameWidth + (j-1)*this.margin.betweenstep)+","+this.margin.top+")")
-                    .attr("transform","translate("+this.margin.left+","+(this.margin.top+(j)*this.step_frameHeight + (j)*this.margin.betweenstep)+")")
+                    .attr("transform","translate("+this.margin.left+","+(this.margin.top+j*this.step_frameHeight + j*this.margin.betweenstep)+")")
                     .style("fill", "none")
                     .style("stroke", "dimgray")
+                    // .attr("stroke",(d)=>{
+                    //     // d3.select("#"+d.key).attr("stroke")
+                    //     console.log()
+
+                    // })
                     .style("stroke-width",1)
                     .style("stroke-dasharray",(d)=>{
                         if(d.value[3]==="max"){
@@ -1414,7 +1419,7 @@ class anim{
                 circles = newcircles.merge(circles);
                 circles
                     .attr("cx",(d)=>this.step_xMap(d.x)+this.margin.left)
-                    .attr("cy",(d)=>this.step_yMap(d.y)+this.margin.top+(j)*this.step_frameHeight + (j)*this.margin.betweenstep)
+                    .attr("cy",(d)=>this.step_yMap(d.y)+this.margin.top+j*this.step_frameHeight + j*this.margin.betweenstep)
                     .attr("r",5)
                     .attr("fill","white");
             
@@ -1427,7 +1432,7 @@ class anim{
                     .attr('dominant-baseline', 'central')
                     .attr('font-size', '12px')
                     .attr("x",(d)=>this.step_xMap(d.x)+this.margin.left)
-                    .attr("y",(d)=>this.step_yMap(d.y)+this.margin.top+(j)*this.step_frameHeight + (j)*this.margin.betweenstep)
+                    .attr("y",(d)=>this.step_yMap(d.y)+this.margin.top+j*this.step_frameHeight + j*this.margin.betweenstep)
                     .attr("class",(d)=>{
                         if(d.type==="max"){
                             return "far max"
@@ -1446,11 +1451,6 @@ class anim{
                             return "\uf140"
                         }
                     })
-            // }
-            // else{
-                // d3.select("#record"+j)
-                    // .style("visibility","hidden");
-                
             }
 
         }
@@ -1488,14 +1488,14 @@ class anim{
 
     clearCanvas(){
         // clear both canvas and svg
-
         this.drawFlag = false;
         $('#animation').remove();
         $('#annotation').remove();
         $('#slidersSVG').remove();
         $('#phSVG').remove();
-        $('#undoSVG').remove();
-        $('#content_main_drawing').append('<canvas id="animation" style="position: absolute;" width="420px" height="420px" ></canvas>');
-        $('#content_main_drawing').append('<svg id="annotation" style="position: absolute; z-index:1;" width="420px" height="420px"></svg>');
+        $('#stepSVG').remove();
+        $('#content_main_drawing').append('<canvas id="animation" style="position: absolute;" width="570px" height="570px" ></canvas>');
+        $('#content_main_drawing').append('<svg id="annotation" style="position: absolute; z-index:1;" width="570px" height="570px"></svg>');
+        $('#stepSVG-cover').append('<svg id="stepSVG"></svg>')
     }  
 }

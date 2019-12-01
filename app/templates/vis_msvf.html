@@ -35,7 +35,7 @@
     
     
     <div class="control-container">
-        <div class="control-group" style="width:15%">
+        <div class="control-group" style="width:12%">
             <div class="toggle-group">
                 <div class="toggle-label"> Skeleton </div>
                 <div class="onoffswitch">
@@ -47,7 +47,7 @@
                 </div>
             </div>
         </div>
-        <div class="control-group" style="width:20%">
+        <div class="control-group" style="width:16%">
             <div class="toggle-group">
                 <div class="toggle-label"> Flow Visualization </div>
                 <div class="onoffswitch">
@@ -59,7 +59,7 @@
                 </div>
             </div>
         </div>
-        <div class="control-group" style="width:15%">
+        <div class="control-group" style="width:12%">
             <div class="toggle-group">
                 <div class="toggle-label"> Animation </div>
                 <div class="onoffswitch">
@@ -89,46 +89,45 @@
 
     <div class="container-fluid" style="background-color: rgb(249,249,249);border: 1px solid rgb(224,224,224);">
         <div class="row">
-            <div style="width:70%">
-                <div class="row">
-                        <div class="col-md-9" style="padding:0px;">
-                                <div class="content-main" id="content_main_drawing">
-                                    <canvas id="animation" style="position: absolute;" width="420px" height="420px" ></canvas>
-                                    <svg id="annotation" style="position: absolute; z-index:1;" width="420px" height="420px"></svg>
-                                </div> 
+            <div style="padding:0; width: 70%;">
+                <div class="row" style="margin:0;padding:0; width:100%; border-right: 1px solid rgb(224,224,224)">
+                    <div style="padding:0px; width:70%">
+                        <div class="content-main" id="content_main_drawing">
+                            <canvas id="animation" style="position: absolute;" width="570px" height="570px" ></canvas>
+                            <svg id="annotation" style="position: absolute; z-index:1;" width="570px" height="570px"></svg>
+                        </div> 
+                    </div>
+                    <div style="padding:0; border-left: 1px solid rgb(224,224,224); width:30%">
+                        <div class="content-sub" style="height:590px">
+                            <h4>Elementary Moves</h4>
+                            <div class="move-button-group">                    
+                                <input type="button" id="amoveplus" class = "btn-sm btn-danger move-button"  value="Face-Max" style="background-color:rgb(249, 167, 167); border: none; color: rgb(58,58,58);">
+                                <img src="../static/assets/move_img/fa.png">
                             </div>
-                            <div class="col-md-3" style="padding:0; border-left: 1px solid rgb(224,224,224);">
-                                <div class="content-sub" style="height:430px">
-                                        <h4>Elementary Moves</h4>
-                                        <div class="move-button-group">                    
-                                            <input type="button" id="amoveplus" class = "btn-sm btn-danger move-button"  value="Face-Max" style="background-color:rgb(249, 167, 167); border: none; color: rgb(58,58,58);">
-                                            <img src="../static/assets/move_img/fa.png">
-                                        </div>
-                                        <div class="move-button-group">
-                                            <input type="button" id="amoveminus" class = "btn-sm btn-danger move-button" value="Face-Min" style="background-color:rgb(249, 167, 167); border: none; color: rgb(58,58,58);">
-                                            <img src="../static/assets/move_img/fb.png">
-                                        </div>
-                                        <div class="move-button-group">
-                                            <input type="button" id="bmoveplus" class = "btn-sm btn-warning move-button" value="Edge-Max" style="background-color:rgb(170,209,245); border: none;color: rgb(58,58,58); ">
-                                            <img src="../static/assets/move_img/ea.png">
-                                        </div>
-                                        <div class="move-button-group">
-                                            <input type="button" id="bmoveminus" class = "btn-sm btn-warning move-button" value="Edge-Min" style="background-color:rgb(170,209,245); border: none;color: rgb(58,58,58);">
-                                            <img src="../static/assets/move_img/eb.png">
-                                        </div>
-                                        <div class="move-button-group">
-                                            <input type="button" id="dmoveplus" class = "btn-sm btn-info move-button" value="Vertex-Max" style="background-color:rgb(155, 225, 147); border: none; color: rgb(58,58,58);">
-                                            <img src="../static/assets/move_img/va.png">
-                                        </div>
-                
-                                        <div class="move-button-group">
-                                            <input type="button" id="dmoveminus" class = "btn-sm btn-info move-button" value="Vertex-Min" style="background-color:rgb(155, 225, 147); border: none; color: rgb(58,58,58);">
-                                            <img src="../static/assets/move_img/vb.png">
-                                        </div>
-                                </div>
+                            <div class="move-button-group">
+                                <input type="button" id="amoveminus" class = "btn-sm btn-danger move-button" value="Face-Min" style="background-color:rgb(249, 167, 167); border: none; color: rgb(58,58,58);">
+                                <img src="../static/assets/move_img/fb.png">
                             </div>
+                            <div class="move-button-group">
+                                <input type="button" id="bmoveplus" class = "btn-sm btn-warning move-button" value="Edge-Max" style="background-color:rgb(170,209,245); border: none;color: rgb(58,58,58); ">
+                                <img src="../static/assets/move_img/ea.png">
+                            </div>
+                            <div class="move-button-group">
+                                <input type="button" id="bmoveminus" class = "btn-sm btn-warning move-button" value="Edge-Min" style="background-color:rgb(170,209,245); border: none;color: rgb(58,58,58);">
+                                <img src="../static/assets/move_img/eb.png">
+                            </div>
+                            <div class="move-button-group">
+                                <input type="button" id="dmoveplus" class = "btn-sm btn-info move-button" value="Vertex-Max" style="background-color:rgb(155, 225, 147); border: none; color: rgb(58,58,58);">
+                                <img src="../static/assets/move_img/va.png">
+                            </div>
+                            <div class="move-button-group">
+                                <input type="button" id="dmoveminus" class = "btn-sm btn-info move-button" value="Vertex-Min" style="background-color:rgb(155, 225, 147); border: none; color: rgb(58,58,58);">
+                                <img src="../static/assets/move_img/vb.png">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="row" style="padding:0; border-top: 1px solid rgb(224,224,224)">
+                <div class="row" style="margin:0;padding:0;border-top: 1px solid rgb(224,224,224);border-right: 1px solid rgb(224,224,224); width:100%">
                         <div class="col-md-12" style="padding-right:5px;">
                             <div class="content-sub" style="height:100px;padding-top: 5px; ">
                                 <div class="scrollable" style="height: 100px;">
@@ -151,7 +150,7 @@
                 
             </div>
             
-            <div style="padding:0; border-left: 1px solid rgb(224,224,224); width:15%">
+            <div style="padding:0; width:15%;">
                 <div class="content-sub" style="height:520px" id="functionValues">
                         <h4>Function Adjustment</h4>
                         <div class="toggle-group">
@@ -169,14 +168,16 @@
                 </div>
             </div>
             <div style="padding:0; border-left: 1px solid rgb(224,224,224);width:15%">
-                    <div class="content-sub scrollable" style="height:520px;padding-top: 10px;padding-left: 10px;">
+                    <div class="content-sub" style="height:660px; padding-top: 10px;padding-left: 10px;">
                         <div id="undo-group">
                             <input type="button" class="btn btn-outline-primary" id="undobutton" value="Undo">
                         </div>
                         <div id="redo-group" style="float:right">
                             <input type="button" class="btn btn-outline-primary" id="redobutton" value="Redo">
                         </div>
-                        <svg id="stepSVG"></svg>
+                        <div id="stepSVG-cover" class="scrollable" style="height:600px;">
+                            <svg id="stepSVG"></svg>
+                        </div>
                     </div>
             </div>
         </div>

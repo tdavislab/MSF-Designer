@@ -6,7 +6,7 @@ class persistence{
         this.barcode = barcode;
         this.margin = {"top":5,"bottom":5,"left":10,"right":10};
         this.svgWidth = 600;
-        this.svgHeight = 200;
+        this.svgHeight = 50;
         this.svg = d3.select("#persistencegroup").append("svg")
             .attr("id","phSVG")
             .attr("width", this.svgWidth)
@@ -96,6 +96,7 @@ class persistence{
                                     that.anim.constructMesh(that.anim.sigma);
                                     that.anim.drawFlow();
                                 }
+                                that.anim.addStep();
                             })
                     }
                 }
@@ -149,6 +150,9 @@ class persistence{
         this.sortBarcode();
         let barHeight = 8;
         let barGap = 5;
+
+        this.svgHeight = (barHeight+barGap)*this.barcode.length + 30;
+        d3.select("#phSVG").attr("height",this.svgHeight);
 
         let xAxis = d3.axisBottom(this.xScale);
         this.xAxisGroup
