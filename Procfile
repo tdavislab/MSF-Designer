@@ -1,1 +1,1 @@
-web: gunicorn -w 4 -b 0.0.0.0:$PORT -k gevent main:app
+web: gunicorn __init__:app --log-file=-
