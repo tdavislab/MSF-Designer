@@ -12,13 +12,6 @@ class moves{
         this.bmType = "";
         this.dpType = "";
         this.dmType = "";
-        this.cpMax = [];
-        for(let i=0;i<this.anim.cp.length;i++){
-            if(this.anim.cp[i].type==="max"){
-                this.cpMax.push(this.anim.cp[i]);
-            }
-        }
-
     }
 
     resetAllMoves(){
@@ -71,10 +64,9 @@ class moves{
                     this.resetMove("amoveplus");
                     let x = this.anim.xMapReverse(d3.event.x-this.margin.left);
                     let y = this.anim.yMapReverse(d3.event.y-this.margin.top);
-                    let mincp = this.anim.findMinPt({"x":x,"y":y},this.cpMax);
+                    let mincp = this.anim.findMinPt({"x":x,"y":y},this.anim.cp_max);
                     let id = this.anim.cp.length;
                     let pt_max = new criticalPoint(id,x,y,"max");
-                    this.cpMax.push(pt_max);
                     this.anim.cp.push(pt_max);
                     this.anim.cp_max.push(pt_max);
                     let pt_saddle = new criticalPoint(id+1,(x+mincp.x)/2,(y+mincp.y)/2,"saddle");
@@ -110,12 +102,12 @@ class moves{
                     this.resetMove("amoveminus");
                     let x = this.anim.xMapReverse(d3.event.x-this.margin.left);
                     let y = this.anim.yMapReverse(d3.event.y-this.margin.top);
-                    let mincp = this.anim.findMinPt({"x":x,"y":y},this.anim.cp);
+                    let maxPt = this.anim.findMinPt({"x":x,"y":y},this.anim.cp_max);
                     let id = this.anim.cp.length;
                     let pt_saddle = new criticalPoint(id,x,y,"saddle");
                     this.anim.cp.push(pt_saddle);
                     this.anim.cp_saddle.push(pt_saddle);
-                    let pt_min = new criticalPoint(id+1,(x+mincp.x)/2,(y+mincp.y)/2,"min");
+                    let pt_min = new criticalPoint(id+1,(x+maxPt.x)/2,(y+maxPt.y)/2,"min");
                     this.anim.cp.push(pt_min)
                     this.anim.cp_min.push(pt_min);
                     
@@ -126,7 +118,12 @@ class moves{
                         this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
                         this.anim.drawAnnotation();
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
-                        this.anim.findEdges();
+                        this.anim.addNewEdge(pt_saddle, maxPt, "max");
+                        this.anim.addNewEdge(pt_saddle, maxPt, "max");
+                        this.anim.addNewEdge(pt_saddle, pt_min, "min");
+                        let min2 = this.anim.findMinPt(pt_saddle, this.anim.minBound);
+                        this.anim.addNewEdge(pt_saddle, min2, "min");
+                        // this.anim.findEdges();
                         this.anim.drawAnnotation();
                         this.anim.addStep();
                         // check edge intersection

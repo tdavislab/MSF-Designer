@@ -256,6 +256,9 @@ function init(){
 
     d3.select("#reset")
     .on("click",()=>{
+        d3.select("#ifflow").property("checked", false);
+        d3.select("#ifvf").property("checked", false);
+        d3.select("#iffv").property("checked", false);
         Anim.clearCanvas();
         Anim = new anim();
         Sliders = new sliders(Anim);

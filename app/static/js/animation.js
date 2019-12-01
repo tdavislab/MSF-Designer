@@ -1147,20 +1147,20 @@ class anim{
                         if(edp[0].direction==="in"){
                             if(this.grad[gradid].ed.inedgeid>0){
                                 let idx = this.grad[gradid].ed.inedgeid;
-                                dx2 = (edp[idx-1].x_new - edp[idx].x_new)*10;
-                                dy2 = (edp[idx-1].y_new - edp[idx].y_new)*10;
+                                dx2 = (edp[idx-1].x_new - edp[idx].x_new)*20;
+                                dy2 = (edp[idx-1].y_new - edp[idx].y_new)*20;
                             } else{
-                                dx2 = (edp[0].x_new - edp[1].x_new)*10;
-                                dy2 = (edp[0].y_new - edp[1].y_new)*10;
+                                dx2 = (edp[0].x_new - edp[1].x_new)*20;
+                                dy2 = (edp[0].y_new - edp[1].y_new)*20;
                             }
                         } else if(edp[0].direction==="out"){
                             if(this.grad[gradid].ed.inedgeid>0){
                                 let idx = this.grad[gradid].ed.inedgeid;
-                                dx2 = (edp[idx].x_new - edp[idx-1].x_new)*10;
-                                dy2 = (edp[idx].y_new - edp[idx-1].y_new)*10;
+                                dx2 = (edp[idx].x_new - edp[idx-1].x_new)*20;
+                                dy2 = (edp[idx].y_new - edp[idx-1].y_new)*20;
                             } else{
-                                dx2 = (edp[1].x_new - edp[0].x_new)*10;
-                                dy2 = (edp[1].y_new - edp[0].y_new)*10;
+                                dx2 = (edp[1].x_new - edp[0].x_new)*20;
+                                dy2 = (edp[1].y_new - edp[0].y_new)*20;
                             }
                         }
                     }
@@ -1209,7 +1209,7 @@ class anim{
 
     animation(){            
         let N = Math.round(1/this.step);
-        let dt = 0.001;
+        let dt = 0.0008;
         let X0 = [], Y0 = []; // to store initial starting locations
         let X  = [], Y  = []; // to store current point for each curve
 
@@ -1232,7 +1232,7 @@ class anim{
         let that = this;
 
         //// animation setup
-        let frameRate = 1000; // ms per timestep (yeah I know it's not really a rate)
+        let frameRate = 400; // ms per timestep (yeah I know it's not really a rate)
         let M = X.length;
         let MaxAge = 200; // # timesteps before restart
         var age = [];
@@ -1245,7 +1245,6 @@ class anim{
             
         g.globalCompositeOperation = "source-over";
         function draw() {
-            console.log("drawing")
             let width = document.getElementById('animation').offsetWidth;
             let height = document.getElementById('animation').offsetHeight;
             g.fillStyle = "rgba(255,255, 255, 0.05)";
