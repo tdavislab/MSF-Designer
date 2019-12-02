@@ -1006,7 +1006,7 @@ class anim{
             .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
             .attr("id",(d)=>d.key)
             // .style("fill", "none")
-            // .style("stroke", "black")
+            .style("stroke", "black")
             // .style("stroke-width",2)
             // .style("stroke-dasharray",(d)=>{
             //     if(d.value[3]==="max"){

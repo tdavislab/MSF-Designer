@@ -18,7 +18,7 @@
 /* } */
 
 .minedge{
-    stroke: black;
+    /* stroke: black; */
     stroke-width: 3px;
     fill: none;
     opacity: 0.6;
@@ -26,7 +26,7 @@
 
 
 .maxedge{
-    stroke: black;
+    /* stroke: black; */
     stroke-width: 3px;
     stroke-dasharray: 5,5; 
     fill: none;
@@ -34,7 +34,7 @@
 }
 
 .edgeactive {
-    stroke-width: 3px;
+    stroke-width: 5px;
 }
 
 
