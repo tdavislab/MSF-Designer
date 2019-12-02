@@ -449,7 +449,7 @@ class anim{
             .attr("id",(d)=>"cpbackground"+d.id)
             .attr("cx",(d)=>this.xMap(d.x))
             .attr("cy",(d)=>this.yMap(d.y))
-            .attr("r",7)
+            .attr("r",9)
             .attr("fill","white")
         
         let circletext = this.pointsGroup.selectAll("text").data(this.cp);
@@ -457,7 +457,7 @@ class anim{
         circletext = circletext.enter().append("text").merge(circletext)
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
-            .attr('font-size', '15px')
+            .attr('font-size', '20px')
             .attr("x",(d)=>this.xMap(d.x))
             .attr("y",(d)=>this.yMap(d.y))
             .attr("class",(d)=>{
@@ -490,11 +490,10 @@ class anim{
         labels.exit().remove();
         labels = labels.enter().append("text").merge(labels)
             .attr("id",(d)=>"cplabel"+d.id)
-            .attr("x",(d)=>this.xMap(d.x)-8)
-            .attr("y",(d)=>this.yMap(d.y)-8)
+            .attr("x",(d)=>this.xMap(d.x)-12)
+            .attr("y",(d)=>this.yMap(d.y)-12)
             .text((d,i)=>i+1)
             .attr("class",(d)=>"label "+d.type)
-            .style("font-weight","bold");
         
         // draw midpoint nodes
         let nodes = this.connNodesGroup.selectAll("circle").data(edgelist);
@@ -1016,22 +1015,22 @@ class anim{
             })
             .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
             .attr("id",(d)=>d.key)
-            .style("fill", "none")
-            .style("stroke", "dimgray")
-            .style("stroke-width",1)
-            .style("stroke-dasharray",(d)=>{
-                if(d.value[3]==="max"){
-                    return "3,1";
-                } else {return "";}
-            })
-            .style("opacity",0.8)
+            // .style("fill", "none")
+            // .style("stroke", "black")
+            // .style("stroke-width",2)
+            // .style("stroke-dasharray",(d)=>{
+            //     if(d.value[3]==="max"){
+            //         return "5,5";
+            //     } else {return "";}
+            // })
+            // .style("opacity",0.8)
             .on("mouseover",(d,i)=>{
                 d3.select("#"+d.key)
-                    .style("stroke-width",2.5)
+                    .classed("edgeactive",true);
             })
             .on("mouseout",(d,i)=>{
                 d3.select("#"+d.key)
-                    .style("stroke-width",1)
+                    .classed("edgeactive",false);
             })
     }
 
@@ -1433,8 +1432,7 @@ class anim{
                     .attr("y",d=>this.margin.top+d*this.step_frameHeight+d*this.margin.betweenstep)
                     .attr("width",this.step_frameWidth)
                     .attr("height",this.step_frameHeight)
-                    .attr("stroke","rgb(170,209,245)")
-                    .attr("fill", "none");
+                    .attr("class","step_frame")
 
                 let step = current_stepRecorder[idx]
                 let edgelist = d3.entries(step.edges);

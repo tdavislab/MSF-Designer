@@ -17,113 +17,106 @@
 </head>
 
 <body>
-    <div class="header_group">
-        <div id="main_title">
-            <h2>Visualization For Morse Vector Fields Design</h2>
-        </div>
-        <div id="mode">
-            <div style="padding-left:15px; padding-right:10px; display:inline-block">
-                <input type="radio" class="form-radio" name="mode-type" value="manual" id="mode1">
-                <label for="mode1" class="mode_label">Manual Mode</label>
-            </div>
-            <div style="padding-left:15px; padding-right:10px; display:inline-block">
-                <input type="radio" class="form-radio" name="mode-type" value="semi-automatic" id="mode2" checked="checked">
-                <label for="mode2" class="mode_label">Semi-automatic Mode</label>
-            </div>   
-        </div>
-    </div>
     
-    
-    <div class="control-container">
-        <div class="control-group" style="width:12%">
-            <div class="toggle-group">
-                <div class="toggle-label"> Skeleton </div>
-                <div class="onoffswitch">
-                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="ifskeleton" checked>
-                    <label class="onoffswitch-label" for="ifskeleton">
-                        <span class="onoffswitch-inner"></span>
-                        <span class="onoffswitch-switch"></span>
-                    </label>
+        <div class="header_group">
+            <div id="main_title">
+                <h2>MVF Designer</h2>
+            </div>
+            <div id="files_group">
+                <div class="import-group">
+                    <form method="post" id="upload" enctype="multipart/form-data" action="" >
+                        <input type="file" style="display:none" id="files" name="files">
+                        <input type="button" class="btn btn-outline-primary" id="import" value="Import A Configuration">
+                    </form>
+                </div>
+                <div class="export-group">
+                    <input class="form-control" type="text" placeholder="Input file name" id="exFilename">
+                    <input style="position: relative; top:0px" type="button" class="btn btn-outline-primary" id="export" value="Export Current Configuration">
                 </div>
             </div>
         </div>
-        <div class="control-group" style="width:16%">
-            <div class="toggle-group">
-                <div class="toggle-label"> Flow Visualization </div>
-                <div class="onoffswitch">
-                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="ifvf">
-                    <label class="onoffswitch-label" for="ifvf">
-                        <span class="onoffswitch-inner"></span>
-                        <span class="onoffswitch-switch"></span>
-                    </label>
-                </div>
-            </div>
-        </div>
-        <div class="control-group" style="width:12%">
-            <div class="toggle-group">
-                <div class="toggle-label"> Animation </div>
-                <div class="onoffswitch">
-                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="ifflow">
-                    <label class="onoffswitch-label" for="ifflow">
-                        <span class="onoffswitch-inner"></span>
-                        <span class="onoffswitch-switch"></span>
-                    </label>
-                </div>
-            </div>
-        </div>
-        <div class="control-group" style="vertical-align: top; padding-top:4px;"> 
-            <input type="button" id="reset" class="btn btn-primary"  value="Reset">
-        </div>     
-        <div class="import-group">
-            <form method="post" id="upload" enctype="multipart/form-data" action="" >
-                <input type="file" style="display:none" id="files" name="files">
-                <input type="button" class="btn btn-outline-primary" id="import" value="Import A Configuration">
-            </form>
-        </div>
-        <div class="export-group">
-            <input class="form-control" type="text" placeholder="Input file name" id="exFilename">
-            <input style="position: relative; top:0px" type="button" class="btn btn-outline-primary" id="export" value="Export Current Configuration">
-        </div>
-    </div>
-
-
-    <div class="container-fluid" style="background-color: rgb(249,249,249);border: 1px solid rgb(224,224,224);">
-        <div class="row">
-            <div style="padding:0; width: 49%;">
-                <div class="row" style="margin:0;padding:0; width:100%; ">
-                    <div style="padding:0px; width:100%">
-                        <div class="content-main" id="content_main_drawing">
-                            <canvas id="animation" style="position: absolute;" width="570px" height="570px" ></canvas>
-                            <svg id="annotation" style="position: absolute; z-index:1;" width="570px" height="570px"></svg>
-                        </div> 
+        
+        <div id="container">
+        <div class="control-container">
+            <div class="control-group" style="width:auto">
+                <div class="toggle-group">
+                    <div class="toggle-label"> Skeleton </div>
+                    <div class="onoffswitch">
+                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="ifskeleton" checked>
+                        <label class="onoffswitch-label" for="ifskeleton">
+                            <span class="onoffswitch-inner"></span>
+                            <span class="onoffswitch-switch"></span>
+                        </label>
                     </div>
-                    
                 </div>
-                <div class="row" style="margin:0;padding:0;border-top: 1px solid rgb(224,224,224);width:100%">
-                        <div class="col-md-12" style="padding-right:5px;">
-                            <div class="content-sub" style="height:100px;padding-top: 5px; ">
-                                <div class="scrollable" style="height: 100px;">
-                                    <div style="display:inline-block; width:12%; vertical-align:middle; padding-top:6px;">
-                                        <h4>Barcode</h4>
+            </div>
+            <div class="control-group" style="width:auto">
+                <div class="toggle-group">
+                    <div class="toggle-label"> Flow Visualization </div>
+                    <div class="onoffswitch">
+                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="ifvf">
+                        <label class="onoffswitch-label" for="ifvf">
+                            <span class="onoffswitch-inner"></span>
+                            <span class="onoffswitch-switch"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group" style="width:auto">
+                <div class="toggle-group">
+                    <div class="toggle-label"> Animation </div>
+                    <div class="onoffswitch">
+                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="ifflow">
+                        <label class="onoffswitch-label" for="ifflow">
+                            <span class="onoffswitch-inner"></span>
+                            <span class="onoffswitch-switch"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group" style="vertical-align: top; padding-top:4px;"> 
+                <input type="button" id="reset" class="btn btn-primary"  value="Reset">
+            </div>     
+        </div>
+
+
+        <div class="container-fluid" style="display: flex;background-color: rgb(249,249,249);border: 1px solid rgb(224,224,224);overflow: scroll;;">
+            <div class="row">
+                <div style="padding:0; width: 49%;">
+                    <div class="row" style="margin:0;padding:0; width:100%; ">
+                        <div style="padding:0px; width:100%">
+                            <div class="content-main" id="content_main_drawing">
+                                <canvas id="animation" style="position: absolute;" width="570px" height="570px" ></canvas>
+                                <svg id="annotation" style="position: absolute; z-index:1;" width="570px" height="570px"></svg>
+                            </div> 
+                        </div>
+                        
+                    </div>
+                    <div class="row" style="margin:0;padding:0;border-top: 1px solid rgb(224,224,224);width:100%">
+                            <div class="col-md-12" style="padding-right:5px;">
+                                <div class="content-sub" style="height:100px;padding-top: 5px; ">
+                                    <div class="scrollable" style="height: 100px;">
+                                        <div style="display:inline-block; width:12%; vertical-align:middle; padding-top:6px;">
+                                            <h4>Barcode</h4>
+                                        </div>
+                                        <div style="display:inline-block; width:65%; padding-bottom:5px;">
+                                                <input type="button" class="btn btn-outline-primary barcode-button" id="computeBarcode" value="Compute Barcode">
+                                                <input type="button" class="btn btn-outline-primary barcode-button" id="simplifyBarcode" value="Simplification">
+                                                <!-- <input type="button" id="cpdetection" class="btn btn-outline-primary barcode-button"  value="Singularities Detection"> -->
+                                        </div>
+                                        <div id="persistencegroup">
+                                            <div style="position: relative; top: 15px; left: 200px;" id="loadergroup"></div>
+                                        </div> 
                                     </div>
-                                    <div style="display:inline-block; width:65%; padding-bottom:5px;">
-                                            <input type="button" class="btn btn-outline-primary barcode-button" id="computeBarcode" value="Compute Barcode">
-                                            <input type="button" class="btn btn-outline-primary barcode-button" id="simplifyBarcode" value="Simplification">
-                                            <!-- <input type="button" id="cpdetection" class="btn btn-outline-primary barcode-button"  value="Singularities Detection"> -->
-                                    </div>
-                                    <div id="persistencegroup">
-                                        <div style="position: relative; top: 15px; left: 200px;" id="loadergroup"></div>
-                                    </div> 
                                 </div>
                             </div>
                         </div>
-                    </div>
-                
-            </div>
-            <div style="padding:0; border-left: 1px solid rgb(224,224,224); width:21%">
+                    
+                </div>
+                <div style="padding:0; border-left: 1px solid rgb(224,224,224); width:21%">
                     <div class="content-sub" style="height:690px">
                         <h4>Elementary Moves</h4>
-                        <div class="move-button-group">                    
+                        <div class="move-button-group">
                             <input type="button" id="amoveplus" class = "btn-sm btn-danger move-button"  value="Face-Max" style="background-color:rgb(249, 167, 167); border: none; color: rgb(58,58,58);">
                             <img src="../static/assets/move_img/fa.png">
                         </div>
@@ -147,46 +140,60 @@
                             <input type="button" id="dmoveminus" class = "btn-sm btn-info move-button" value="Vertex-Min" style="background-color:rgb(155, 225, 147); border: none; color: rgb(58,58,58);">
                             <img src="../static/assets/move_img/vb.png">
                         </div>
-                        <div class="move-button-group" style="padding-top:20px; padding-left:30px;">
-                                <input type="button" id="cancelmove" class = "btn-sm btn-outline-primary" value="Cancel Adding">
+                        <div class="move-button-group" style="padding-top:15px; padding-left:5px;">
+                            <div style="padding-left:0px; padding-right:15px; display:inline">
+                                <input type="radio" class="form-radio" name="mode-type" value="manual" id="mode1">
+                                <label for="mode1" class="mode_label">Manual</label>
+                            </div>
+                            <div style="padding-left:0px; padding-right:0px; display:inline">
+                                <input type="radio" class="form-radio" name="mode-type" value="semi-automatic" id="mode2" checked="checked">
+                                <label for="mode2" class="mode_label">Semi-automatic</label>
+                            </div>
+                            <div style="padding-left:10px; padding-right:0px; display:inline">
+                                <input type="button" id="cancelmove" class = "btn-sm btn-outline-primary" value="Cancel">
+                            </div>
+                            
+                            
                         </div>
                     </div>
                 </div>
-            
-            <div style="padding:0; border-left: 1px solid rgb(224,224,224); width:15%;">
-                <div class="content-sub" style="height:520px" id="functionValues">
-                        <h4>Function Adjustment</h4>
-                        <div class="toggle-group">
-                            <div class="onoffswitch" style="float:left">
-                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="iffv">
-                                <label class="onoffswitch-label" for="iffv">
-                                    <span class="onoffswitch-inner"></span>
-                                    <span class="onoffswitch-switch"></span>
-                                </label>
+                
+                <div style="padding:0; border-left: 1px solid rgb(224,224,224); width:15%;">
+                    <div class="content-sub" style="height:520px" id="functionValues">
+                            <h4>Function Adjustment</h4>
+                            <div class="toggle-group">
+                                <div class="onoffswitch" style="float:left">
+                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="iffv">
+                                    <label class="onoffswitch-label" for="iffv">
+                                        <span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                    </label>
+                                </div>
+                            </div>
+                                <!-- <br>
+                                <p><input type="button" id="enableFV" class="btn btn-outline-primary btn-block"  value="Enable Function Value Control"></p>   -->
+
+                    </div>
+                </div>
+                <div style="padding:0; border-left: 1px solid rgb(224,224,224);width:15%; display: flex;flex-direction: column;">
+                        <div class="content-sub" style="height:660px; padding-top: 10px;padding-left: 10px;">
+                            <div id="undo-group">
+                                <input type="button" class="btn btn-outline-primary" id="undobutton" value="Undo">
+                            </div>
+                            <div id="redo-group" style="float:right">
+                                <input type="button" class="btn btn-outline-primary" id="redobutton" value="Redo">
+                            </div>
+                            <div id="stepSVG-cover" class="scrollable" style="height:600px;">
+                                <svg id="stepSVG"></svg>
                             </div>
                         </div>
-                            <!-- <br>
-                            <p><input type="button" id="enableFV" class="btn btn-outline-primary btn-block"  value="Enable Function Value Control"></p>   -->
-
                 </div>
             </div>
-            <div style="padding:0; border-left: 1px solid rgb(224,224,224);width:15%">
-                    <div class="content-sub" style="height:660px; padding-top: 10px;padding-left: 10px;">
-                        <div id="undo-group">
-                            <input type="button" class="btn btn-outline-primary" id="undobutton" value="Undo">
-                        </div>
-                        <div id="redo-group" style="float:right">
-                            <input type="button" class="btn btn-outline-primary" id="redobutton" value="Redo">
-                        </div>
-                        <div id="stepSVG-cover" class="scrollable" style="height:600px;">
-                            <svg id="stepSVG"></svg>
-                        </div>
-                    </div>
-            </div>
-        </div>
-        
+            
 
-    </div> 
+        </div> 
+
+    </div>
 
 
      

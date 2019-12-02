@@ -2,24 +2,40 @@
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
-/* .minedge{
-    stroke: white;
-    stroke-width: 2;
+/* #container {
+    display: flex;
+    height:100%;
+}
+ .header_group {
+    display: flex;
+    flex: 0 0 64px;
+    justify-content: right;
+    flex-direction: row;
+    /* position: relative; */
+    /* width:auto; */
+    /* overflow: scroll; */
+    /* overflow-x: scroll; */
+/* } */
+
+.minedge{
+    stroke: black;
+    stroke-width: 2px;
     fill: none;
+    opacity: 0.6;
 }
 
 
 .maxedge{
-    stroke: white;
-    stroke-width: 2;
+    stroke: black;
+    stroke-width: 2px;
     stroke-dasharray: 5,5; 
     fill: none;
-} */
+    opacity: 0.6;
+}
 
-/* .container-fluid {
-    max-width: 1050px;
-    width: 100%;
-} */
+.edgeactive {
+    stroke-width: 3px;
+}
 
 
 html, body {
@@ -34,7 +50,7 @@ html, body {
 } */
 
 .mode_label{
-    font-size:12px;
+    font-size:10px;
 }
 
 
@@ -50,20 +66,21 @@ h4 {
 }
 
 #main_title {
+    width:20%;
     margin:0px;
     border:0px;
     background-color: rgb(51,54,57);
-    padding-top: 0px;
+    padding-top: 6px;
     padding-bottom: 0px;
     padding-left: 15px;
     padding-right: 15px;
-    display:table-cell;
+    display:inline-block;
 }
 
-#mode {
+#files_group {
     background-color: #FFF;
-    display:table-cell;
-    padding: 0px;
+    display:inline-block;
+    padding-left: 10px;
 }
 
 .content-main {
@@ -85,7 +102,7 @@ h4 {
 
 
 .connNode {
-    r: 3;
+    r: 4;
     fill: rgb(274,194,68);
     stroke: dimgray;
     stroke-width: 1px;
@@ -96,36 +113,46 @@ h4 {
 }
 
 .terminalNode {
-    r: 2px;
+    r: 3px;
     fill: grey;
     stroke: dimgray;
 }
 
 .terminalNode.active{
-    r: 4;
+    r: 5;
+}
+
+.step_frame {
+    stroke: rgb(0,43,235);
+    fill: none;
 }
 
 .frame{
     /* stroke: rgb(44,123,246); */
-    stroke: rgb(170,209,245);
-    stroke-width: 2px;
+    /* stroke: rgb(170,209,245); */
+    stroke: rgb(0,43,235);
+    stroke-width: 3px;
 }
 
 text.max{
-    fill: rgb(250, 141, 135);
-    /* opacity: 1; */
+    fill: rgb(232, 53, 33);
+    /* fill: rgb(250, 141, 135); */
+    opacity: 1;
+    /* font-weight:bold; */
 }
 
 text.saddle{
-    fill: rgb(135, 215, 126);
+    fill: rgb(71, 142, 33);
+    /* fill: rgb(135, 215, 126); */
 }
 
 text.min{
-    fill: rgb(170,209,245);
+    /* fill: rgb(170,209,245); */
+    fill: rgb(0,43,235);
 }
 
 text.active{
-    font-size:20px;
+    font-size:22px;
 }
 
 .track {
@@ -175,7 +202,8 @@ text.values{
 }
 
 text.label{
-    font-size:9px;
+    font-size:11px;
+    font-weight: bold;
 }
 
 .phactive{
@@ -234,7 +262,7 @@ div.scrollable {
        border: 1px solid rgb(51,54,57);
        border-radius: 25px;
        cursor: pointer;     
-       margin-right: 5px;
+       margin-right: 3px;
        outline: none;
   }
   .form-radio:checked::before
@@ -259,20 +287,18 @@ div.scrollable {
   .import-group {
     display: inline-block;
     /* width: 10%; */
-    padding-top: 5px;
     padding-right: 10px;
     padding-left:15px;
-    padding-bottom: 8px;
-    padding-top:4px;vertical-align: top;
+    padding-bottom: 6px;
+    padding-top:0px;vertical-align: top;
   }
 
   .export-group{
     display: inline-block;
     /* width: 25%; */
-    padding-top: 5px;
     padding-right: 10px;
     padding-bottom: 5px;
-    padding-top:4px;vertical-align: top;
+    padding-top:0px;vertical-align: top;
   }
 
   #import, #export, #exFilename {
@@ -303,8 +329,8 @@ div.scrollable {
 
   /* Buttons */
 #cancelmove {
-    width: 88%;
-    height: 50%;
+    /* width: 88%; */
+    height: 40%;
     font-size: 10px;
     line-height: 4px;
     color:rgb(110,123,196);
@@ -388,12 +414,12 @@ div.scrollable {
 
 /* Toggle */
 .control-container {
-    width: 100%;
+    /* width: 100%; */
     height: 35px;
     background-color: rgb(249,249,249);
     padding-left: 20px;
     border-top: 1px solid rgb(224,224,224);
-    margin:0
+    margin:0;
 }
 
 .control-group {
@@ -421,7 +447,7 @@ div.scrollable {
 
 .onoffswitch {
     display: inline-block;
-    width:40%;
+    /* width:40%; */
     height:100%;
     -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
     padding-top:5px;
