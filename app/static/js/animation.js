@@ -449,7 +449,7 @@ class anim{
             .attr("id",(d)=>"cpbackground"+d.id)
             .attr("cx",(d)=>this.xMap(d.x))
             .attr("cy",(d)=>this.yMap(d.y))
-            .attr("r",9)
+            .attr("r",12)
             .attr("fill","white")
         
         let circletext = this.pointsGroup.selectAll("text").data(this.cp);
@@ -457,7 +457,7 @@ class anim{
         circletext = circletext.enter().append("text").merge(circletext)
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
-            .attr('font-size', '20px')
+            .attr('font-size', '30px')
             .attr("x",(d)=>this.xMap(d.x))
             .attr("y",(d)=>this.yMap(d.y))
             .attr("class",(d)=>{
@@ -490,8 +490,8 @@ class anim{
         labels.exit().remove();
         labels = labels.enter().append("text").merge(labels)
             .attr("id",(d)=>"cplabel"+d.id)
-            .attr("x",(d)=>this.xMap(d.x)-12)
-            .attr("y",(d)=>this.yMap(d.y)-12)
+            .attr("x",(d)=>this.xMap(d.x)-15)
+            .attr("y",(d)=>this.yMap(d.y)-15)
             .text((d,i)=>i+1)
             .attr("class",(d)=>"label "+d.type)
         
@@ -813,25 +813,29 @@ class anim{
             let pt1;
             let pt2;
             if(ed[2].x === edMapper[0].x_new && ed[2].y === edMapper[0].y_new){
-                pt1 = edMapper[0];
-                pt2 = edMapper[1];
                 if(ed[2].ifBound){
+                    pt1 = edMapper[0];
+                    pt2 = edMapper[1];
                     tx = 0.8*pt1.x_new+0.2*pt2.x_new
                     ty = 0.8*pt1.y_new+0.2*pt2.y_new;
                 }
                 else{ 
+                    pt1 = edMapper[0];
+                    pt2 = edMapper[2];
                     tx = pt2.x_new;
                     ty = pt2.y_new;
                 }
             }
             if(ed[2].x === edMapper[this.numSeg].x_new && ed[2].y === edMapper[this.numSeg].y_new){
-                pt1 = edMapper[this.numSeg];
-                pt2 = edMapper[this.numSeg-1];
                 if(ed[2].ifBound){
-                    tx = 0.8*pt1.x_new+0.2*pt2.x_new
+                    pt1 = edMapper[this.numSeg];
+                    pt2 = edMapper[this.numSeg-1];
+                    tx = 0.8*pt1.x_new+0.2*pt2.x_new;
                     ty = 0.8*pt1.y_new+0.2*pt2.y_new;
                 }
                 else{ 
+                    pt1 = edMapper[this.numSeg];
+                    pt2 = edMapper[this.numSeg-2];
                     tx = pt2.x_new;
                     ty = pt2.y_new;
                 }

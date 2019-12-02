@@ -19,7 +19,7 @@
 
 .minedge{
     stroke: black;
-    stroke-width: 2px;
+    stroke-width: 3px;
     fill: none;
     opacity: 0.6;
 }
@@ -27,7 +27,7 @@
 
 .maxedge{
     stroke: black;
-    stroke-width: 2px;
+    stroke-width: 3px;
     stroke-dasharray: 5,5; 
     fill: none;
     opacity: 0.6;
@@ -102,7 +102,7 @@ h4 {
 
 
 .connNode {
-    r: 4;
+    r: 6;
     fill: rgb(274,194,68);
     stroke: dimgray;
     stroke-width: 1px;
