@@ -842,29 +842,15 @@ class anim{
             }
 
         }
-        
-        
-        
-        // if(edge[2].y===0 || edge[2].y===1 || edge[0].x===edge[2].x){
-        //     tx = this.xMap(edge[2].x);
-        // } else if(edge[2].x===0){
-        //     tx = this.xMap(edge[2].x+0.005);
-        // } else if(edge[2].x===1){
-        //     tx = this.xMap(edge[2].x-0.005);
-        // } else {
-        //     tx = this.xMap(edge[2].x + (edge[0].x-edge[2].x)/Math.abs(edge[0].x-edge[2].x)*0.015);
-        // }
 
-        // if(edge[2].x===0 || edge[2].x===1 || edge[0].y===edge[2].y){
-        //     ty = this.yMap(edge[2].y);
-        // } else if(edge[2].y===0){
-        //     ty = this.yMap(edge[2].y+0.005);
-        // } else if(edge[2].y===1){
-        //     ty = this.yMap(edge[2].y-0.005);
-        // } else {
-        //     ty = this.yMap(edge[2].y + (edge[0].y-edge[2].y)/Math.abs(edge[0].y-edge[2].y)*0.015)
-        // }
-
+        if(!ed[2].ifBound){
+            let cp_r = this.xMap.invert(12.5);
+            let dist = this.calDist({"x":tx, "y":ty},ed[2])
+            let rate = cp_r / dist;
+            tx = (1-rate)*ed[2].x + rate*tx;
+            ty = (1-rate)*ed[2].y + rate*ty;
+        }
+        
         tx = this.xMap(tx);
         ty = this.yMap(ty);
 
