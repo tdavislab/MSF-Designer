@@ -91,7 +91,6 @@ class moves{
                         })
                         let max2 = this.anim.findMinPt(pt_saddle, cp_max);
                         this.anim.addNewEdge(pt_saddle, max2, "max");
-                        this.anim.addStep();
                         let min1;
                         let min2;
                         let cp_min = [];
@@ -115,7 +114,6 @@ class moves{
                             if(min1 && min2){
                                 break;
                             }
-
                         }
                         if(min1===undefined){
                             min1 = this.anim.findMinPt({"x":pt_saddle.x, "y":0}, this.anim.minBound);
@@ -123,7 +121,7 @@ class moves{
                         } else if(min2 === undefined){
                             let min2_tmp1 = this.anim.findMinPt({"x":pt_saddle.x, "y":0}, this.anim.minBound);
                             let min2_tmp2 = this.anim.findMinPt({"x":pt_saddle.x, "y":1}, this.anim.minBound);
-                            if(this.anim.calDist(min2_tmp1, pt_saddle)>this.anim.calDist(min2_tmp2, pt_saddle)){
+                            if(this.anim.calDist(min2_tmp1, min1)>this.anim.calDist(min2_tmp2, min1)){
                                 min2 = min2_tmp1;
                             } else { min2 = min2_tmp2; }
                             
@@ -131,6 +129,7 @@ class moves{
                         
                         this.anim.addNewEdge(pt_saddle,min1,"min");
                         this.anim.addNewEdge(pt_saddle,min2,"min");
+                        this.anim.addStep();
                         // check edge intersection
                         if(!this.anim.checkIntersection() && d3.select("#ifvf").property("checked")){
                             this.anim.assignEdge();
@@ -224,8 +223,44 @@ class moves{
                             this.anim.edges["temp2"] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y+0.06},"min"]; // new min edge 2
                             // this.anim.drawAnnotation();
                         } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
-                            let min1 = this.anim.findMinPt({"x":pt_saddle.x, "y":0}, this.anim.minBound)
-                            let min2 = this.anim.findMinPt({"x":pt_saddle.x, "y":1}, this.anim.minBound)
+                            // let min1 = this.anim.findMinPt({"x":pt_saddle.x, "y":0}, this.anim.minBound)
+                            // let min2 = this.anim.findMinPt({"x":pt_saddle.x, "y":1}, this.anim.minBound)
+                            let min1;
+                            let min2;
+                            let cp_min = [];
+                            this.anim.cp_min.forEach(p=>{
+                                if(!p.ifBound) { cp_min.push(p); }
+                            })
+                            for(let i=0; i<cp_min.length;i++){
+                                let min_tmp = cp_min[i];
+                                let em_tmp = this.anim.initializeEdgeMapper([pt_saddle, {"x":(pt_saddle.x+min_tmp.x)/2, "y":(pt_saddle.x+min_tmp.x)/2}, min_tmp])
+                                let ifInter = false;
+                                for(let eid in this.anim.edges){
+                                    if(this.anim.ifCurvesIntersect(em_tmp, this.anim.edgeMapper[eid])){
+                                        ifInter = true;
+                                    }
+                                }
+                                if(!ifInter && min1===undefined){
+                                    min1 = min_tmp;
+                                } else if(!ifInter && min2===undefined){
+                                    min2 = min_tmp;
+                                }
+                                if(min1 && min2){
+                                    break;
+                                }
+                            }
+                            if(min1===undefined){
+                                min1 = this.anim.findMinPt({"x":pt_saddle.x, "y":0}, this.anim.minBound);
+                                min2 = this.anim.findMinPt({"x":pt_saddle.x, "y":1}, this.anim.minBound)
+                            } else if(min2 === undefined){
+                                let min2_tmp1 = this.anim.findMinPt({"x":pt_saddle.x, "y":0}, this.anim.minBound);
+                                let min2_tmp2 = this.anim.findMinPt({"x":pt_saddle.x, "y":1}, this.anim.minBound);
+                                if(this.anim.calDist(min2_tmp1, min1)>this.anim.calDist(min2_tmp2, min1)){
+                                    min2 = min2_tmp1;
+                                } else { min2 = min2_tmp2; }
+                                
+                            }
+                        
                             this.anim.addNewEdge(pt_saddle,min1,"min");
                             this.anim.addNewEdge(pt_saddle,min2,"min");
                             let ifInter = this.anim.checkIntersection();
