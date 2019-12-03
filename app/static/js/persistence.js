@@ -249,7 +249,7 @@ class persistence{
 
         function mouseover(d){
             d3.select(this).classed("phactive",true);
-            if(d.edge!=undefined){
+            if(d.death>0){
                 d3.select("#"+d.edge.key)
                     .style("stroke","rgb(142, 73, 182)")
                     .style("stroke-width","10");
@@ -259,7 +259,7 @@ class persistence{
 
         function mouseout(d){
             d3.select(this).classed("phactive",false);
-            if(d.edge!=undefined){
+            if(d.death>0){
                 d3.select("#"+d.edge.key)
                     .style("stroke","black")
                     .style("stroke-width","3");

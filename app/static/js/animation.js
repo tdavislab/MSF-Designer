@@ -274,6 +274,7 @@ class anim{
             }
             
         }
+        console.log(edgeid)
         this.cpReassignEdge();
 
         
@@ -509,8 +510,18 @@ class anim{
         nodes.exit().remove();
         nodes = nodes.enter().append("circle").merge(nodes)
             .attr("id",(d)=>"conn_"+d.key)
-            .attr("cx",(d)=>this.xMap(d.value[1].x))
-            .attr("cy",(d)=>this.yMap(d.value[1].y))
+            // .attr("cx",(d)=>this.xMap(d.value[1].x))
+            // .attr("cy",(d)=>this.yMap(d.value[1].y))
+            .attr("cx",(d)=>{
+                let total_length = d3.select("#"+d.key).node().getTotalLength();
+                let mid_pt = d3.select("#"+d.key).node().getPointAtLength(total_length/2);
+                return mid_pt.x;
+            })
+            .attr("cy",(d)=>{
+                let total_length = d3.select("#"+d.key).node().getTotalLength();
+                let mid_pt = d3.select("#"+d.key).node().getPointAtLength(total_length/2);
+                return mid_pt.y;
+            })
             .attr("class","connNode")
             .call(d3.drag()
                 .on("start", dragstarted)
@@ -562,9 +573,13 @@ class anim{
                     }
                     d3.select("#"+eid)
                         .attr("d",that.curve0(ed_new))
+                    let total_length = d3.select("#"+eid).node().getTotalLength();
+                    let mid_pt = d3.select("#"+eid).node().getPointAtLength(total_length/2);
                     d3.select("#conn_"+eid)
-                        .attr("cx", ()=>that.xMap(ed_new[1].x))
-                        .attr("cy", ()=>that.xMap(ed_new[1].y))
+                        // .attr("cx", ()=>that.xMap(ed_new[1].x))
+                        // .attr("cy", ()=>that.xMap(ed_new[1].y))
+                        .attr("cx",mid_pt.x)
+                        .attr("cy",mid_pt.y)
                     d3.select("#terminal_"+eid)
                         .style("visibility","hidden");
                 }
@@ -655,8 +670,8 @@ class anim{
                     cpm = that.findMinPt(pt,that.cp_min);
                 }
                 if(that.calDist(pt,cpm)<0.1){
-                    that.addNewEdge(d.value[0],cpm,d.value[3]);
                     that.deleteOldEdge(d.key);
+                    that.addNewEdge(d.value[0],cpm,d.value[3]);
                     let ifTemp = that.ifTempEdge();
                     let ifInter = that.checkIntersection();
                     // that.drawAnnotation();
@@ -722,11 +737,11 @@ class anim{
                 }
             }
         }
-        if(!ifInter & !this.ifTempEdge()){
+        if(!this.ifTempEdge()){
             this.cp.forEach(p=>{
                 if(p.type==="saddle"){
                     if(this.ifArcViolate(p)){
-                        alert("Lines are not in correct order!");
+                        // alert("Lines are not in correct order!");
                         this.edgeInterArray.push(Object.keys(p.edges))
                         ifInter = true;
                     }
@@ -742,9 +757,7 @@ class anim{
     }
 
     highlightIntersection(){
-        console.log("highlight", this.edgeInterArray)
         this.edgeInterArray.forEach(eid_list=>{
-            console.log(eid_list)
             eid_list.forEach(eid=>{
                 d3.select("#"+eid).style("stroke", "red");
             })
