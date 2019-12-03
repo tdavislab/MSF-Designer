@@ -42,8 +42,11 @@ function init(){
                 Object.keys(Anim.edges).forEach(eid=>{
                     Anim.edgeMapper[eid] = Anim.initializeEdgeMapper(Anim.edges[eid]);
                 })
-                Anim.assignEdge();
-                Anim.constructMesh(Anim.sigma);
+                if(d3.select("#ifvf").property("checked")){
+                    Anim.assignEdge();
+                    Anim.constructMesh(Anim.sigma);
+                }
+                Anim.checkIntersection();
                 Anim.drawAnnotation();
                 Anim.drawStep();
             }
@@ -84,8 +87,11 @@ function init(){
                 Object.keys(Anim.edges).forEach(eid=>{
                     Anim.edgeMapper[eid] = Anim.initializeEdgeMapper(Anim.edges[eid]);
                 })
-                Anim.assignEdge();
-                Anim.constructMesh(Anim.sigma);
+                if(d3.select("#ifvf").property("checked")){
+                    Anim.assignEdge();
+                    Anim.constructMesh(Anim.sigma);
+                }
+                Anim.checkIntersection();
                 Anim.drawAnnotation();
                 Anim.drawStep();
             }
@@ -233,8 +239,12 @@ function init(){
         })
 
 
-    $("#computeBarcode").click(function(){
+    $("#computeBarcode").click(()=>compute_barcode())
+
+    function compute_barcode(){
         if(Anim.ifConfigAllowed()){
+            Anim.assignEdge();
+            Anim.constructMesh();
             d3.select("#loadergroup").classed("loader",true)
             d3.select("#persistencegroup").select("svg").style("visibility","hidden")
             $.post( "/grad", {
@@ -249,7 +259,7 @@ function init(){
                 console.log("response",res)
             });
         }
-    })
+    }
 
     $("#cpdetection").click(function(){
         $.post("/detection",{

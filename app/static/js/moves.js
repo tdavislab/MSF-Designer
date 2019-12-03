@@ -377,7 +377,10 @@ class moves{
                         this.anim.edges["temp"+(tempIdx+1)] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y+0.06},"max"]; // new max edge 2 
                         // this.anim.drawAnnotation();
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
-                        this.anim.findEdges();
+                        // this.anim.findEdges();
+                        let maxPt = this.anim.findMinPt(pt_min, this.anim.cp_max);
+                        this.anim.addNewEdge(pt_saddle, maxPt, "max");
+                        this.anim.addNewEdge(pt_saddle, maxPt, "max");
                         
                         // check edge intersection
                         if(!this.anim.checkIntersection() && d3.select("#ifvf").property("checked")){

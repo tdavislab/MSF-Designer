@@ -547,9 +547,9 @@ class anim{
                     .attr("x",d3.mouse(this)[0])
                     .attr("y",d3.mouse(this)[1]);
                 d3.select("#cplabel"+d.id)
-                    .attr("x",d3.mouse(this)[0])
-                    .attr("y",d3.mouse(this)[1]);
-                d3.select("cpbackground"+d.id)
+                    .attr("x",d3.mouse(this)[0]-15)
+                    .attr("y",d3.mouse(this)[1]-15);
+                d3.select("#cpbackground"+d.id)
                     .attr("cx",d3.mouse(this)[0])
                     .attr("cy",d3.mouse(this)[1]);
                 for(let eid in d.edges){

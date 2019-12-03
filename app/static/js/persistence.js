@@ -90,12 +90,12 @@ class persistence{
                                         console.log(eid)
                                     }
                                     that.anim.cpReorganize();
-                                    that.anim.drawAnnotation();
-                                    if(!that.anim.checkIntersection()){
+                                    if(!that.anim.checkIntersection() && d3.select("#ifvf").property("checked")){
                                         that.anim.assignEdge();
                                         that.anim.constructMesh(that.anim.sigma);
                                         that.anim.drawFlow();
                                     }
+                                    that.anim.drawAnnotation();
                                     that.anim.addStep();
                                 })
                         }
