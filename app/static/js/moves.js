@@ -125,7 +125,6 @@ class moves{
                         this.anim.addNewEdge(pt_saddle, pt_min, "min");
                         let min2 = this.anim.findMinPt(pt_saddle, this.anim.minBound);
                         this.anim.addNewEdge(pt_saddle, min2, "min");
-                        // this.anim.findEdges();
                         this.anim.drawAnnotation();
                         this.anim.addStep();
                         // check edge intersection
@@ -176,23 +175,24 @@ class moves{
                         if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
                             this.anim.edges["temp1"] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y-0.06},"min"]; // new min edge 1
                             this.anim.edges["temp2"] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y+0.06},"min"]; // new min edge 2
-                            this.anim.drawAnnotation();
+                            // this.anim.drawAnnotation();
                         } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                             let min1 = this.anim.findMinPt({"x":pt_saddle.x, "y":0}, this.anim.minBound)
                             let min2 = this.anim.findMinPt({"x":pt_saddle.x, "y":1}, this.anim.minBound)
                             this.anim.addNewEdge(pt_saddle,min1,"min");
                             this.anim.addNewEdge(pt_saddle,min2,"min");
-                            this.anim.drawAnnotation();
-                            this.anim.addStep();
+                            let ifInter = this.anim.checkIntersection();
 
                             // check edge intersection
-                            if(!this.anim.checkIntersection() && d3.select("#ifvf").property("checked")){
+                            if(!ifInter && d3.select("#ifvf").property("checked")){
                                     this.anim.assignEdge();
                                     this.anim.constructMesh(this.anim.sigma);
                                     this.anim.drawFlow();
                             }                            
                         }
                     }
+                    this.anim.drawAnnotation();
+                    this.anim.addStep();
                     this.sliders.addSlider();
                     this.anim.findRange();
                     }
@@ -235,7 +235,6 @@ class moves{
                         if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
                             this.anim.edges["temp1"] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y-0.06},"max"]; // new max edge 1
                             this.anim.edges["temp2"] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y+0.06},"max"]; // new max edge 2
-                            this.anim.drawAnnotation();
                         } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                             let max2connect = [];
                             let saddle_edges = d.value[0].edges;
@@ -246,16 +245,16 @@ class moves{
                             }
                             this.anim.addNewEdge(pt_saddle,max2connect[0],"max");
                             this.anim.addNewEdge(pt_saddle,max2connect[1],"max");
-                            // this.anim.findEdges();
-                            this.anim.drawAnnotation();
-                            this.anim.addStep();
+                            let ifInter = this.anim.checkIntersection();
                             // check edge intersection
-                            if(!this.anim.checkIntersection() && d3.select("#ifvf").property("checked")){
+                            if(!ifInter && d3.select("#ifvf").property("checked")){
                                 this.anim.assignEdge();
                                 this.anim.constructMesh(this.anim.sigma);
                                 this.anim.drawFlow();
                             }
                         }
+                        this.anim.drawAnnotation();
+                        this.anim.addStep();
                         this.sliders.addSlider();
                         this.anim.findRange();
                     }
@@ -308,15 +307,11 @@ class moves{
                         
                         this.anim.edges["temp"+tempIdx] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y-0.06},"min"]; // new min edge 1
                         this.anim.edges["temp"+(tempIdx+1)] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y+0.06},"min"]; // new min edge 2 
-                        this.anim.drawAnnotation();
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                         let min1 = this.anim.findMinPt({"x":pt_saddle.x, "y":0}, this.anim.minBound)
                         let min2 = this.anim.findMinPt({"x":pt_saddle.x, "y":1}, this.anim.minBound)
                         this.anim.addNewEdge(pt_saddle,min1,"min");
                         this.anim.addNewEdge(pt_saddle,min2,"min");
-                        // this.anim.findEdges();
-                        this.anim.drawAnnotation();
-                        this.anim.addStep();
                         // check edge intersection
                         if(!this.anim.checkIntersection() && d3.select("#ifvf").property("checked")){
                             this.anim.assignEdge();this.anim.constructMesh(this.anim.sigma);
@@ -325,6 +320,8 @@ class moves{
                     }
                                     
                 }
+                this.anim.drawAnnotation();
+                this.anim.addStep();
                 this.sliders.addSlider();
                 this.anim.findRange();
             })
@@ -378,11 +375,10 @@ class moves{
                         // this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
                         this.anim.edges["temp"+tempIdx] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y-0.06},"max"]; // new max edge 1
                         this.anim.edges["temp"+(tempIdx+1)] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y+0.06},"max"]; // new max edge 2 
-                        this.anim.drawAnnotation();
+                        // this.anim.drawAnnotation();
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                         this.anim.findEdges();
-                        this.anim.drawAnnotation();
-                        this.anim.addStep();
+                        
                         // check edge intersection
                         if(!this.anim.checkIntersection() && d3.select("#ifvf").property("checked")){
                             this.anim.assignEdge();
@@ -391,6 +387,8 @@ class moves{
                         }
                     }
                 }
+                this.anim.drawAnnotation();
+                this.anim.addStep();
                 this.sliders.addSlider();
                 this.anim.findRange();
             })
