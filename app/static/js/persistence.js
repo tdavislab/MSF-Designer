@@ -19,7 +19,7 @@ class persistence{
             .attr("id","persistencebargroup");
 
         this.xScale = d3.scaleLinear()
-            .domain([this.local_max, this.local_min])
+            .domain([this.local_min, this.local_max])
             .range([this.margin.left,this.svgWidth-this.margin.right]);
         
             console.log("barcode",barcode)
@@ -229,12 +229,14 @@ class persistence{
         let newbars = bars.enter().append("rect");
         bars = newbars.merge(bars);
         bars
-            .attr("x",d=>this.xScale(Math.round(d.birth*10)/10))
+            .attr("x",d=>this.xScale(Math.round(d.death*10)/10))
             .attr("y",(d,i)=>(i+1)*(barHeight+barGap)+this.margin.top*2)
             .attr("width",d=>{
-                console.log(d)
-                if(d.death>this.local_max){
-                    return this.xScale.range()[1]
+                if(d.death<=this.local_min){
+                    console.log(Math.round(d.death*10)/10)
+                    console.log(this.xScale.range())
+
+                    return this.xScale.range()[1] - this.xScale.range()[0]
                 } else {
                     return this.xScale.range()[1] - this.xScale(d.birth-d.death)
                 }
