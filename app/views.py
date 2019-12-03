@@ -116,10 +116,12 @@ def exportGrad():
             f.write(s)
     f.close()
 
-    print(os.listdir(path.join(APP_STATIC,"assets/")))
 
     os.system(APP_STATIC+"/assets/./perseusMac simtop "+APP_STATIC+"/assets/grad.txt "+APP_STATIC+"/assets/grad")
     dim0 = pd.read_csv(path.join(APP_STATIC,"assets/grad_0.txt"),sep=" ",header=None)
+
+    print(os.listdir(path.join(APP_STATIC,"assets/")))
+
     bar = []
     dec = 1000
     # fmax = np.max(grad.iloc[:,2])
