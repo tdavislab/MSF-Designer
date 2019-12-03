@@ -230,7 +230,7 @@ function init(){
             javascript_data: JSON.stringify(anim_info)
         });
        
-        // alert("Configuration saved");
+        alert("Configuration saved");
     })
 
     d3.select("#export-dict")
