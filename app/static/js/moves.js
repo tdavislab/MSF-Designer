@@ -76,14 +76,13 @@ class moves{
                     this.anim.cp.push(pt_saddle);
                     this.anim.cp_saddle.push(pt_saddle);
                     if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
-                        this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max"];
-                        this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max"];
-                        this.anim.edges["temp3"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"];
-                        this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
-                        this.anim.drawAnnotation();
+                        this.anim.edges["temp1"] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y+0.06},"max"];
+                        this.anim.edges["temp2"] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y-0.06},"max"];
+                        this.anim.edges["temp3"] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y-0.06},"min"];
+                        this.anim.edges["temp4"] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y+0.06},"min"];
+                        // this.anim.drawAnnotation();
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                         this.anim.findEdges();
-                        this.anim.drawAnnotation();
                         this.anim.addStep();
                         // check edge intersection
                         if(!this.anim.checkIntersection() && d3.select("#ifvf").property("checked")){
@@ -91,7 +90,8 @@ class moves{
                             this.anim.constructMesh(this.anim.sigma);
                             this.anim.drawFlow();
                         }
-                    }                    
+                    }     
+                    this.anim.drawAnnotation();
                     this.sliders.addSlider();
                     this.anim.findRange();
                 }
@@ -115,11 +115,10 @@ class moves{
                     this.anim.cp_min.push(pt_min);
                     
                     if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
-                        this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max"];
-                        this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max"];
-                        this.anim.edges["temp3"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"];
-                        this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
-                        this.anim.drawAnnotation();
+                        this.anim.edges["temp1"] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y+0.06},"max"];
+                        this.anim.edges["temp2"] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y-0.06},"max"];
+                        this.anim.edges["temp3"] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y-0.06},"min"];
+                        this.anim.edges["temp4"] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y+0.06},"min"];
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                         this.anim.addNewEdge(pt_saddle, maxPt, "max");
                         this.anim.addNewEdge(pt_saddle, maxPt, "max");
@@ -136,9 +135,10 @@ class moves{
                             this.anim.drawFlow();
                         }
                     }
+                    this.anim.drawAnnotation();
+                    this.sliders.addSlider();
+                    this.anim.findRange();
                 }
-                this.sliders.addSlider();
-                this.anim.findRange();
             })
     }
 
@@ -174,8 +174,8 @@ class moves{
                         this.anim.addNewEdge(d.value[0],pt_max,"max");
                         this.anim.deleteOldEdge(d.key);
                         if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
-                            this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"]; // new min edge 1
-                            this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"]; // new min edge 2
+                            this.anim.edges["temp1"] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y-0.06},"min"]; // new min edge 1
+                            this.anim.edges["temp2"] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y+0.06},"min"]; // new min edge 2
                             this.anim.drawAnnotation();
                         } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                             let min1 = this.anim.findMinPt({"x":pt_saddle.x, "y":0}, this.anim.minBound)
@@ -233,8 +233,8 @@ class moves{
                         this.anim.addNewEdge(d.value[0],pt_min,"min");
                         
                         if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
-                            this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"max"]; // new max edge 1
-                            this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"max"]; // new max edge 2
+                            this.anim.edges["temp1"] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y-0.06},"max"]; // new max edge 1
+                            this.anim.edges["temp2"] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y+0.06},"max"]; // new max edge 2
                             this.anim.drawAnnotation();
                         } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                             let max2connect = [];
@@ -288,26 +288,26 @@ class moves{
                     let pt_saddle = new criticalPoint(id,x,y,"saddle");
                     this.anim.cp.push(pt_saddle);
                     this.anim.cp_saddle.push(pt_saddle);
-                    let pt_max = new criticalPoint(id+1,x-0.05,y+0.05,"max");
+                    let pt_max = new criticalPoint(id+1,x-0.08,y+0.08,"max");
                     this.anim.cp.push(pt_max);
                     this.anim.cp_max.push(pt_max);
-                    d.x = d.x + 0.05;
-                    d.y = d.y - 0.05;    
+                    d.x = d.x + 0.08;
+                    d.y = d.y - 0.08;    
                     this.anim.addNewEdge(pt_saddle,d,"max");
                     this.anim.addNewEdge(pt_saddle,pt_max,"max");
 
                     if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
                         let tempIdx = 1;
                         for(let eid in d.edges){
-                            let dirc_x = (d.edges[eid][0].x - d.edges[eid][2].x)/Math.abs((d.edges[eid][0].x - d.edges[eid][2].x))*0.04;
-                            let dirc_y = (d.edges[eid][0].y - d.edges[eid][2].y)/Math.abs((d.edges[eid][0].y - d.edges[eid][2].y))*0.04;
-                            this.anim.edges["temp"+tempIdx] = [d.edges[eid][0],d.edges[eid][0],{"x":d.edges[eid][0].x-dirc_x,"y":d.edges[eid][0].y-dirc_y},d.edges[eid][3]];
+                            let dirc_x = (d.edges[eid][0].x - d.edges[eid][2].x)/Math.abs((d.edges[eid][0].x - d.edges[eid][2].x))*0.06;
+                            let dirc_y = (d.edges[eid][0].y - d.edges[eid][2].y)/Math.abs((d.edges[eid][0].y - d.edges[eid][2].y))*0.06;
+                            this.anim.edges["temp"+tempIdx] = [d.edges[eid][0],{"x":d.edges[eid][0].x-dirc_x*2/3,"y":d.edges[eid][0].y-dirc_y*2/3},{"x":d.edges[eid][0].x-dirc_x,"y":d.edges[eid][0].y-dirc_y},d.edges[eid][3]];
                             this.anim.deleteOldEdge(eid);
                             tempIdx+=1;
                         }
                         
-                        this.anim.edges["temp"+tempIdx] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"]; // new min edge 1
-                        this.anim.edges["temp"+(tempIdx+1)] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"]; // new min edge 2 
+                        this.anim.edges["temp"+tempIdx] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y-0.06},"min"]; // new min edge 1
+                        this.anim.edges["temp"+(tempIdx+1)] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y+0.06},"min"]; // new min edge 2 
                         this.anim.drawAnnotation();
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                         let min1 = this.anim.findMinPt({"x":pt_saddle.x, "y":0}, this.anim.minBound)
@@ -354,17 +354,30 @@ class moves{
                     let pt_saddle = new criticalPoint(id,x,y,"saddle");
                     this.anim.cp.push(pt_saddle);
                     this.anim.cp_saddle.push(pt_saddle);
-                    let pt_min = new criticalPoint(id+1,x+0.05,y-0.05,"min")
+                    let pt_min = new criticalPoint(id+1,x+0.08,y+0.08,"min")
                     this.anim.cp.push(pt_min);
                     this.anim.cp_min.push(pt_min);
-                    d.x = d.x - 0.05;
-                    d.y = d.y + 0.05;                  
+                    d.x = d.x - 0.08;
+                    d.y = d.y - 0.08;                  
+                    this.anim.addNewEdge(pt_saddle,d,"min");
+                    this.anim.addNewEdge(pt_saddle,pt_min,"min");
                     
                     if(d3.select('input[name="mode-type"]:checked').node().value==="manual"){
-                        this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max"];
-                        this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max"];
-                        this.anim.edges["temp3"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"];
-                        this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
+                        let tempIdx = 1;
+                        for(let eid in d.edges){
+                            let dirc_x = (d.edges[eid][0].x - d.edges[eid][2].x)/Math.abs((d.edges[eid][0].x - d.edges[eid][2].x))*0.06;
+                            let dirc_y = (d.edges[eid][0].y - d.edges[eid][2].y)/Math.abs((d.edges[eid][0].y - d.edges[eid][2].y))*0.06;
+                            this.anim.edges["temp"+tempIdx] = [d.edges[eid][0],{"x":d.edges[eid][0].x-dirc_x*2/3,"y":d.edges[eid][0].y-dirc_y*2/3},{"x":d.edges[eid][0].x-dirc_x,"y":d.edges[eid][0].y-dirc_y},d.edges[eid][3]];
+                            this.anim.deleteOldEdge(eid);
+                            tempIdx+=1;
+                        }
+
+                        // this.anim.edges["temp1"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},"max"];
+                        // this.anim.edges["temp2"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},"max"];
+                        // this.anim.edges["temp3"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y-0.04},"min"];
+                        // this.anim.edges["temp4"] = [pt_saddle,pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},"min"];
+                        this.anim.edges["temp"+tempIdx] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y-0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y-0.06},"max"]; // new max edge 1
+                        this.anim.edges["temp"+(tempIdx+1)] = [pt_saddle,{"x":pt_saddle.x-0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x-0.06,"y":pt_saddle.y+0.06},"max"]; // new max edge 2 
                         this.anim.drawAnnotation();
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
                         this.anim.findEdges();

@@ -184,7 +184,10 @@ class anim{
             .y(d=>this.yMap(d.y))
             .curve(d3.curveCardinal.tension(0));
 
+        this.dragTerminal = false;
+        this.edgeInterArray = [];
         this.grad = this.initializeMesh();
+
         this.assignEdge();
         this.constructMesh(this.sigma);
         this.animation();
@@ -192,12 +195,20 @@ class anim{
         this.drawAnnotation();
         this.drawStep();
 
-        this.dragTerminal = false;
+        
 
         // console.log(this.ifArcViolate(this.cp[1])) // false
         console.log("grad",this.grad)
         console.log('cp', this.cp)
 
+    }
+
+    ifConfigAllowed(){
+        let ifAllowed = !(this.ifTempEdge() || this.checkIntersection()) // no temp edges and no intersections
+        if(!ifAllowed){
+            alert("Please modify current configuration first!")
+        }
+        return ifAllowed;
     }
 
     drawRcpd(cp_detection){ // draw robust critical points detection
@@ -211,8 +222,6 @@ class anim{
             .attr("r",5)
             .attr("fill","red")
     }
-
-    
 
     findRange(){
         // find the range of the function value for each critical point
@@ -561,30 +570,25 @@ class anim{
 
         function dragendedText(d) {
             if(this.dragText){
-                if(that.ifTempEdge()){
-                    alert("Please connect all edges first!")
-                    that.drawAnnotation();
-                } else if(that.ifInsideCanvas(d3.mouse(this))){
+                if(that.ifInsideCanvas(d3.mouse(this))){
                     d.x = that.xMap.invert(d3.mouse(this)[0]);
                     d.y = that.yMap.invert(d3.mouse(this)[1]);
                     for(let eid in d.edges){
                         that.mapEdges(eid);
                     }
                     // check edge intersection
-                    let ifInter = that.checkIntersection();
-                    if(!ifInter){
-                        that.drawAnnotation();
+                    if(!that.checkIntersection()){
                         if(d3.select("#ifvf").property("checked")){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
                             that.drawFlow();
                         }
-                        that.addStep();
                     } else { that.drawFlag = false; }
+                    that.addStep();
                 }
+                that.drawAnnotation();
                 for(let eid in d.edges){
-                    d3.select("#terminal_"+eid)
-                        .style("visibility","visible");
+                    d3.select("#terminal_"+eid).style("visibility","visible");
                 }
                 this.dragText = false;
             }
@@ -604,24 +608,20 @@ class anim{
 
         function dragendedConnNode(d){
             d3.select(this).classed("active", false);
-            if(that.ifTempEdge()){
-                alert("Please connect all edges first!")
-                that.drawAnnotation();
-            } else if(that.ifInsideCanvas(d3.mouse(this))){
+            if(that.ifInsideCanvas(d3.mouse(this))){
                 d.value[1].x = that.xMap.invert(d3.mouse(this)[0]);
                 d.value[1].y = that.yMap.invert(d3.mouse(this)[1]);
                 that.mapEdges(d.key);
-                let ifInter = that.checkIntersection();
-                if(!ifInter){
-                    that.drawAnnotation();
+                if(!that.checkIntersection()){
                     if(d3.select("#ifvf").property("checked")){
                         that.assignEdge();
                         that.constructMesh(that.sigma);
                         that.drawFlow();
                     }
-                    that.addStep();
                 } else { that.drawFlag = false; }
-            } 
+                that.addStep();
+            }
+            that.drawAnnotation();
         }
 
         function draggedTerminal(d){
@@ -642,11 +642,8 @@ class anim{
         }
 
         function dragendedTerminal(d,i) {
-            console.log("dragging terminal")
             d3.select(this).classed("active", false);
             if(that.ifInsideCanvas(d3.mouse(this))){
-                let ifInter=false;
-                let ifInter1 = false;
                 let pt = {"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])};
                 let cpm;
                 if(d.value[3]==="max"){
@@ -655,75 +652,33 @@ class anim{
                     cpm = that.findMinPt(pt,that.cp_min);
                 }
                 if(that.calDist(pt,cpm)<0.05){
-                    // check intersection
-                    // ifinter: if this edge does not intersect with other edges, draw this edge
-                    for(let eid in that.edges){
-                        if(eid!=d.key && ["temp1","temp2","temp3","temp4"].indexOf(eid)===-1){
-                            let curve1 = that.edgeMapper[eid];
-                            let curve2 = that.initializeEdgeMapper([d.value[0],{"x":(d.value[0].x+cpm.x)/2, "y":(d.value[0].y+cpm.y)/2},cpm,cpm.type]);
-                            if(that.ifCurvesIntersect(curve1,curve2)){
-                                that.highlightIntersection([d.key, eid]);
-                                ifInter=true;
-                            }
-                        }
-                    }
-                    if(!ifInter){
-                        that.addNewEdge(d.value[0],cpm,d.value[3]);
-                        that.deleteOldEdge(d.key);
-                        that.drawAnnotation();
-
-                    }
-                    
-                    // //ifinter1: if there are no any other edges intersect, allow this configuration
-                    // // only for semi-auto mode
-                    // for(let eid1 in that.edges){
-                    //     for(let eid2 in that.edges){
-                    //         if(eid1 != eid2 && ["temp1","temp2","temp3","temp4"].indexOf(eid1)===-1 && ["temp1","temp2","temp3","temp4"].indexOf(eid2)===-1){
-                    //             if(that.ifCurvesIntersect(that.edgeMapper[eid1], that.edgeMapper[eid2])){
-                    //                 that.highlightIntersection([eid1, eid2]);
-                    //                 ifInter1 = true;
-                    //             }
-                    //         }
-                    //     }
-                    // }
-                    
-                    
+                    that.addNewEdge(d.value[0],cpm,d.value[3]);
+                    that.deleteOldEdge(d.key);
                     let ifTemp = that.ifTempEdge();
+                    let ifInter = that.checkIntersection();
+                    // that.drawAnnotation();
                     // check the line order
-                    if(!ifTemp && !ifInter && !ifInter1){
-                        that.cp.forEach(p=>{
-                            if(p.type === "saddle"){
-                                if(that.ifArcViolate(p)){
-                                    alert("Lines are not in correct order!");
-                                    ifInter1 = true;
-                                    that.highlightIntersection(Object.keys(p.edges));
-                                }
-                            }
-                        })
-
-                    }
-                    
-                    if(!ifTemp && !ifInter && !ifInter1){
-                        that.drawAnnotation();
+                    if(!ifTemp && !ifInter){
                         if(d3.select("#ifvf").property("checked")){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
                             that.drawFlow();
                         }
-                        that.addStep();
                     }
                 }
-                else{
-                    d3.select(this)
-                        .attr("cx",(d)=>that.terminalPosition(d.key)[0])
-                        .attr("cy",(d)=>that.terminalPosition(d.key)[1])
-                    d3.select("#"+d.key)
-                        .attr("d",(d)=>that.curve0([d.value[0],d.value[1],d.value[2]]))
-                    d3.select("#conn_"+d.key)
-                        .attr("cx",(d)=>that.xMap(d.value[1].x))
-                        .attr("cy",(d)=>that.yMap(d.value[1].y))
-                }
+                that.drawAnnotation();
+                that.addStep();
+
+
             }
+            // d3.select(this)
+            //     .attr("cx",(d)=>that.terminalPosition(d.key)[0])
+            //     .attr("cy",(d)=>that.terminalPosition(d.key)[1])
+            // d3.select("#"+d.key)
+            //     .attr("d",(d)=>that.curve0([d.value[0],d.value[1],d.value[2]]))
+            // d3.select("#conn_"+d.key)
+            //     .attr("cx",(d)=>that.xMap(d.value[1].x))
+            //     .attr("cy",(d)=>that.yMap(d.value[1].y))
         }
 
         function dragstarted() {
@@ -741,25 +696,32 @@ class anim{
     }
 
     checkIntersection(){
+        console.log("checking intersection")
+        this.edgeInterArray = [];
         let ifInter = false;
         let edgelist = d3.entries(this.edges);
         for(let i=0; i<edgelist.length-1; i++){
             for(let j=i+1; j<edgelist.length; j++){
                 let eid1 = edgelist[i].key;
                 let eid2 = edgelist[j].key;
-                if(this.ifCurvesIntersect(this.edgeMapper[eid1], this.edgeMapper[eid2])){
-                    console.log(eid1, eid2)
-                    this.highlightIntersection([eid1,eid2]);
-                    ifInter = true;
+                console.log(eid1, eid2)
+                if(!eid1.startsWith("temp") && !eid2.startsWith("temp")){
+                    if(this.ifCurvesIntersect(this.edgeMapper[eid1], this.edgeMapper[eid2])){
+                        console.log(eid1, eid2)
+                        this.edgeInterArray.push([eid1,eid2])
+                        // this.highlightIntersection([eid1,eid2]);
+                        ifInter = true;
+                    }
                 }
             }
         }
-        if(!ifInter){
+        if(!ifInter & !this.ifTempEdge()){
             this.cp.forEach(p=>{
                 if(p.type==="saddle"){
                     if(this.ifArcViolate(p)){
                         alert("Lines are not in correct order!");
-                        this.highlightIntersection(Object.keys(p.edges));
+                        this.edgeInterArray.push(Object.keys(p.edges))
+                        // this.highlightIntersection(Object.keys(p.edges));
                         ifInter = true;
                     }
                 }
@@ -773,9 +735,13 @@ class anim{
         // d3.select("#ifflow").node().value = "Disable Flow";
     }
 
-    highlightIntersection(eid_list){
-        eid_list.forEach(eid=>{
-            d3.select("#"+eid).style("stroke", "red");
+    highlightIntersection(){
+        console.log("highlight", this.edgeInterArray)
+        this.edgeInterArray.forEach(eid_list=>{
+            console.log(eid_list)
+            eid_list.forEach(eid=>{
+                d3.select("#"+eid).style("stroke", "red");
+            })
         })
     }
 
@@ -791,9 +757,9 @@ class anim{
     }
 
     ifTempEdge(){
-        let temp_list = ["temp1","temp2","temp3","temp4"];
+        // let temp_list = ["temp1","temp2","temp3","temp4"];
         for(let eid in this.edges){
-            if(temp_list.indexOf(eid)!=-1){
+            if(eid.startsWith("temp")){
                 return true;
             }
         }
@@ -801,15 +767,15 @@ class anim{
     }
 
     terminalPosition(eid){
-
         let ed = this.edges[eid];
         let edMapper = this.edgeMapper[eid];
         let tx = 0.95*ed[2].x+0.05*ed[0].x;
         let ty = 0.95*ed[2].y+0.05*ed[0].y;
-        if(edMapper){
-            if(ed[2].ifBound){
-                ty = 0.995*ed[2].y+0.005*ed[0].y;
-            }
+        if(eid.startsWith("temp")){
+            tx = ed[2].x;
+            ty = ed[2].y;
+        }
+        else if(edMapper){
             let pt1;
             let pt2;
             if(ed[2].x === edMapper[0].x_new && ed[2].y === edMapper[0].y_new){
@@ -840,17 +806,15 @@ class anim{
                     ty = pt2.y_new;
                 }
             }
-
+            if(!ed[2].ifBound){
+                let cp_r = this.xMap.invert(12.5);
+                let dist = this.calDist({"x":tx, "y":ty},ed[2])
+                let rate = cp_r / dist;
+                tx = (1-rate)*ed[2].x + rate*tx;
+                ty = (1-rate)*ed[2].y + rate*ty;
+            }
         }
 
-        if(!ed[2].ifBound){
-            let cp_r = this.xMap.invert(12.5);
-            let dist = this.calDist({"x":tx, "y":ty},ed[2])
-            let rate = cp_r / dist;
-            tx = (1-rate)*ed[2].x + rate*tx;
-            ty = (1-rate)*ed[2].y + rate*ty;
-        }
-        
         tx = this.xMap(tx);
         ty = this.yMap(ty);
 
@@ -1022,6 +986,7 @@ class anim{
                 d3.select("#"+d.key)
                     .classed("edgeactive",false);
             })
+            this.highlightIntersection();
     }
 
     initializeMesh(){
@@ -1377,7 +1342,10 @@ class anim{
             let endpoint;
             
             let type = this.edges[eid][3];
-            if(this.edges[eid][2].ifBound){
+            if(eid.startsWith("temp")){
+                endpoint={"x":this.edges[eid][2].x, "y":this.edges[eid][2].y};
+            }
+            else if(this.edges[eid][2].ifBound){
                 endpoint = {"x":this.edges[eid][2].x, "y":this.edges[eid][2].y, "id":this.edges[eid][2].id, "type":this.edges[eid][2].type, "ifBound":true};
             } else{
                 let endId = this.edges[eid][2].id;

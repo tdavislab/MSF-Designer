@@ -103,13 +103,16 @@ function init(){
     d3.select("#ifvf")
         .on("change", ()=>{
             if(d3.select("#ifvf").property("checked")){
-                Anim.assignEdge();
-                Anim.drawAnnotation();
-                Anim.constructMesh(Anim.sigma);
-                Anim.drawFlag = true;
-                d3.select("#animation").style("visibility","visible");
-                d3.select("#ifflow").property("checked", true);
-
+                if(Anim.ifConfigAllowed()){
+                    Anim.assignEdge();
+                    Anim.drawAnnotation();
+                    Anim.constructMesh(Anim.sigma);
+                    Anim.drawFlag = true;
+                    d3.select("#animation").style("visibility","visible");
+                    d3.select("#ifflow").property("checked", true);
+                } else{
+                    d3.select("#ifvf").property("checked", false);
+                }
             } else {
                 Anim.drawFlag = false;
                 d3.select("#animation").style("visibility","hidden");
@@ -231,19 +234,21 @@ function init(){
 
 
     $("#computeBarcode").click(function(){
-        d3.select("#loadergroup").classed("loader",true)
-        d3.select("#persistencegroup").select("svg").style("visibility","hidden")
-        $.post( "/grad", {
-            grad_data: JSON.stringify(Anim.grad)
-        }, function(res){
-            Persistence.barcode = res.data;
-            Persistence.drawPersistence();
-            Persistence.recoverPairs();
-            Persistence.recoverPersisitence();
-            d3.select("#loadergroup").classed("loader",false)
-            d3.select("#persistencegroup").select("svg").style("visibility","visible")
-            console.log("response",res)
-        });
+        if(Anim.ifConfigAllowed()){
+            d3.select("#loadergroup").classed("loader",true)
+            d3.select("#persistencegroup").select("svg").style("visibility","hidden")
+            $.post( "/grad", {
+                grad_data: JSON.stringify(Anim.grad)
+            }, function(res){
+                Persistence.barcode = res.data;
+                Persistence.drawPersistence();
+                Persistence.recoverPairs();
+                Persistence.recoverPersisitence();
+                d3.select("#loadergroup").classed("loader",false)
+                d3.select("#persistencegroup").select("svg").style("visibility","visible")
+                console.log("response",res)
+            });
+        }
     })
 
     $("#cpdetection").click(function(){
@@ -255,20 +260,20 @@ function init(){
     })
 
     d3.select("#reset")
-    .on("click",()=>{
-        d3.select("#ifflow").property("checked", false);
-        d3.select("#ifvf").property("checked", false);
-        d3.select("#iffv").property("checked", false);
-        Anim.clearCanvas();
-        Anim = new anim();
-        Sliders = new sliders(Anim);
-        Persistence = new persistence(barcode,Anim);
-        Moves = new moves(Anim,Sliders,Persistence);
-    })
+        .on("click",()=>{
+            d3.select("#ifflow").property("checked", false);
+            d3.select("#ifvf").property("checked", false);
+            d3.select("#iffv").property("checked", false);
+            Anim.clearCanvas();
+            Anim = new anim();
+            Sliders = new sliders(Anim);
+            Persistence = new persistence(barcode,Anim);
+            Moves = new moves(Anim,Sliders,Persistence);
+        })
 
     d3.select("#amoveplus")
         .on("click",()=>{
-            if(Moves.apType===""){
+            if(Moves.apType==="" && Anim.ifConfigAllowed()){
                 Anim.drawFlag=false;
                 Moves.apType = "max";
                 d3.select("#amoveplus")
@@ -280,7 +285,7 @@ function init(){
 
     d3.select("#amoveminus")
         .on("click",()=>{
-            if(Moves.amType===""){
+            if(Moves.amType==="" && Anim.ifConfigAllowed()){
                 Anim.drawFlag=false;
                 Moves.amType = "min";
                 d3.select("#amoveminus")
@@ -293,7 +298,7 @@ function init(){
 
     d3.select("#bmoveplus")
         .on("click",()=>{
-            if(Moves.bpType===""){
+            if(Moves.bpType==="" && Anim.ifConfigAllowed()){
                 Anim.drawFlag=false;
                 Moves.bpType = "max";
                 d3.select("#bmoveplus")
@@ -305,7 +310,7 @@ function init(){
 
     d3.select("#bmoveminus")
         .on("click",()=>{
-            if(Moves.bmType===""){
+            if(Moves.bmType==="" && Anim.ifConfigAllowed()){
                 Anim.drawFlag=false;
                 Moves.bmType = "min";
                 d3.select("#bmoveminus")
@@ -317,7 +322,7 @@ function init(){
 
     d3.select("#dmoveplus")
         .on("click",()=>{
-            if(Moves.dpType===""){
+            if(Moves.dpType==="" && Anim.ifConfigAllowed()){
                 Anim.drawFlag=false;
                 Moves.dpType = "add";
                 d3.select("#dmoveplus")
@@ -329,7 +334,7 @@ function init(){
 
     d3.select("#dmoveminus")
         .on("click",()=>{
-            if(Moves.dmType===""){
+            if(Moves.dmType==="" && Anim.ifConfigAllowed()){
                 Anim.drawFlag=false;
                 Moves.dmType = "add";
                 d3.select("#dmoveminus")

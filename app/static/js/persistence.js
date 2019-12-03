@@ -31,74 +31,77 @@ class persistence{
         let that=this;
         d3.select("#simplifyBarcode")
             .on("click",()=>{
-                for(let i=0;i<that.barcode.length;i++){
-                    if(that.barcode[i].edge){
-                        d3.select("#"+that.barcode[i].edge.key)
-                            .style("stroke","red")
-                            .style("stroke-width","3")
-                            .on("mouseover",()=>{
-                                d3.select("#"+that.barcode[i].edge.key)
-                                    .style("stroke-width","6")
-                            })
-                            .on("mouseout",()=>{
-                                d3.select("#"+that.barcode[i].edge.key)
-                                    .style("stroke-width","3")
-                            })
-                            .on("click",()=>{
-                                that.anim.drawFlag = false;
-                                // delete saddle, saddle edges, and max/min
-                                let birthid;
-                                let deathid;
-                                let edgeType = that.barcode[i].edge.value[3]
-                                if(edgeType==="max"){
-                                    birthid = that.barcode[i].edge.value[2].id;
-                                    deathid = that.barcode[i].edge.value[0].id;
-                                } else if(edgeType ==="min"){
-                                    birthid = that.barcode[i].edge.value[0].id;
-                                    deathid = that.barcode[i].edge.value[2].id;
-                                }
-                                let saddle_edges = that.barcode[i].edge.value[0].edges;
-                                let point2reassign;
-                                for(let ed_key in saddle_edges){
-                                    if(edgeType==="max" && saddle_edges[ed_key][3]==="max" && that.barcode[i].edge.value[2].id != saddle_edges[ed_key][2].id){
-                                        point2reassign = saddle_edges[ed_key][2];
-                                    } else if(edgeType==="min" && saddle_edges[ed_key][3]==="min" && that.barcode[i].edge.value[2].id != saddle_edges[ed_key][2].id){
-                                        points2reassign = saddle_edges[ed_key][2];
+                if(this.anim.ifConfigAllowed()){
+                    for(let i=0;i<that.barcode.length;i++){
+                        if(that.barcode[i].edge){
+                            d3.select("#"+that.barcode[i].edge.key)
+                                .style("stroke","red")
+                                .style("stroke-width","3")
+                                .on("mouseover",()=>{
+                                    d3.select("#"+that.barcode[i].edge.key)
+                                        .style("stroke-width","6")
+                                })
+                                .on("mouseout",()=>{
+                                    d3.select("#"+that.barcode[i].edge.key)
+                                        .style("stroke-width","3")
+                                })
+                                .on("click",()=>{
+                                    that.anim.drawFlag = false;
+                                    // delete saddle, saddle edges, and max/min
+                                    let birthid;
+                                    let deathid;
+                                    let edgeType = that.barcode[i].edge.value[3]
+                                    if(edgeType==="max"){
+                                        birthid = that.barcode[i].edge.value[2].id;
+                                        deathid = that.barcode[i].edge.value[0].id;
+                                    } else if(edgeType ==="min"){
+                                        birthid = that.barcode[i].edge.value[0].id;
+                                        deathid = that.barcode[i].edge.value[2].id;
                                     }
-                                    that.anim.deleteOldEdge(ed_key);
-                                }
-
-                                let edges2reassign = that.barcode[i].edge.value[2].edges;
-                                for(let i=0; i<Object.keys(edges2reassign).length; i++){
-                                    let ed_key = Object.keys(edges2reassign)[i];
-                                    let temp = [...edges2reassign[ed_key]];
-                                    that.anim.addNewEdge(temp[0], point2reassign, point2reassign.type);
-                                    that.anim.deleteOldEdge(ed_key);
-                                }
-                            
-                                let cp = [...that.anim.cp];
-                                that.anim.cp = []
-                                for(let k=0; k<cp.length; k++){
-                                    if(k!=birthid && k!= deathid){
-                                        console.log("k",k)
-                                        that.anim.cp.push(cp[k])
+                                    let saddle_edges = that.barcode[i].edge.value[0].edges;
+                                    let point2reassign;
+                                    for(let ed_key in saddle_edges){
+                                        if(edgeType==="max" && saddle_edges[ed_key][3]==="max" && that.barcode[i].edge.value[2].id != saddle_edges[ed_key][2].id){
+                                            point2reassign = saddle_edges[ed_key][2];
+                                        } else if(edgeType==="min" && saddle_edges[ed_key][3]==="min" && that.barcode[i].edge.value[2].id != saddle_edges[ed_key][2].id){
+                                            points2reassign = saddle_edges[ed_key][2];
+                                        }
+                                        that.anim.deleteOldEdge(ed_key);
                                     }
-                                }
-                                that.anim.cp.forEach(p=>{console.log(p)})
-                                for(let eid in that.anim.edges){
-                                    console.log(eid)
-                                }
-                                that.anim.cpReorganize();
-                                that.anim.drawAnnotation();
-                                if(!that.anim.checkIntersection()){
-                                    that.anim.assignEdge();
-                                    that.anim.constructMesh(that.anim.sigma);
-                                    that.anim.drawFlow();
-                                }
-                                that.anim.addStep();
-                            })
+    
+                                    let edges2reassign = that.barcode[i].edge.value[2].edges;
+                                    for(let i=0; i<Object.keys(edges2reassign).length; i++){
+                                        let ed_key = Object.keys(edges2reassign)[i];
+                                        let temp = [...edges2reassign[ed_key]];
+                                        that.anim.addNewEdge(temp[0], point2reassign, point2reassign.type);
+                                        that.anim.deleteOldEdge(ed_key);
+                                    }
+                                
+                                    let cp = [...that.anim.cp];
+                                    that.anim.cp = []
+                                    for(let k=0; k<cp.length; k++){
+                                        if(k!=birthid && k!= deathid){
+                                            console.log("k",k)
+                                            that.anim.cp.push(cp[k])
+                                        }
+                                    }
+                                    that.anim.cp.forEach(p=>{console.log(p)})
+                                    for(let eid in that.anim.edges){
+                                        console.log(eid)
+                                    }
+                                    that.anim.cpReorganize();
+                                    that.anim.drawAnnotation();
+                                    if(!that.anim.checkIntersection()){
+                                        that.anim.assignEdge();
+                                        that.anim.constructMesh(that.anim.sigma);
+                                        that.anim.drawFlow();
+                                    }
+                                    that.anim.addStep();
+                                })
+                        }
                     }
                 }
+                
             })
 
     }
