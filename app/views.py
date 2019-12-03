@@ -119,6 +119,11 @@ def exportGrad():
     os.system("ls "+APP_STATIC+"/assets/")
     os.system("uname -a")
 
+
+    os.system(APP_STATIC+"/assets/./perseusLin simtop "+APP_STATIC+"/assets/nmfst.txt "+APP_STATIC+"/assets/nmfst")
+
+    os.system("ls "+APP_STATIC+"/assets/")
+
     os.system(APP_STATIC+"/assets/./perseusLin simtop "+APP_STATIC+"/assets/grad.txt "+APP_STATIC+"/assets/grad")
     dim0 = pd.read_csv(path.join(APP_STATIC,"assets/grad_0.txt"),sep=" ",header=None)
 
