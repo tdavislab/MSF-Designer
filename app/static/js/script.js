@@ -1,10 +1,8 @@
 function init(){
     // local minimum always equal to 0 
-    let barcode = [{"birth":0,"death":5},{"birth":0,"death":-1}]
-
     let Anim = new anim();
     let Sliders = new sliders(Anim);
-    let Persistence = new persistence(barcode,Anim,Sliders);
+    let Persistence = new persistence(Anim,Sliders);
     let Moves = new moves(Anim,Sliders,Persistence);
 
     d3.select("#undobutton")
@@ -192,7 +190,7 @@ function init(){
                     Anim.clearCanvas();
                     Anim = new anim(cp_recover,edges_recover,data.edgeMapper);
                     Sliders = new sliders(Anim);
-                    Persistence = new persistence(barcode,Anim);
+                    Persistence = new persistence(Anim,Sliders);
                     Moves = new moves(Anim,Sliders,Persistence);
                 },
                 error: function (error) {
@@ -241,7 +239,10 @@ function init(){
 
     $("#computeBarcode").click(()=>compute_barcode())
 
+    // $("#annotation").click(()=>compute_barcode())
+
     function compute_barcode(){
+        console.log("computing")
         if(Anim.ifConfigAllowed()){
             Anim.assignEdge();
             Anim.constructMesh();
@@ -251,8 +252,8 @@ function init(){
                 grad_data: JSON.stringify(Anim.grad)
             }, function(res){
                 Persistence.barcode = res.data;
-                Persistence.drawPersistence();
                 Persistence.recoverPairs();
+                Persistence.drawPersistence();
                 Persistence.recoverPersisitence();
                 d3.select("#loadergroup").classed("loader",false)
                 d3.select("#persistencegroup").select("svg").style("visibility","visible")
@@ -277,7 +278,7 @@ function init(){
             Anim.clearCanvas();
             Anim = new anim();
             Sliders = new sliders(Anim);
-            Persistence = new persistence(barcode,Anim);
+            Persistence = new persistence(Anim,Sliders);
             Moves = new moves(Anim,Sliders,Persistence);
         })
 

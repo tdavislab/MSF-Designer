@@ -695,7 +695,7 @@ class anim{
         // avoid to have isolated critical points
         console.log(this.edges[eid][2].edges)
         let pt = this.edges[eid][2];
-        if(!pt.ifBound){
+        if(!pt.ifBound && !eid.startsWith("temp")){
             let edge_keys = Object.keys(pt.edges);
             if(edge_keys.length<=1){
                 alert("The critical point cannot be isolated!")
@@ -986,11 +986,11 @@ class anim{
             // .style("opacity",0.8)
             .on("mouseover",(d,i)=>{
                 d3.select("#"+d.key)
-                    .classed("edgeactive",true);
+                    .style("stroke-width",5);
             })
             .on("mouseout",(d,i)=>{
                 d3.select("#"+d.key)
-                    .classed("edgeactive",false);
+                    .style("stroke-width",3);
             })
             this.highlightIntersection();
     }

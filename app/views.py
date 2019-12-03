@@ -125,7 +125,7 @@ def exportGrad():
     # os.system("bash "+APP_STATIC+"/assets/perseus.sh")
     dim0 = pd.read_csv(path.join(APP_STATIC,"assets/grad_0.txt"),sep=" ",header=None)
 
-    print(os.listdir(path.join(APP_STATIC,"assets/")))
+    # print(os.listdir(path.join(APP_STATIC,"assets/")))
 
     bar = []
     dec = 1000
@@ -136,7 +136,7 @@ def exportGrad():
             row = list(dim0.iloc[i,:])
             birth = (row[0]-1)/dec
             death = (row[1]-1)/dec
-            if death - birth > 0.02 or death < 0:
+            if death - birth > 0.01 or death < 0:
                 bar.append({"birth":birth,"death":death})
     return jsonify(data=bar)
 

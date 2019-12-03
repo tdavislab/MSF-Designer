@@ -1,5 +1,6 @@
 class persistence{
-    constructor(barcode, anim, sliders){
+    constructor(anim, sliders){
+        let barcode = [{"birth":0,"death":5},{"birth":0,"death":-1}];
         this.anim = anim;
         this.sliders = sliders;
         this.local_max = 10;
@@ -18,12 +19,15 @@ class persistence{
             .attr("id","persistencebargroup");
 
         this.xScale = d3.scaleLinear()
-            .domain([this.local_min, this.local_max])
+            .domain([this.local_max, this.local_min])
             .range([this.margin.left,this.svgWidth-this.margin.right]);
+        
+            console.log("barcode",barcode)
+
 
         // this.sortBarcode();
-        this.drawPersistence();
         this.recoverPairs();
+        this.drawPersistence();
         this.recoverPersisitence();
         
     }
@@ -34,7 +38,7 @@ class persistence{
             .on("click",()=>{
                 if(this.anim.ifConfigAllowed()){
                     for(let i=0;i<that.barcode.length;i++){
-                        if(that.barcode[i].edge){
+                        if(that.barcode[i].death>0){
                             d3.select("#"+that.barcode[i].edge.key)
                                 .style("stroke","rgb(142, 73, 182)")
                                 .style("stroke-width","10")
@@ -113,9 +117,19 @@ class persistence{
         // recover persistence pairs from barcode (based on function values)
         let edgelist = [];
         let cplist = [];
+        this.sortBarcode();
         for(let i=0;i<this.barcode.length;i++){
+            console.log(this.barcode[i].birth, this.barcode[i].death)
+            this.barcode[i].birth = this.local_max - this.barcode[i].birth;
+            // else{
+
+            // }
+            // console.log(this.barcode[i].birth, this.barcode[i].death)
+
             if(this.barcode[i].death>0){
-                let min_dist = 100;
+                this.barcode[i].death = this.local_max - this.barcode[i].death;
+                console.log(this.barcode[i])
+                let min_dist = Infinity;
                 let min_ed_key;
                 let min_ed_value;
                 
@@ -123,16 +137,55 @@ class persistence{
                     let ed = this.anim.edges[ed_key];
                     let b_ed;
                     let d_ed;
-                    if(ed[3]==="max"){ // compare the function value and period ?
+                    if(ed[3]==="max"){ // compare the function value and period
                         b_ed = ed[2].fv;
                         d_ed = ed[0].fv;                    
-                    } else if(ed[3]==="min"){ 
+                    } 
+                    else if(ed[3]==="min"){ 
                         b_ed = ed[0].fv;
                         d_ed = ed[2].fv;
                     }
-                    let b_bar = this.local_max - this.barcode[i].birth;
-                    let d_bar = this.local_max - this.barcode[i].death;
-                    let dist = Math.abs(b_ed-b_bar)+Math.abs(d_ed-d_bar);
+                    // let b_bar = ;
+                    // let d_bar = this.local_max - this.barcode[i].death;
+                    let dist = Math.abs(b_ed-this.barcode[i].birth)+Math.abs(d_ed-this.barcode[i].death);
+                    if(dist<=min_dist && edgelist.indexOf(ed_key)===-1 && cplist.indexOf(ed[0].id)===-1 && cplist.indexOf(ed[2].id)===-1){
+                        min_dist = dist;
+                        min_ed_key = ed_key;
+                        min_ed_value = ed;
+                    }
+                    console.log("min_ed_key",dist, ed_key,min_ed_key)
+                }
+                
+                if(min_ed_key){
+                    this.barcode[i].edge = {"key":min_ed_key,"value":min_ed_value};
+                    this.barcode[i].birth = Math.max(min_ed_value[0].fv, min_ed_value[2].fv);
+                    this.barcode[i].death = Math.min(min_ed_value[0].fv, min_ed_value[2].fv);
+                    edgelist.push(min_ed_key);
+                    cplist.push(min_ed_value[0].id);
+                    cplist.push(min_ed_value[2].id);
+                }
+                
+            } else {
+                this.barcode[i].death = 0;
+                let min_dist = Infinity;
+                let min_ed_key;
+                let min_ed_value;
+                
+                for(let ed_key in this.anim.edges){
+                    let ed = this.anim.edges[ed_key];
+                    let b_ed;
+                    let d_ed;
+                    if(ed[3]==="max"){ // compare the function value and period
+                        b_ed = ed[2].fv;
+                        d_ed = ed[0].fv;                    
+                    } 
+                    else if(ed[3]==="min"){ 
+                        b_ed = ed[0].fv;
+                        d_ed = ed[2].fv;
+                    }
+                    // let b_bar = ;
+                    // let d_bar = this.local_max - this.barcode[i].death;
+                    let dist = Math.abs(b_ed-this.barcode[i].birth)+Math.abs(d_ed-this.barcode[i].death);
                     if(dist<=min_dist && edgelist.indexOf(ed_key)===-1 && cplist.indexOf(ed[0].id)===-1 && cplist.indexOf(ed[2].id)===-1){
                         min_dist = dist;
                         min_ed_key = ed_key;
@@ -142,17 +195,22 @@ class persistence{
                 
                 if(min_ed_key){
                     this.barcode[i].edge = {"key":min_ed_key,"value":min_ed_value};
+                    this.barcode[i].birth = Math.max(min_ed_value[0].fv, min_ed_value[2].fv);
+                    this.barcode[i].death = 0;
                     edgelist.push(min_ed_key);
-                    cplist.push(min_ed_value[0].id);
+                    // cplist.push(min_ed_value[0].id);
                     cplist.push(min_ed_value[2].id);
                 }
-                
+
             }
         }
     }
     
     drawPersistence(){
-        this.sortBarcode();
+        // console.log(this.barcode)
+        this.barcode.sort(function(a,b){
+            return d3.descending(a.birth-a.death,b.birth-b.death)
+        });
         let barHeight = 8;
         let barGap = 5;
 
@@ -174,10 +232,11 @@ class persistence{
             .attr("x",d=>this.xScale(Math.round(d.birth*10)/10))
             .attr("y",(d,i)=>(i+1)*(barHeight+barGap)+this.margin.top*2)
             .attr("width",d=>{
-                if(d.death<0){
+                console.log(d)
+                if(d.death>this.local_max){
                     return this.xScale.range()[1]
                 } else {
-                    return this.xScale(d.death-d.birth)
+                    return this.xScale.range()[1] - this.xScale(d.birth-d.death)
                 }
             })
             .attr("height",barHeight)
