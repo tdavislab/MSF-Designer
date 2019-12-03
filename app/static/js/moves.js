@@ -81,8 +81,21 @@ class moves{
                         this.anim.edges["temp4"] = [pt_saddle,{"x":pt_saddle.x+0.04,"y":pt_saddle.y+0.04},{"x":pt_saddle.x+0.06,"y":pt_saddle.y+0.06},"min"];
                         // this.anim.drawAnnotation();
                     } else if(d3.select('input[name="mode-type"]:checked').node().value==="semi-automatic"){
-                        this.anim.findEdges();
+                        // this.anim.findEdges();
+                        this.anim.addNewEdge(pt_saddle, pt_max, "max");
+                        let cp_max = [];
+                        this.anim.cp_max.forEach(p=>{
+                            if(p.id!=pt_max.id){
+                                cp_max.push(p);
+                            }
+                        })
+                        let max2 = this.anim.findMinPt(pt_saddle, cp_max);
+                        this.anim.addNewEdge(pt_saddle, max2, "max");
                         this.anim.addStep();
+                        let min1 = this.anim.findMinPt({"x":pt_saddle.x, "y":0}, this.anim.minBound)
+                        let min2 = this.anim.findMinPt({"x":pt_saddle.x, "y":1}, this.anim.minBound)
+                        this.anim.addNewEdge(pt_saddle,min1,"min");
+                        this.anim.addNewEdge(pt_saddle,min2,"min");
                         // check edge intersection
                         if(!this.anim.checkIntersection() && d3.select("#ifvf").property("checked")){
                             this.anim.assignEdge();
