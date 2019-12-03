@@ -562,6 +562,9 @@ class anim{
                     }
                     d3.select("#"+eid)
                         .attr("d",that.curve0(ed_new))
+                    d3.select("#conn_"+eid)
+                        .attr("cx", ()=>that.xMap(ed_new[1].x))
+                        .attr("cy", ()=>that.xMap(ed_new[1].y))
                     d3.select("#terminal_"+eid)
                         .style("visibility","hidden");
                 }
@@ -643,7 +646,7 @@ class anim{
 
         function dragendedTerminal(d,i) {
             d3.select(this).classed("active", false);
-            if(that.ifInsideCanvas(d3.mouse(this))){
+            if(that.ifInsideCanvas(d3.mouse(this)) && !that.ifLastEdge(d.key)){
                 let pt = {"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])};
                 let cpm;
                 if(d.value[3]==="max"){
@@ -651,7 +654,7 @@ class anim{
                 } else if (d.value[3]==="min"){
                     cpm = that.findMinPt(pt,that.cp_min);
                 }
-                if(that.calDist(pt,cpm)<0.05){
+                if(that.calDist(pt,cpm)<0.1){
                     that.addNewEdge(d.value[0],cpm,d.value[3]);
                     that.deleteOldEdge(d.key);
                     let ifTemp = that.ifTempEdge();
@@ -666,19 +669,12 @@ class anim{
                         }
                     }
                 }
-                that.drawAnnotation();
+                
                 that.addStep();
 
 
             }
-            // d3.select(this)
-            //     .attr("cx",(d)=>that.terminalPosition(d.key)[0])
-            //     .attr("cy",(d)=>that.terminalPosition(d.key)[1])
-            // d3.select("#"+d.key)
-            //     .attr("d",(d)=>that.curve0([d.value[0],d.value[1],d.value[2]]))
-            // d3.select("#conn_"+d.key)
-            //     .attr("cx",(d)=>that.xMap(d.value[1].x))
-            //     .attr("cy",(d)=>that.yMap(d.value[1].y))
+            that.drawAnnotation();
         }
 
         function dragstarted() {
@@ -695,6 +691,20 @@ class anim{
 
     }
 
+    ifLastEdge(eid){
+        // avoid to have isolated critical points
+        console.log(this.edges[eid][2].edges)
+        let pt = this.edges[eid][2];
+        if(!pt.ifBound){
+            let edge_keys = Object.keys(pt.edges);
+            if(edge_keys.length<=1){
+                alert("The critical point cannot be isolated!")
+                return true;
+            }
+        }
+        return false;
+    }
+
     checkIntersection(){
         console.log("checking intersection")
         this.edgeInterArray = [];
@@ -704,12 +714,9 @@ class anim{
             for(let j=i+1; j<edgelist.length; j++){
                 let eid1 = edgelist[i].key;
                 let eid2 = edgelist[j].key;
-                console.log(eid1, eid2)
                 if(!eid1.startsWith("temp") && !eid2.startsWith("temp")){
                     if(this.ifCurvesIntersect(this.edgeMapper[eid1], this.edgeMapper[eid2])){
-                        console.log(eid1, eid2)
                         this.edgeInterArray.push([eid1,eid2])
-                        // this.highlightIntersection([eid1,eid2]);
                         ifInter = true;
                     }
                 }
@@ -721,7 +728,6 @@ class anim{
                     if(this.ifArcViolate(p)){
                         alert("Lines are not in correct order!");
                         this.edgeInterArray.push(Object.keys(p.edges))
-                        // this.highlightIntersection(Object.keys(p.edges));
                         ifInter = true;
                     }
                 }
@@ -971,7 +977,7 @@ class anim{
             .attr("id",(d)=>d.key)
             // .style("fill", "none")
             .style("stroke", "black")
-            // .style("stroke-width",2)
+            .style("stroke-width",3)
             // .style("stroke-dasharray",(d)=>{
             //     if(d.value[3]==="max"){
             //         return "5,5";

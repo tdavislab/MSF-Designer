@@ -206,8 +206,13 @@ text.label{
     font-weight: bold;
 }
 
+
 .phactive{
     fill: rgb(212,58,129);
+}
+
+.phactive_edge{
+    stroke-width:10px;
 }
 
 /* rect.barcode{

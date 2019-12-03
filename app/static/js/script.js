@@ -4,7 +4,7 @@ function init(){
 
     let Anim = new anim();
     let Sliders = new sliders(Anim);
-    let Persistence = new persistence(barcode,Anim);
+    let Persistence = new persistence(barcode,Anim,Sliders);
     let Moves = new moves(Anim,Sliders,Persistence);
 
     d3.select("#undobutton")

@@ -1,6 +1,7 @@
 class persistence{
-    constructor(barcode, anim){
+    constructor(barcode, anim, sliders){
         this.anim = anim;
+        this.sliders = sliders;
         this.local_max = 10;
         this.local_min = 0;
         this.barcode = barcode;
@@ -35,15 +36,15 @@ class persistence{
                     for(let i=0;i<that.barcode.length;i++){
                         if(that.barcode[i].edge){
                             d3.select("#"+that.barcode[i].edge.key)
-                                .style("stroke","red")
-                                .style("stroke-width","3")
+                                .style("stroke","rgb(142, 73, 182)")
+                                .style("stroke-width","10")
                                 .on("mouseover",()=>{
                                     d3.select("#"+that.barcode[i].edge.key)
-                                        .style("stroke-width","6")
+                                        .style("stroke-width","12")
                                 })
                                 .on("mouseout",()=>{
                                     d3.select("#"+that.barcode[i].edge.key)
-                                        .style("stroke-width","3")
+                                        .style("stroke-width","10")
                                 })
                                 .on("click",()=>{
                                     that.anim.drawFlag = false;
@@ -97,6 +98,8 @@ class persistence{
                                     }
                                     that.anim.drawAnnotation();
                                     that.anim.addStep();
+                                    that.anim.findRange();
+                                    that.sliders.addSlider();
                                 })
                         }
                     }
@@ -187,8 +190,9 @@ class persistence{
             d3.select(this).classed("phactive",true);
             if(d.edge!=undefined){
                 d3.select("#"+d.edge.key)
-                    .style("stroke","red")
+                    .style("stroke","rgb(142, 73, 182)")
                     .style("stroke-width","10");
+                    
             }                
         }
 
@@ -197,7 +201,7 @@ class persistence{
             if(d.edge!=undefined){
                 d3.select("#"+d.edge.key)
                     .style("stroke","black")
-                    .style("stroke-width","2");
+                    .style("stroke-width","3");
             }
         }
 
