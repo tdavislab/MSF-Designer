@@ -116,6 +116,7 @@ def exportGrad():
             f.write(s)
     f.close()
 
+    os.system("ls")
 
     os.system(APP_STATIC+"/assets/./perseusMac simtop "+APP_STATIC+"/assets/grad.txt "+APP_STATIC+"/assets/grad")
     dim0 = pd.read_csv(path.join(APP_STATIC,"assets/grad_0.txt"),sep=" ",header=None)
