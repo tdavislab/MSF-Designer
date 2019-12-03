@@ -5,7 +5,6 @@ class moves{
         this.persistence = persistence;
 
         this.margin = {"left":60, "top":80};
-
         this.apType = "";
         this.amType = "";
         this.bpType = "";
