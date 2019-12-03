@@ -238,7 +238,7 @@ class persistence{
 
                     return this.xScale.range()[1] - this.xScale.range()[0]
                 } else {
-                    return this.xScale.range()[1] - this.xScale(d.birth-d.death)
+                    return this.xScale(d.birth-d.death) - this.xScale.range()[0]
                 }
             })
             .attr("height",barHeight)
