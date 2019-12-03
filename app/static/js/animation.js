@@ -1055,10 +1055,20 @@ class anim{
                         let ed = this.edges[this.grad[gradid].ed.edgeid];
                         let cpCandi = [];
                         this.cp_max.forEach(p=>{
-                            if(this.ifLinesIntersect([{"x":x,"y":y}, p],[ed[0],ed[2]])===false){
+                            let ifInter = false;
+                            for(let eid in this.edges){
+                                if(this.ifLinesIntersect([{"x":x,"y":y}, {"x":p.x+0.001, "y":p.y+0.001}],[this.edges[eid][0],this.edges[eid][2]]) && this.ifLinesIntersect([{"x":x,"y":y}, {"x":p.x-0.001, "y":p.y-0.001}],[this.edges[eid][0],this.edges[eid][2]])){
+                                    ifInter = true
+                                }
+                            }
+                            if(!ifInter){
                                 cpCandi.push(p);
                             }
                         })
+                        // if(x>=0.5 && y>= 0.5){
+                        //     console.log(x,y,cpt, cpCandi)
+
+                        // }
                         if(cpCandi.length>0){
                             cpt = this.findMinPt({"x":x, "y":y}, cpCandi);
                         }
