@@ -189,11 +189,11 @@ class anim{
         this.grad = this.initializeMesh();
         this.onMove = false; // if there is any incomplete move, indicating if compute barcode
 
+        this.drawAnnotation();
         this.assignEdge();
         this.constructMesh(this.sigma);
         this.animation();
         this.findRange();
-        this.drawAnnotation();
         this.drawStep();
 
         
@@ -900,21 +900,21 @@ class anim{
             if((edge[2].x>edge[0].x)||(edge[2].y>edge[0].y)){
                 
                 em[0]["direction"] = "in";
-                em[this.numSeg-1]["direction"] = "out";
+                em[this.numSeg]["direction"] = "out";
             } else {
                 xRange = ed[0].x-ed[2].x;
                 yRange = ed[0].y-ed[2].y;
 
                 em[0]["direction"] = "out";
-                em[this.numSeg-1]["direction"] = "in";
+                em[this.numSeg]["direction"] = "in";
             }
         } else { // min
             if((edge[2].x>edge[0].x)||(edge[2].y>edge[0].y)){
                 em[0]["direction"] = "out";
-                em[this.numSeg-1]["direction"] = "in";
+                em[this.numSeg]["direction"] = "in";
             } else {
                 em[0]["direction"] = "in";
-                em[this.numSeg-1]["direction"] = "out";
+                em[this.numSeg]["direction"] = "out";
             }
         }
         return em;
@@ -1091,6 +1091,10 @@ class anim{
     }
 
     constructMesh(sigma){
+        this.addedges();
+        for(let eid in this.edges){
+            this.mapEdges(eid);
+        }
         // initialize the triangulation
         for(let x=0;x<=1;x+=this.step){
             for(let y=0;y<=1;y+=this.step){
