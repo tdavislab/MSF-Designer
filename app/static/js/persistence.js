@@ -91,10 +91,14 @@ class persistence{
                                         }
                                     }
                                     that.anim.cpReorganize();
-                                    if(!that.anim.checkIntersection() && d3.select("#ifvf").property("checked")){
-                                        that.anim.assignEdge();
-                                        that.anim.constructMesh(that.anim.sigma);
-                                        that.anim.drawFlow();
+                                    let ifConfig = that.anim.ifConfigAllowed();
+                                    if(ifConfig){
+                                        that.anim.computeBarcode();
+                                        if(d3.select("#ifvf").property("checked")){
+                                            that.anim.assignEdge();
+                                            that.anim.constructMesh(that.anim.sigma);
+                                            that.anim.drawFlow();
+                                        }
                                     }
                                     that.anim.drawAnnotation();
                                     that.anim.addStep();
@@ -130,12 +134,12 @@ class persistence{
                     let b_ed;
                     let d_ed;
                     if(ed[3]==="max"){ // compare the function value and period
-                        b_ed = ed[2].fv;
-                        d_ed = ed[0].fv;                    
+                        b_ed = ed[2].fv_perb;
+                        d_ed = ed[0].fv_perb;                    
                     } 
                     else if(ed[3]==="min"){ 
-                        b_ed = ed[0].fv;
-                        d_ed = ed[2].fv;
+                        b_ed = ed[0].fv_perb;
+                        d_ed = ed[2].fv_perb;
                     }
                     // let b_bar = ;
                     // let d_bar = this.local_max - this.barcode[i].death;
@@ -167,12 +171,12 @@ class persistence{
                     let b_ed;
                     let d_ed;
                     if(ed[3]==="max"){ // compare the function value and period
-                        b_ed = ed[2].fv;
-                        d_ed = ed[0].fv;                    
+                        b_ed = ed[2].fv_perb;
+                        d_ed = ed[0].fv_perb;                    
                     } 
                     else if(ed[3]==="min"){ 
-                        b_ed = ed[0].fv;
-                        d_ed = ed[2].fv;
+                        b_ed = ed[0].fv_perb;
+                        d_ed = ed[2].fv_perb;
                     }
                     // let b_bar = ;
                     // let d_bar = this.local_max - this.barcode[i].death;

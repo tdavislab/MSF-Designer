@@ -7,7 +7,7 @@ class criticalPoint{
         this.y = y;
         this.type = type;
         this.fv = this.f(x,y,type); // function value
-        this.fv_perb = this.fv + Math.random();
+        this.fv_perb = this.fv + Math.random()/10;
         this.edges = {};
         this.lvalue = 0;
         this.uvalue = 10;
