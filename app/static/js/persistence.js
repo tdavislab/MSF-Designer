@@ -9,8 +9,7 @@ class persistence{
         this.margin = {"top":5,"bottom":5,"left":10,"right":10};
         this.svgWidth = 600;
         this.svgHeight = 50;
-        this.svg = d3.select("#persistencegroup").append("svg")
-            .attr("id","phSVG")
+        this.svg = d3.select("#phSVG")
             .attr("width", this.svgWidth)
             .attr("height", this.svgHeight);
         this.xAxisGroup = this.svg.append('g')
@@ -29,6 +28,8 @@ class persistence{
         this.recoverPairs();
         this.drawPersistence();
         this.recoverPersisitence();
+        console.log(anim.edges)
+        console.log(anim.cp)
         
     }
 
@@ -38,7 +39,7 @@ class persistence{
             .on("click",()=>{
                 if(this.anim.ifConfigAllowed()){
                     for(let i=0;i<that.barcode.length;i++){
-                        if(that.barcode[i].death>0){
+                        if(that.barcode[i].death>0 && that.barcode[i].edge){
                             d3.select("#"+that.barcode[i].edge.key)
                                 .style("stroke","rgb(142, 73, 182)")
                                 .style("stroke-width","10")
@@ -86,13 +87,8 @@ class persistence{
                                     that.anim.cp = []
                                     for(let k=0; k<cp.length; k++){
                                         if(k!=birthid && k!= deathid){
-                                            console.log("k",k)
                                             that.anim.cp.push(cp[k])
                                         }
-                                    }
-                                    that.anim.cp.forEach(p=>{console.log(p)})
-                                    for(let eid in that.anim.edges){
-                                        console.log(eid)
                                     }
                                     that.anim.cpReorganize();
                                     if(!that.anim.checkIntersection() && d3.select("#ifvf").property("checked")){
@@ -118,17 +114,13 @@ class persistence{
         let edgelist = [];
         let cplist = [];
         this.sortBarcode();
+        console.log(this.anim.edges)
+        console.log(this.anim.cp)
         for(let i=0;i<this.barcode.length;i++){
-            console.log(this.barcode[i].birth, this.barcode[i].death)
+            console.log(this.barcode[i])
             this.barcode[i].birth = this.local_max - this.barcode[i].birth;
-            // else{
-
-            // }
-            // console.log(this.barcode[i].birth, this.barcode[i].death)
-
             if(this.barcode[i].death>0){
                 this.barcode[i].death = this.local_max - this.barcode[i].death;
-                console.log(this.barcode[i])
                 let min_dist = Infinity;
                 let min_ed_key;
                 let min_ed_value;
@@ -153,7 +145,6 @@ class persistence{
                         min_ed_key = ed_key;
                         min_ed_value = ed;
                     }
-                    console.log("min_ed_key",dist, ed_key,min_ed_key)
                 }
                 
                 if(min_ed_key){
@@ -207,7 +198,7 @@ class persistence{
     }
     
     drawPersistence(){
-        // console.log(this.barcode)
+        console.log(this.barcode)
         this.barcode.sort(function(a,b){
             return d3.descending(a.birth-a.death,b.birth-b.death)
         });
@@ -233,9 +224,6 @@ class persistence{
             .attr("y",(d,i)=>(i+1)*(barHeight+barGap)+this.margin.top*2)
             .attr("width",d=>{
                 if(d.death<=this.local_min){
-                    console.log(Math.round(d.death*10)/10)
-                    console.log(this.xScale.range())
-
                     return this.xScale.range()[1] - this.xScale.range()[0]
                 } else {
                     return this.xScale(d.birth-d.death) - this.xScale.range()[0]
@@ -244,6 +232,7 @@ class persistence{
             .attr("height",barHeight)
             .attr("id",(d,i)=>"barcode"+i)
             .attr("fill","rgba(187,160,203,1)")
+            .style("visibility","visible")
             .on("mouseover",mouseover)
             .on("mouseout",mouseout)
 
@@ -276,7 +265,6 @@ class persistence{
         console.log(cpmax)
         if(this.barcode.length > cpmax.length){
             let unpairNum = this.barcode.length - cpmax.length;
-            console.log(unpairNum)
             for(let k=0; k<unpairNum; k++){
                 let barId = this.barcode.length-1-k;
                 d3.select("#barcode"+barId)

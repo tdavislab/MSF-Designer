@@ -12,6 +12,7 @@ function init(){
                 let currentStep = Anim.stepRecorder[Anim.stepRecorder_Idx];
                 Anim.cp = [];
                 currentStep.cp.forEach(p=>{
+                    console.log(p)
                     let new_p = new criticalPoint(p.id, p.x, p.y, p.type);
                     new_p.fv = p.fv;
                     new_p.fv_perb = p.fv_perb;
@@ -20,7 +21,9 @@ function init(){
                     Anim.cp.push(new_p);
                 })
                 Anim.edges = {};
+                console.log(currentStep.edges)
                 for(let eid in currentStep.edges){
+                    console.log(eid)
                     let ed = currentStep.edges[eid];
                     let startId = ed[0].id;
                     let startpoint = Anim.cp[startId];
@@ -35,6 +38,7 @@ function init(){
                     }
                     Anim.edges[eid] = [startpoint, midpoint, endpoint,type];
                 }
+                Anim.cpClassification();
                 Anim.cpReassignEdge();
                 Anim.edgeMapper = {};
                 Object.keys(Anim.edges).forEach(eid=>{
@@ -47,6 +51,7 @@ function init(){
                 Anim.checkIntersection();
                 Anim.drawAnnotation();
                 Anim.drawStep();
+                Sliders.addSlider();
             }
         })
 
@@ -80,6 +85,7 @@ function init(){
                     }
                     Anim.edges[eid] = [startpoint, midpoint, endpoint,type];
                 }
+                Anim.cpClassification();
                 Anim.cpReassignEdge();
                 Anim.edgeMapper = {};
                 Object.keys(Anim.edges).forEach(eid=>{
@@ -92,6 +98,7 @@ function init(){
                 Anim.checkIntersection();
                 Anim.drawAnnotation();
                 Anim.drawStep();
+                Sliders.addSlider();
             }
         })
 
@@ -247,17 +254,17 @@ function init(){
             Anim.assignEdge();
             Anim.constructMesh();
             d3.select("#loadergroup").classed("loader",true)
-            d3.select("#persistencegroup").select("svg").style("visibility","hidden")
+            d3.select("#persistencegroup").select("#phSVG").style("visibility","hidden")
+            d3.select("#persistencebargroup").selectAll("rect").style("visibility","hidden")
             $.post( "/grad", {
                 grad_data: JSON.stringify(Anim.grad)
             }, function(res){
+                d3.select("#loadergroup").classed("loader",false)
+                d3.select("#persistencegroup").select("svg").style("visibility","visible")
                 Persistence.barcode = res.data;
                 Persistence.recoverPairs();
                 Persistence.drawPersistence();
                 Persistence.recoverPersisitence();
-                d3.select("#loadergroup").classed("loader",false)
-                d3.select("#persistencegroup").select("svg").style("visibility","visible")
-                console.log("response",res)
             });
         }
     }

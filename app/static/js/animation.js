@@ -329,7 +329,8 @@ class anim{
         this.cp_max = cp_max;
         this.cp_min = cp_min;
         this.cp_saddle = cp_saddle;
-        console.log("cpmax",this.cp_max)
+        this.cp_min = this.cp_min.concat(this.minBound);
+
     }
 
     cpReassignID(){
@@ -352,6 +353,7 @@ class anim{
 
     mapEdges(edgeid){
         // update edgeMapper when change the edge curve
+        console.log(edgeid)
         let ed = this.edges[edgeid];
         let totalLength = d3.select("#"+edgeid).node().getTotalLength();
         let stepLength = totalLength/this.numSeg;
@@ -621,6 +623,8 @@ class anim{
                 let edgeid = d.key;
                 d3.select("#"+edgeid)
                     .attr("d",(d)=>that.curve0([d.value[0],{"x":that.xMap.invert(d3.mouse(this)[0]),"y":that.yMap.invert(d3.mouse(this)[1])},d.value[2]]))
+                d3.select("#terminal_"+d.key)
+                    .style("visibility","hidden");
             } 
         }
 
@@ -640,6 +644,8 @@ class anim{
                 that.addStep();
             }
             that.drawAnnotation();
+            d3.select("#terminal_"+d.key)
+                    .style("visibility","visible");
         }
 
         function draggedTerminal(d){
@@ -708,7 +714,6 @@ class anim{
 
     ifLastEdge(eid){
         // avoid to have isolated critical points
-        console.log(this.edges[eid][2].edges)
         let pt = this.edges[eid][2];
         if(!pt.ifBound && !eid.startsWith("temp")){
             let edge_keys = Object.keys(pt.edges);
@@ -786,10 +791,13 @@ class anim{
     }
 
     terminalPosition(eid){
+        console.log(eid)
         let ed = this.edges[eid];
         let edMapper = this.edgeMapper[eid];
         let tx = 0.95*ed[2].x+0.05*ed[0].x;
         let ty = 0.95*ed[2].y+0.05*ed[0].y;
+        console.log(ed)
+        console.log(edMapper)
         if(eid.startsWith("temp")){
             tx = ed[2].x;
             ty = ed[2].y;
@@ -797,12 +805,12 @@ class anim{
         else if(edMapper){
             let pt1;
             let pt2;
-            if(ed[2].x === edMapper[0].x_new && ed[2].y === edMapper[0].y_new){
+            if(this.roundValue(ed[2].x) === this.roundValue(edMapper[0].x_new) && this.roundValue(ed[2].y) === this.roundValue(edMapper[0].y_new)){
                 if(ed[2].ifBound){
                     pt1 = edMapper[0];
                     pt2 = edMapper[1];
-                    tx = 0.8*pt1.x_new+0.2*pt2.x_new
-                    ty = 0.8*pt1.y_new+0.2*pt2.y_new;
+                    tx = 0.6*pt1.x_new+0.4*pt2.x_new
+                    ty = 0.6*pt1.y_new+0.4*pt2.y_new;
                 }
                 else{ 
                     pt1 = edMapper[0];
@@ -811,12 +819,13 @@ class anim{
                     ty = pt2.y_new;
                 }
             }
-            if(ed[2].x === edMapper[this.numSeg].x_new && ed[2].y === edMapper[this.numSeg].y_new){
+            if(this.roundValue(ed[2].x) === this.roundValue(edMapper[this.numSeg].x_new) && this.roundValue(ed[2].y) === this.roundValue(edMapper[this.numSeg].y_new)){
                 if(ed[2].ifBound){
                     pt1 = edMapper[this.numSeg];
                     pt2 = edMapper[this.numSeg-1];
-                    tx = 0.8*pt1.x_new+0.2*pt2.x_new;
-                    ty = 0.8*pt1.y_new+0.2*pt2.y_new;
+                    tx = 0.6*pt1.x_new+0.4*pt2.x_new;
+                    ty = 0.6*pt1.y_new+0.4*pt2.y_new;
+                    console.log(tx,ty)
                 }
                 else{ 
                     pt1 = edMapper[this.numSeg];
@@ -833,6 +842,8 @@ class anim{
                 ty = (1-rate)*ed[2].y + rate*ty;
             }
         }
+
+        console.log(tx,ty)
 
         tx = this.xMap(tx);
         ty = this.yMap(ty);
@@ -967,7 +978,7 @@ class anim{
                 let line1 = [pt1, pt2];
                 let line2 = [pt3, pt4];
                 if(this.ifLinesIntersect(line1,line2)){
-                    console.log(i,j,line1,line2)
+                    // console.log(i,j,line1,line2)
                     return true;
                 }
             }
@@ -1078,10 +1089,6 @@ class anim{
                                 cpCandi.push(p);
                             }
                         })
-                        // if(x>=0.5 && y>= 0.5){
-                        //     console.log(x,y,cpt, cpCandi)
-
-                        // }
                         if(cpCandi.length>0){
                             cpt = this.findMinPt({"x":x, "y":y}, cpCandi);
                         }
@@ -1206,9 +1213,6 @@ class anim{
         }
 
         let g = d3.select("#animation").node().getContext("2d"); // initialize a "canvas" element
-        console.log(g)
-        // g.scale(0.72,0.38)
-        // g.translate(10,10)
         let that = this;
 
         //// animation setup
@@ -1283,71 +1287,71 @@ class anim{
 
     // **************** This is only for "semi-auto" mode ****************
 
-    findEdges(){
-        console.log("finding edges")
-        console.log(this.cp_max)
-        console.log(this.cp_min)
-        console.log(this.cp_saddle);
-        // automatically find edges, only for "expert mode"
-        for(let i=0;i<this.cp.length;i++){
-            if(this.cp[i].type==="saddle"){
-                let saddle = this.cp[i];
-                for(let ed_key in saddle.edges){
-                    this.deleteOldEdge(ed_key);
-                }
-                if(this.cp_max.length>0){
-                    let pts = [];
-                    let cp_new_max = this.cp_max.slice(0);
-                    if(cp_new_max.length>2){
-                        // find the closest max points
-                        pts = this.find2MinPt(saddle,this.cp_max);
-                    } else { pts = cp_new_max; }
-                    for(let j=0;j<pts.length;j++){
-                        this.addNewEdge(saddle,pts[j],"max");
-                    }
-                }
-                let cp_new_min = [];
-                this.cp.forEach(p=>{
-                    if(p.type==="min"){
-                        cp_new_min.push(p);
-                    }
-                })
-                let bound_upper = [];
-                let bound_lower = [];
-                this.cp_min.forEach(p=>{
-                    if(p.y===0){
-                        bound_upper.push(p);
-                    } else if(p.y===1){
-                        bound_lower.push(p);
-                    }
-                })
-                let pts = [];
-                let pt_lower = this.findMinPt(saddle,bound_lower);
-                let pt_upper = this.findMinPt(saddle,bound_upper);
-                if(cp_new_min.length>=2){
-                //     // find the closest min points
-                    pts = this.find2MinPt(saddle,cp_new_min);
-                } else if(cp_new_min.length===1){
-                    pts.push(cp_new_min[0])
-                    pts.push(this.findMinPt(saddle,[pt_lower,pt_upper]));
-                    // if(cp_new_min[0].y>=saddle.y){
-                    //     pts.push(this.findMinPt(saddle,bound_lower));
-                    // } else { pts.push(this.findMinPt(saddle,bound_upper));}
-                } else if(cp_new_min.length===0){
-                    pts.push(pt_lower);
-                    pts.push(pt_upper);
+    // findEdges(){
+    //     console.log("finding edges")
+    //     console.log(this.cp_max)
+    //     console.log(this.cp_min)
+    //     console.log(this.cp_saddle);
+    //     // automatically find edges, only for "expert mode"
+    //     for(let i=0;i<this.cp.length;i++){
+    //         if(this.cp[i].type==="saddle"){
+    //             let saddle = this.cp[i];
+    //             for(let ed_key in saddle.edges){
+    //                 this.deleteOldEdge(ed_key);
+    //             }
+    //             if(this.cp_max.length>0){
+    //                 let pts = [];
+    //                 let cp_new_max = this.cp_max.slice(0);
+    //                 if(cp_new_max.length>2){
+    //                     // find the closest max points
+    //                     pts = this.find2MinPt(saddle,this.cp_max);
+    //                 } else { pts = cp_new_max; }
+    //                 for(let j=0;j<pts.length;j++){
+    //                     this.addNewEdge(saddle,pts[j],"max");
+    //                 }
+    //             }
+    //             let cp_new_min = [];
+    //             this.cp.forEach(p=>{
+    //                 if(p.type==="min"){
+    //                     cp_new_min.push(p);
+    //                 }
+    //             })
+    //             let bound_upper = [];
+    //             let bound_lower = [];
+    //             this.cp_min.forEach(p=>{
+    //                 if(p.y===0){
+    //                     bound_upper.push(p);
+    //                 } else if(p.y===1){
+    //                     bound_lower.push(p);
+    //                 }
+    //             })
+    //             let pts = [];
+    //             let pt_lower = this.findMinPt(saddle,bound_lower);
+    //             let pt_upper = this.findMinPt(saddle,bound_upper);
+    //             if(cp_new_min.length>=2){
+    //             //     // find the closest min points
+    //                 pts = this.find2MinPt(saddle,cp_new_min);
+    //             } else if(cp_new_min.length===1){
+    //                 pts.push(cp_new_min[0])
+    //                 pts.push(this.findMinPt(saddle,[pt_lower,pt_upper]));
+    //                 // if(cp_new_min[0].y>=saddle.y){
+    //                 //     pts.push(this.findMinPt(saddle,bound_lower));
+    //                 // } else { pts.push(this.findMinPt(saddle,bound_upper));}
+    //             } else if(cp_new_min.length===0){
+    //                 pts.push(pt_lower);
+    //                 pts.push(pt_upper);
 
-                }
-                for(let j=0;j<pts.length;j++){
-                    this.addNewEdge(saddle,pts[j],"min");               
-                }
+    //             }
+    //             for(let j=0;j<pts.length;j++){
+    //                 this.addNewEdge(saddle,pts[j],"min");               
+    //             }
 
                 
-            }
-        }
+    //         }
+    //     }
         
         
-    }
+    // }
 
     // **************** Draw "undo/redo" sketch ****************
 
@@ -1387,6 +1391,7 @@ class anim{
         this.stepRecorder.unshift(step);
         this.stepRecorder_Idx =  0;
         this.drawStep();
+        // console.log(this.stepRecorder, this.stepRecorder_Idx)
     }
 
     drawStep(){
@@ -1521,6 +1526,10 @@ class anim{
         return [pt1,pt2];
     }
 
+    roundValue(v){
+        return Math.round(v*1000)/1000;
+    }
+
     clearCanvas(){
         // clear both canvas and svg
         this.drawFlag = false;
@@ -1531,6 +1540,7 @@ class anim{
         $('#stepSVG').remove();
         $('#content_main_drawing').append('<canvas id="animation" style="position: absolute;" width="570px" height="570px" ></canvas>');
         $('#content_main_drawing').append('<svg id="annotation" style="position: absolute; z-index:1;" width="570px" height="570px"></svg>');
-        $('#stepSVG-cover').append('<svg id="stepSVG"></svg>')
+        $('#stepSVG-cover').append('<svg id="stepSVG"></svg>');
+        $('#persistencegroup').append('<svg id="phSVG"></svg>');
     }  
 }
