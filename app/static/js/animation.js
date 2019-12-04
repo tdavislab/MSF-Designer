@@ -865,8 +865,14 @@ class anim{
             }
             if(!ed[2].ifBound){
                 let cp_r = this.xMap.invert(12.5);
-                let dist = this.calDist({"x":tx, "y":ty},ed[2])
+                let dist = this.calDist({"x":tx, "y":ty},ed[2]);
                 let rate = cp_r / dist;
+                tx = (1-rate)*ed[2].x + rate*tx;
+                ty = (1-rate)*ed[2].y + rate*ty;
+            } else{
+                let r = this.xMap.invert(4);
+                let dist = this.calDist({"x":tx, "y":ty},ed[2]);
+                let rate = r / dist;
                 tx = (1-rate)*ed[2].x + rate*tx;
                 ty = (1-rate)*ed[2].y + rate*ty;
             }
