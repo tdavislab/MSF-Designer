@@ -37,6 +37,10 @@
     stroke-width: 5px;
 } */
 
+circle.mouseover{
+    r: 8px;
+}
+
 
 html, body {
     margin: 0;

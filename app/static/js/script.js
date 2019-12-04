@@ -4,15 +4,16 @@ function init(){
     let Sliders = new sliders(Anim);
     let Persistence = new persistence(Anim,Sliders);
     let Moves = new moves(Anim,Sliders,Persistence);
+    Anim.persistence = Persistence;
+    console.log(Anim.persistence)
 
     d3.select("#undobutton")
         .on("click",()=>{
             if(Anim.stepRecorder_Idx<Anim.stepRecorder.length-1){
                 Anim.stepRecorder_Idx += 1;
                 let currentStep = Anim.stepRecorder[Anim.stepRecorder_Idx];
-                Anim.cp = [];
+                Anim.cp = []
                 currentStep.cp.forEach(p=>{
-                    console.log(p)
                     let new_p = new criticalPoint(p.id, p.x, p.y, p.type);
                     new_p.fv = p.fv;
                     new_p.fv_perb = p.fv_perb;
@@ -21,9 +22,7 @@ function init(){
                     Anim.cp.push(new_p);
                 })
                 Anim.edges = {};
-                console.log(currentStep.edges)
                 for(let eid in currentStep.edges){
-                    console.log(eid)
                     let ed = currentStep.edges[eid];
                     let startId = ed[0].id;
                     let startpoint = Anim.cp[startId];
@@ -44,11 +43,17 @@ function init(){
                 Object.keys(Anim.edges).forEach(eid=>{
                     Anim.edgeMapper[eid] = Anim.initializeEdgeMapper(Anim.edges[eid]);
                 })
-                if(d3.select("#ifvf").property("checked")){
-                    Anim.assignEdge();
-                    Anim.constructMesh(Anim.sigma);
+                let previousStep = Anim.stepRecorder[Anim.stepRecorder_Idx-1];
+                if(previousStep.cp.length!=currentStep.cp.length){
+                    let ifConfig = Anim.ifConfigAllowed;
+                    if(ifConfig){
+                        Anim.computeBarcode();
+                    }
+                    if(d3.select("#ifvf").property("checked")){
+                        Anim.assignEdge();
+                        Anim.constructMesh(Anim.sigma);
+                    }
                 }
-                Anim.checkIntersection();
                 Anim.drawAnnotation();
                 Anim.drawStep();
                 Sliders.addSlider();
@@ -91,11 +96,18 @@ function init(){
                 Object.keys(Anim.edges).forEach(eid=>{
                     Anim.edgeMapper[eid] = Anim.initializeEdgeMapper(Anim.edges[eid]);
                 })
-                if(d3.select("#ifvf").property("checked")){
-                    Anim.assignEdge();
-                    Anim.constructMesh(Anim.sigma);
+                let previousStep = Anim.stepRecorder[Anim.stepRecorder_Idx+1];
+                if(previousStep.cp.length!=currentStep.cp.length){
+                    let ifConfig = Anim.ifConfigAllowed;
+                    if(ifConfig){
+                        Anim.computeBarcode();
+                    }
+                    if(d3.select("#ifvf").property("checked")){
+                        Anim.assignEdge();
+                        Anim.constructMesh(Anim.sigma);
+                    }
+
                 }
-                Anim.checkIntersection();
                 Anim.drawAnnotation();
                 Anim.drawStep();
                 Sliders.addSlider();
@@ -122,6 +134,7 @@ function init(){
                     d3.select("#animation").style("visibility","visible");
                     d3.select("#ifflow").property("checked", true);
                 } else{
+                    alert("Please modify current configuration first!")
                     d3.select("#ifvf").property("checked", false);
                 }
             } else {
@@ -134,10 +147,17 @@ function init(){
     d3.select("#ifflow")
         .on("change",()=>{
             if(d3.select("#ifflow").property("checked")){
-                Anim.assignEdge();
-                Anim.drawAnnotation();
-                Anim.constructMesh(Anim.sigma);
-                Anim.drawFlag = true;
+                if(Anim.ifConfigAllowed()){
+                    Anim.assignEdge();
+                    Anim.drawAnnotation();
+                    Anim.constructMesh(Anim.sigma);
+                    Anim.drawFlag = true;
+                    d3.select("#ifvf").property("checked",true)
+                } else {
+                    alert("Please modify current configuration first!")
+                    d3.select("#ifflow").property("checked", false);
+                }
+                
             } else {
                 Anim.drawFlag = false;
             }
@@ -206,11 +226,9 @@ function init(){
             });
 
         })
+    
     $("#export").click(function(){
-        $("#export-dict").click();
-        console.log("cp",Anim.cp)
         let v = $("#exFilename").val();
-        console.log(v)
         // avoid circular structure
         let cp_new = [];
         let edges_new = {};
@@ -238,36 +256,13 @@ function init(){
         alert("Configuration saved");
     })
 
-    d3.select("#export-dict")
-        .on("change",(e)=>{
-            console.log(e)
-        })
-
-
-    $("#computeBarcode").click(()=>compute_barcode())
-
-    // $("#annotation").click(()=>compute_barcode())
-
-    function compute_barcode(){
-        console.log("computing")
+    $("#computeBarcode").click(()=>{
         if(Anim.ifConfigAllowed()){
-            Anim.assignEdge();
-            Anim.constructMesh();
-            d3.select("#loadergroup").classed("loader",true)
-            d3.select("#persistencegroup").select("#phSVG").style("visibility","hidden")
-            d3.select("#persistencebargroup").selectAll("rect").style("visibility","hidden")
-            $.post( "/grad", {
-                grad_data: JSON.stringify(Anim.grad)
-            }, function(res){
-                d3.select("#loadergroup").classed("loader",false)
-                d3.select("#persistencegroup").select("svg").style("visibility","visible")
-                Persistence.barcode = res.data;
-                Persistence.recoverPairs();
-                Persistence.drawPersistence();
-                Persistence.recoverPersisitence();
-            });
+            Anim.computeBarcode();
+        } else {
+            alert("Please modify current configuration first!");
         }
-    }
+    })
 
     $("#cpdetection").click(function(){
         $.post("/detection",{
@@ -291,74 +286,99 @@ function init(){
 
     d3.select("#amoveplus")
         .on("click",()=>{
-            if(Moves.apType==="" && Anim.ifConfigAllowed()){
-                Anim.drawFlag=false;
-                Moves.apType = "max";
-                d3.select("#amoveplus")
-                    .attr("value","Select a face")
-                    .classed("small-label", true);
-                Moves.amovePlus();
+            if(Moves.apType===""){
+                if(Anim.ifConfigAllowed()){
+                    Anim.drawFlag=false;
+                    Moves.apType = "max";
+                    d3.select("#amoveplus")
+                        .attr("value","Select a face")
+                        .classed("small-label", true);
+                    Moves.amovePlus();
+                } else{
+                    alert("Please modify current configuration first!");
+                }
             }
         })
 
     d3.select("#amoveminus")
         .on("click",()=>{
-            if(Moves.amType==="" && Anim.ifConfigAllowed()){
-                Anim.drawFlag=false;
-                Moves.amType = "min";
-                d3.select("#amoveminus")
-                    .attr("value","Select a face")
-                    .classed("small-label", true);
-                Moves.amoveMinus();
-
+            if(Moves.amType===""){
+                if(Anim.ifConfigAllowed()){
+                    Anim.drawFlag=false;
+                    Moves.amType = "min";
+                    d3.select("#amoveminus")
+                        .attr("value","Select a face")
+                        .classed("small-label", true);
+                    Moves.amoveMinus();
+                } else {
+                    alert("Please modify current configuration first!");
+                }
             }
         })
 
     d3.select("#bmoveplus")
         .on("click",()=>{
-            if(Moves.bpType==="" && Anim.ifConfigAllowed()){
-                Anim.drawFlag=false;
-                Moves.bpType = "max";
-                d3.select("#bmoveplus")
-                    .attr("value","Select an edge")
-                    .classed("small-label", true);   
-                Moves.bmovePlus();
+            if(Moves.bpType===""){
+                if(Anim.ifConfigAllowed()){
+                    Anim.drawFlag=false;
+                    Moves.bpType = "max";
+                    d3.select("#bmoveplus")
+                        .attr("value","Select an edge")
+                        .classed("small-label", true);   
+                    Moves.bmovePlus();
+                } else{
+                    alert("Please modify current configuration first!");
+                } 
             }  
         })
 
     d3.select("#bmoveminus")
         .on("click",()=>{
-            if(Moves.bmType==="" && Anim.ifConfigAllowed()){
-                Anim.drawFlag=false;
-                Moves.bmType = "min";
-                d3.select("#bmoveminus")
-                    .attr("value","Select an edge")
-                    .classed("small-label", true); 
-                Moves.bmoveMinus();   
+            if(Moves.bmType===""){
+                if(Anim.ifConfigAllowed()){
+                    Anim.drawFlag=false;
+                    Moves.bmType = "min";
+                    d3.select("#bmoveminus")
+                        .attr("value","Select an edge")
+                        .classed("small-label", true); 
+                    Moves.bmoveMinus();  
+                } else {
+                    alert("Please modify current configuration first!");
+                }
             }
         })
 
     d3.select("#dmoveplus")
         .on("click",()=>{
-            if(Moves.dpType==="" && Anim.ifConfigAllowed()){
-                Anim.drawFlag=false;
-                Moves.dpType = "add";
-                d3.select("#dmoveplus")
-                    .attr("value","select a max point")
-                    .classed("small-label", true);
-                Moves.dmovePlus();
+            if(Moves.dpType===""){
+                if(Anim.ifConfigAllowed()){
+                    Anim.drawFlag=false;
+                    Moves.dpType = "add";
+                    d3.select("#dmoveplus")
+                        .attr("value","select a max point")
+                        .classed("small-label", true);
+                    Moves.dmovePlus();
+                } else {
+                    alert("Please modify current configuration first!");
+                }
+                
             }
         })
 
     d3.select("#dmoveminus")
         .on("click",()=>{
-            if(Moves.dmType==="" && Anim.ifConfigAllowed()){
-                Anim.drawFlag=false;
-                Moves.dmType = "add";
-                d3.select("#dmoveminus")
-                    .attr("value","select a min point")
-                    .classed("small-label", true);
-                Moves.dmoveMinus();
+            if(Moves.dmType===""){
+                if(Anim.ifConfigAllowed()){
+                    Anim.drawFlag=false;
+                    Moves.dmType = "add";
+                    d3.select("#dmoveminus")
+                        .attr("value","select a min point")
+                        .classed("small-label", true);
+                    Moves.dmoveMinus();
+                } else {
+                    alert("Please modify current configuration first!");
+                }
+                
             } 
         })
 

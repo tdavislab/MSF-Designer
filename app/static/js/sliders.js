@@ -173,7 +173,6 @@ class sliders{
 
             }
 
-            d3.select("#high")
             d3.select(this).attr("cx",p);
             d3.select("#value"+i).text(Math.round(that.xMap[i].invert(p)*10)/10);
             d3.select("#showbar"+i).attr("x2",p);
@@ -182,7 +181,10 @@ class sliders{
         function dragended(d) {
             d3.select(this).classed("active", false)
                 .classed("mouseover",false);
-            that.anim.constructMesh(that.anim.sigma)
+            let ifConfig = that.anim.ifConfigAllowed();
+            if(ifConfig){
+                that.anim.computeBarcode();
+            }
         }
 
     }

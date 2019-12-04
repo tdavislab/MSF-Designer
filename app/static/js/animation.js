@@ -187,6 +187,7 @@ class anim{
         this.dragTerminal = false;
         this.edgeInterArray = [];
         this.grad = this.initializeMesh();
+        this.onMove = false; // if there is any incomplete move, indicating if compute barcode
 
         this.assignEdge();
         this.constructMesh(this.sigma);
@@ -203,11 +204,33 @@ class anim{
 
     }
 
+    computeBarcode(){
+        console.log("computing in anim")
+        let that = this;
+        // if(this.ifConfigAllowed()){
+            this.assignEdge();
+            this.constructMesh();
+            d3.select("#loadergroup").classed("loader",true)
+            d3.select("#persistencegroup").select("#phSVG").style("visibility","hidden")
+            d3.select("#persistencebargroup").selectAll("rect").style("visibility","hidden")
+            $.post( "/grad", {
+                grad_data: JSON.stringify(this.grad)
+            }, function(res){
+                d3.select("#loadergroup").classed("loader",false)
+                d3.select("#persistencegroup").select("svg").style("visibility","visible")
+                that.persistence.barcode = res.data;
+                that.persistence.recoverPairs();
+                that.persistence.drawPersistence();
+                that.persistence.recoverPersisitence();
+            });
+        // }
+    }
+
     ifConfigAllowed(){
         let ifAllowed = !(this.ifTempEdge() || this.checkIntersection()) // no temp edges and no intersections
-        if(!ifAllowed){
-            alert("Please modify current configuration first!")
-        }
+        // if(!ifAllowed){
+        //     alert("Please modify current configuration first!")
+        // }
         return ifAllowed;
     }
 
@@ -596,8 +619,12 @@ class anim{
                     for(let eid in d.edges){
                         that.mapEdges(eid);
                     }
-                    // check edge intersection
-                    if(!that.checkIntersection()){
+                    let ifConfig = that.ifConfigAllowed();   
+                    if(ifConfig){
+                        if(that.onMove){
+                            that.onMove = false;
+                            that.computeBarcode();
+                        }
                         if(d3.select("#ifvf").property("checked")){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
@@ -634,7 +661,12 @@ class anim{
                 d.value[1].x = that.xMap.invert(d3.mouse(this)[0]);
                 d.value[1].y = that.yMap.invert(d3.mouse(this)[1]);
                 that.mapEdges(d.key);
-                if(!that.checkIntersection()){
+                let ifConfig = that.ifConfigAllowed();
+                if(ifConfig){
+                    if(that.onMove){
+                        that.onMove = false;
+                        that.computeBarcode();
+                    }
                     if(d3.select("#ifvf").property("checked")){
                         that.assignEdge();
                         that.constructMesh(that.sigma);
@@ -678,11 +710,12 @@ class anim{
                 if(that.calDist(pt,cpm)<0.1){
                     that.deleteOldEdge(d.key);
                     that.addNewEdge(d.value[0],cpm,d.value[3]);
-                    let ifTemp = that.ifTempEdge();
-                    let ifInter = that.checkIntersection();
-                    // that.drawAnnotation();
-                    // check the line order
-                    if(!ifTemp && !ifInter){
+                    let ifConfig = that.ifConfigAllowed();  
+                    if(ifConfig){
+                        if(that.onMove){
+                            that.onMove = false;
+                            that.computeBarcode();
+                        }
                         if(d3.select("#ifvf").property("checked")){
                             that.assignEdge();
                             that.constructMesh(that.sigma);
@@ -791,13 +824,10 @@ class anim{
     }
 
     terminalPosition(eid){
-        console.log(eid)
         let ed = this.edges[eid];
         let edMapper = this.edgeMapper[eid];
         let tx = 0.95*ed[2].x+0.05*ed[0].x;
         let ty = 0.95*ed[2].y+0.05*ed[0].y;
-        console.log(ed)
-        console.log(edMapper)
         if(eid.startsWith("temp")){
             tx = ed[2].x;
             ty = ed[2].y;
@@ -825,7 +855,6 @@ class anim{
                     pt2 = edMapper[this.numSeg-1];
                     tx = 0.6*pt1.x_new+0.4*pt2.x_new;
                     ty = 0.6*pt1.y_new+0.4*pt2.y_new;
-                    console.log(tx,ty)
                 }
                 else{ 
                     pt1 = edMapper[this.numSeg];
@@ -842,8 +871,6 @@ class anim{
                 ty = (1-rate)*ed[2].y + rate*ty;
             }
         }
-
-        console.log(tx,ty)
 
         tx = this.xMap(tx);
         ty = this.yMap(ty);
@@ -999,14 +1026,8 @@ class anim{
             })
             .attr("class",(d)=>d.value[3]+"edge") // minedge/maxedge
             .attr("id",(d)=>d.key)
-            // .style("fill", "none")
             .style("stroke", "black")
             .style("stroke-width",3)
-            // .style("stroke-dasharray",(d)=>{
-            //     if(d.value[3]==="max"){
-            //         return "5,5";
-            //     } else {return "";}
-            // })
             // .style("opacity",0.8)
             .on("mouseover",(d,i)=>{
                 d3.select("#"+d.key)
@@ -1158,9 +1179,6 @@ class anim{
                         dx = (edgedist*3*dx1 + (1-edgedist*3)*dx2)*1.5;
                         dy = (edgedist*3*dy1 + (1-edgedist*3)*dy2)*1.5;
                     }
-                    
-                    
-
                 }
                 let fv_cp = this.findMinPt({"x":x,"y":y},this.cp)
                 let fv = this.calFV(x,y,fv_cp);
