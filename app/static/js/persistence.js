@@ -21,7 +21,7 @@ class persistence{
             .domain([this.local_min, this.local_max])
             .range([this.margin.left,this.svgWidth-this.margin.right]);
         
-            console.log("barcode",barcode)
+            // console.log("barcode",barcode)
 
 
         // this.sortBarcode();
@@ -118,10 +118,10 @@ class persistence{
         let edgelist = [];
         let cplist = [];
         this.sortBarcode();
-        console.log(this.anim.edges)
-        console.log(this.anim.cp)
+        // console.log(this.anim.edges)
+        // console.log(this.anim.cp)
         for(let i=0;i<this.barcode.length;i++){
-            console.log(this.barcode[i])
+            // console.log(this.barcode[i])
             this.barcode[i].birth = this.local_max - this.barcode[i].birth;
             if(this.barcode[i].death>0){
                 this.barcode[i].death = this.local_max - this.barcode[i].death;
@@ -202,7 +202,7 @@ class persistence{
     }
     
     drawPersistence(){
-        console.log(this.barcode)
+        // console.log(this.barcode)
         this.barcode.sort(function(a,b){
             return d3.descending(a.birth-a.death,b.birth-b.death)
         });
@@ -266,7 +266,7 @@ class persistence{
                 cpmax.push(p);
             }
         })
-        console.log(cpmax)
+        // console.log(cpmax)
         if(this.barcode.length > cpmax.length){
             let unpairNum = this.barcode.length - cpmax.length;
             for(let k=0; k<unpairNum; k++){

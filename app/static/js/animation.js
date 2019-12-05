@@ -1020,6 +1020,7 @@ class anim{
     }
 
     addedges(){
+        this.checkIntersection();
         let edgelist = d3.entries(this.edges);
         let edges = this.edgeGroup.selectAll("path").data(edgelist);
         edges.exit().remove();
@@ -1043,7 +1044,7 @@ class anim{
                 d3.select("#"+d.key)
                     .style("stroke-width",3);
             })
-            this.highlightIntersection();
+        this.highlightIntersection();
     }
 
     initializeMesh(){

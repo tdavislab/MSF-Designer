@@ -5,7 +5,6 @@ function init(){
     let Persistence = new persistence(Anim,Sliders);
     let Moves = new moves(Anim,Sliders,Persistence);
     Anim.persistence = Persistence;
-    console.log(Anim.persistence)
 
     d3.select("#undobutton")
         .on("click",()=>{
@@ -170,31 +169,15 @@ function init(){
         .on("change",()=>{
             let form = $('#upload')[0];
             let content = new FormData(form);
-    //         let files = $('#files')[0].files[0]
-    //         let fileReader = new FileReader();
-    //         fileReader.onload = function(fileLoadedEvent) 
-	// {
-    //     var textFromFileLoaded = fileLoadedEvent.target.result;
-    //     console.log(textFromFileLoaded)
-	// };
-    //         fileReader.readAsText(files, "UTF-8");
-
-    //         console.log(files.target)
-            $.ajax({
-                type: "POST",
-                enctype: 'multipart/form-data',
-                url: "/import",
-                data: content,
-                processData: false, //prevent jQuery from automatically transforming the data into a query string
-                contentType: false,
-                cache: false,
-                dataType:'json',
-                success: function (response) {
-                    data=response;
-                    console.log(data);
-                    // recover cp and edges
-                    // To minimize the file size, only save the keys of cp's and edges
-                    let edges_recover = [];
+            let files = $('#files')[0].files[0]
+            let fileReader = new FileReader();
+            fileReader.onload = function(fileLoadedEvent) {
+                let textFromFileLoaded = fileLoadedEvent.target.result;
+                // console.log(textFromFileLoaded)
+                // return textFromFileLoaded;
+                let data = JSON.parse(textFromFileLoaded);
+                console.log(data)
+                let edges_recover = [];
                     let cp_recover = [];
                     Object.keys(data.edge).forEach(eid=>{
                         let ed = data.edge[eid];
@@ -220,11 +203,56 @@ function init(){
                     Persistence = new persistence(Anim,Sliders);
                     Moves = new moves(Anim,Sliders,Persistence);
                     Anim.persistence = Persistence;
-                },
-                error: function (error) {
-                    console.log("error",error);
-                }
-            });
+
+	        };
+            fileReader.readAsText(files, "UTF-8");
+
+            // // console.log(textFromFileLoaded)
+            // $.ajax({
+            //     type: "POST",
+            //     enctype: 'multipart/form-data',
+            //     url: "/import",
+            //     data: content,
+            //     processData: false, //prevent jQuery from automatically transforming the data into a query string
+            //     contentType: false,
+            //     cache: false,
+            //     dataType:'json',
+            //     success: function (response) {
+            //         data=response;
+            //         console.log(data);
+            //         // recover cp and edges
+            //         // To minimize the file size, only save the keys of cp's and edges
+            //         let edges_recover = [];
+            //         let cp_recover = [];
+                //     Object.keys(data.edge).forEach(eid=>{
+                //         let ed = data.edge[eid];
+                //         let ed_recover;
+                //         if(ed[2].ifBound){
+                //             ed_recover = [data.cp[ed[0]], ed[1], ed[2], ed[3]];
+                //         } else {
+                //             ed_recover = [data.cp[ed[0]], ed[1], data.cp[ed[2]], ed[3]];
+                //         }
+                //         edges_recover[eid] = ed_recover;
+                //     })
+                //     data.cp.forEach(p=>{
+                //         let ed_new = {};
+                //         p.edges.forEach(eid=>{
+                //             ed_new[eid] = edges_recover[eid];
+                //         })
+                //         p.edges = ed_new;
+                //         cp_recover.push(p);
+                //     })
+                //     Anim.clearCanvas();
+                //     Anim = new anim(cp_recover,edges_recover,data.edgeMapper);
+                //     Sliders = new sliders(Anim);
+                //     Persistence = new persistence(Anim,Sliders);
+                //     Moves = new moves(Anim,Sliders,Persistence);
+                //     Anim.persistence = Persistence;
+                // },
+            //     error: function (error) {
+            //         console.log("error",error);
+            //     }
+            // });
 
         })
     
