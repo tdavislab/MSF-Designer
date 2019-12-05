@@ -11,13 +11,21 @@ pip3 install flask
 pip3 install flask-assets
 ```
 
-Depending on your perssions, you might have to do `sudo pip3 install`.
+Depending on your permissions, you might have to do `sudo pip3 install`.
 
-2.
+2. Download the repository
 
 ```bash
 git clone git@github.com:zhou325/VIS-MSVF.git
 ```
+
+3. Install Perseus
+
+Perseus is used for computing persistence barcode.
+
+If your system is Mac OS Tiger and up, or Linux, this software will be installed automatically with the downloading of this repository.
+
+Otherwise, please go to http://people.maths.ox.ac.uk/nanda/perseus/index.html, and download a proper version, then move Perseus to `VIS-MSVF/app/static/assets/`.
 
 ## Running
 
