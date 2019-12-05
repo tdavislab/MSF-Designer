@@ -1,23 +1,30 @@
 
-## How to run
-Before run the code, please install the following software/libraries:
-1. Flask: https://palletsprojects.com/p/flask/
-2. Perseus: http://people.maths.ox.ac.uk/nanda/perseus/index.html
-3. Robust Critical Point Detection: https://github.com/bhatiaharsh/RobustCriticalPointDetection
+# MVF Designer
 
-After installation, please follow the following instruction to set up.
-1. Run
-`git clone git@github.com:zhou325/VIS-MSVF.git` to download the repository.
-2. Move `Perseus` and `Robust Critical Point Detection` to `VIS-MSVF/app/static/assets/`
-3. Use `python3 run.py` to run the server.
-4. Visit http://localhost:8080/ (If possible, please use Chrome.)
+This is the source code for **MVF Designer: Design and Visualization of Morse Vector Fields**.
 
-When export configurations, files will be saved in `app/static/assets/`
+## Installation
 
-<!-- ## Current Functions
+1. Install Flask
+```bash
+pip3 install flask
+pip3 install flask-assets
+```
 
-1 Drag the critical points to change the position.
+Depending on your perssions, you might have to do `sudo pip3 install`.
 
-2 Drag the yellow node to change the boundary geometry.
+2.
 
-3 Click buttons to add moves. -->
+```bash
+git clone git@github.com:zhou325/VIS-MSVF.git
+```
+
+## Running
+
+```bash
+cd VIS-MSVF
+python3 run.py
+#Hit Ctrl+c to quit
+```
+
+You can view the page at http://0.0.0.0:8080/ (If possible, please use Chrome).
