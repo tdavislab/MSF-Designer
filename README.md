@@ -36,3 +36,7 @@ python3 run.py
 ```
 
 You can view the page at http://0.0.0.0:8080/ (If possible, please use Chrome).
+
+## Demo
+
+A demo video can be found here: https://youtu.be/gA5UMdU4Cos.
