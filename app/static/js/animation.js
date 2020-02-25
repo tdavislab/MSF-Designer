@@ -53,6 +53,8 @@ class anim{
         this.svg = d3.select("#annotation");
         this.svgWidth = 570;
         this.svgHeight = 570;
+        this.faceGroup = this.svg.append("g")
+            .attr("id", "facegroup");
         this.rcpdGroup = this.svg.append("g")
             .attr("id","rcpdgroup");
         this.edgeGroup = this.svg.append("g")
@@ -199,13 +201,12 @@ class anim{
         
 
         // console.log(this.ifArcViolate(this.cp[1])) // false
-        console.log("grad",this.grad)
-        console.log('cp', this.cp)
+        // console.log("grad",this.grad)
 
     }
 
     computeBarcode(){
-        console.log("computing in anim")
+        // console.log("computing in anim")
         let that = this;
         // if(this.ifConfigAllowed()){
             this.assignEdge();
@@ -279,12 +280,9 @@ class anim{
     }
 
     addNewEdge(startpoint, endpoint, type, that_cp = this.cp, that_edges = this.edges, that_edgeMapper = this.edgeMapper, midpoint = undefined){
-        // console.log("adding!!", startpoint, endpoint, type)
         let edgeid = "edge"+startpoint.id+endpoint.id;
-        // console.log("edgeid",edgeid)
         // add to this.edges
         if(Object.keys(that_edges).indexOf(edgeid)!=-1){
-            // console.log(edgeid)
             // check if there has already been an edge between start and end points
             that_edges[edgeid] = [startpoint,{"x":(startpoint.x+endpoint.x)/2-0.03, "y":(startpoint.y+endpoint.y)/2-0.03},endpoint,type];
             edgeid = edgeid + "_1";
@@ -297,7 +295,6 @@ class anim{
             }
             
         }
-        console.log(edgeid)
         this.cpReassignEdge();
 
         
@@ -376,7 +373,6 @@ class anim{
 
     mapEdges(edgeid){
         // update edgeMapper when change the edge curve
-        console.log(edgeid)
         let ed = this.edges[edgeid];
         let totalLength = d3.select("#"+edgeid).node().getTotalLength();
         let stepLength = totalLength/this.numSeg;
@@ -418,8 +414,6 @@ class anim{
             this.edgeMapper[edgeid][i].x_new = pt.x;
             this.edgeMapper[edgeid][i].y_new = pt.y;
         }
-        // this.edgeMapper[edgeid]
-        // console.log(newPoints)
         
 
     }
@@ -437,7 +431,6 @@ class anim{
     }
 
     ifArcViolate(saddle){ // check the order of flow lines
-        // console.log('ifArcViolate')
         let max_angles = [];
         let min_angles = [];
         for(let eid in saddle.edges){
@@ -759,7 +752,7 @@ class anim{
     }
 
     checkIntersection(){
-        console.log("checking intersection")
+        // console.log("checking intersection")
         this.edgeInterArray = [];
         let ifInter = false;
         let edgelist = d3.entries(this.edges);
@@ -1312,75 +1305,7 @@ class anim{
         let fv = (triang[0].fv + triang[1].fv + triang[2].fv)/3
         return [ex_v,pt_new,fv];
         // return ex_v;
-    }
-
-    // **************** This is only for "semi-auto" mode ****************
-
-    // findEdges(){
-    //     console.log("finding edges")
-    //     console.log(this.cp_max)
-    //     console.log(this.cp_min)
-    //     console.log(this.cp_saddle);
-    //     // automatically find edges, only for "expert mode"
-    //     for(let i=0;i<this.cp.length;i++){
-    //         if(this.cp[i].type==="saddle"){
-    //             let saddle = this.cp[i];
-    //             for(let ed_key in saddle.edges){
-    //                 this.deleteOldEdge(ed_key);
-    //             }
-    //             if(this.cp_max.length>0){
-    //                 let pts = [];
-    //                 let cp_new_max = this.cp_max.slice(0);
-    //                 if(cp_new_max.length>2){
-    //                     // find the closest max points
-    //                     pts = this.find2MinPt(saddle,this.cp_max);
-    //                 } else { pts = cp_new_max; }
-    //                 for(let j=0;j<pts.length;j++){
-    //                     this.addNewEdge(saddle,pts[j],"max");
-    //                 }
-    //             }
-    //             let cp_new_min = [];
-    //             this.cp.forEach(p=>{
-    //                 if(p.type==="min"){
-    //                     cp_new_min.push(p);
-    //                 }
-    //             })
-    //             let bound_upper = [];
-    //             let bound_lower = [];
-    //             this.cp_min.forEach(p=>{
-    //                 if(p.y===0){
-    //                     bound_upper.push(p);
-    //                 } else if(p.y===1){
-    //                     bound_lower.push(p);
-    //                 }
-    //             })
-    //             let pts = [];
-    //             let pt_lower = this.findMinPt(saddle,bound_lower);
-    //             let pt_upper = this.findMinPt(saddle,bound_upper);
-    //             if(cp_new_min.length>=2){
-    //             //     // find the closest min points
-    //                 pts = this.find2MinPt(saddle,cp_new_min);
-    //             } else if(cp_new_min.length===1){
-    //                 pts.push(cp_new_min[0])
-    //                 pts.push(this.findMinPt(saddle,[pt_lower,pt_upper]));
-    //                 // if(cp_new_min[0].y>=saddle.y){
-    //                 //     pts.push(this.findMinPt(saddle,bound_lower));
-    //                 // } else { pts.push(this.findMinPt(saddle,bound_upper));}
-    //             } else if(cp_new_min.length===0){
-    //                 pts.push(pt_lower);
-    //                 pts.push(pt_upper);
-
-    //             }
-    //             for(let j=0;j<pts.length;j++){
-    //                 this.addNewEdge(saddle,pts[j],"min");               
-    //             }
-
-                
-    //         }
-    //     }
-        
-        
-    // }
+    }   
 
     // **************** Draw "undo/redo" sketch ****************
 

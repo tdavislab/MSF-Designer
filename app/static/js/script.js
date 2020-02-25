@@ -203,6 +203,7 @@ function init(){
                     Persistence = new persistence(Anim,Sliders);
                     Moves = new moves(Anim,Sliders,Persistence);
                     Anim.persistence = Persistence;
+                    // Anim.computeBarcode();
 
 	        };
             fileReader.readAsText(files, "UTF-8");

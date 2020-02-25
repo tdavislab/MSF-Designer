@@ -28,8 +28,8 @@ class persistence{
         this.recoverPairs();
         this.drawPersistence();
         this.recoverPersisitence();
-        console.log(anim.edges)
-        console.log(anim.cp)
+        // console.log(anim.edges)
+        // console.log(anim.cp)
         
     }
 
@@ -118,86 +118,52 @@ class persistence{
         let edgelist = [];
         let cplist = [];
         this.sortBarcode();
-        // console.log(this.anim.edges)
-        // console.log(this.anim.cp)
-        for(let i=0;i<this.barcode.length;i++){
+        this.barcode[0].birth = 10;
+        this.barcode[0].death = 0; // actually no death, this is only for drawing purpose.
+        let max_edges = {};
+        for(let eid in this.anim.edges){
+            if(this.anim.edges[eid][3]==="max"){
+                max_edges[eid] = this.anim.edges[eid];
+            }
+        }
+        // console.log(this.barcode)
+        // console.log(this.anim.cp_max)
+        let max_edges_array = d3.entries(max_edges);
+        max_edges_array.sort(function(a,b){
+            // return d3.ascending(a.value[2].fv, b.value[2].fv) || d3.descending(a.value[0].fv, b.value[0].fv);
+            return d3.descending(a.value[2].fv-a.value[0].fv, b.value[2].fv-b.value[0].fv)
+        })
+        // console.log(max_edges_array)
+        for(let i=1;i<this.barcode.length;i++){
             // console.log(this.barcode[i])
             this.barcode[i].birth = this.local_max - this.barcode[i].birth;
-            if(this.barcode[i].death>0){
-                this.barcode[i].death = this.local_max - this.barcode[i].death;
-                let min_dist = Infinity;
-                let min_ed_key;
-                let min_ed_value;
+            this.barcode[i].death = this.local_max - this.barcode[i].death;
+            let min_dist = Infinity;
+            let min_ed_key;
+            let min_ed_value;
                 
-                for(let ed_key in this.anim.edges){
-                    let ed = this.anim.edges[ed_key];
-                    let b_ed;
-                    let d_ed;
-                    if(ed[3]==="max"){ // compare the function value and period
-                        b_ed = ed[2].fv_perb;
-                        d_ed = ed[0].fv_perb;                    
-                    } 
-                    else if(ed[3]==="min"){ 
-                        b_ed = ed[0].fv_perb;
-                        d_ed = ed[2].fv_perb;
-                    }
-                    // let b_bar = ;
-                    // let d_bar = this.local_max - this.barcode[i].death;
-                    let dist = Math.abs(b_ed-this.barcode[i].birth)+Math.abs(d_ed-this.barcode[i].death);
-                    if(dist<=min_dist && edgelist.indexOf(ed_key)===-1 && cplist.indexOf(ed[0].id)===-1 && cplist.indexOf(ed[2].id)===-1){
-                        min_dist = dist;
-                        min_ed_key = ed_key;
-                        min_ed_value = ed;
-                    }
+            for(let j=0; j<max_edges_array.length; j++){
+                let ed_key = max_edges_array[j].key
+                let ed = max_edges_array[j].value;
+                let b_ed = ed[2].fv_perb;
+                let d_ed = ed[0].fv_perb;
+                let dist = Math.abs(b_ed-this.barcode[i].birth)+Math.abs(d_ed-this.barcode[i].death);
+                if(dist<=min_dist && edgelist.indexOf(ed_key)===-1 && cplist.indexOf(ed[0].id)===-1 && cplist.indexOf(ed[2].id)===-1){
+                    min_dist = dist;
+                    min_ed_key = ed_key;
+                    min_ed_value = ed;
                 }
-                
-                if(min_ed_key){
-                    this.barcode[i].edge = {"key":min_ed_key,"value":min_ed_value};
-                    this.barcode[i].birth = Math.max(min_ed_value[0].fv, min_ed_value[2].fv);
-                    this.barcode[i].death = Math.min(min_ed_value[0].fv, min_ed_value[2].fv);
-                    edgelist.push(min_ed_key);
-                    cplist.push(min_ed_value[0].id);
-                    cplist.push(min_ed_value[2].id);
-                }
-                
-            } else {
-                this.barcode[i].death = 0;
-                let min_dist = Infinity;
-                let min_ed_key;
-                let min_ed_value;
-                
-                for(let ed_key in this.anim.edges){
-                    let ed = this.anim.edges[ed_key];
-                    let b_ed;
-                    let d_ed;
-                    if(ed[3]==="max"){ // compare the function value and period
-                        b_ed = ed[2].fv_perb;
-                        d_ed = ed[0].fv_perb;                    
-                    } 
-                    else if(ed[3]==="min"){ 
-                        b_ed = ed[0].fv_perb;
-                        d_ed = ed[2].fv_perb;
-                    }
-                    // let b_bar = ;
-                    // let d_bar = this.local_max - this.barcode[i].death;
-                    let dist = Math.abs(b_ed-this.barcode[i].birth)+Math.abs(d_ed-this.barcode[i].death);
-                    if(dist<=min_dist && edgelist.indexOf(ed_key)===-1 && cplist.indexOf(ed[0].id)===-1 && cplist.indexOf(ed[2].id)===-1){
-                        min_dist = dist;
-                        min_ed_key = ed_key;
-                        min_ed_value = ed;
-                    }
-                }
-                
-                if(min_ed_key){
-                    this.barcode[i].edge = {"key":min_ed_key,"value":min_ed_value};
-                    this.barcode[i].birth = Math.max(min_ed_value[0].fv, min_ed_value[2].fv);
-                    this.barcode[i].death = 0;
-                    edgelist.push(min_ed_key);
-                    // cplist.push(min_ed_value[0].id);
-                    cplist.push(min_ed_value[2].id);
-                }
-
             }
+                
+            if(min_ed_key){
+                this.barcode[i].edge = {"key":min_ed_key,"value":min_ed_value};
+                this.barcode[i].birth = min_ed_value[2].fv;
+                this.barcode[i].death = min_ed_value[0].fv;
+                edgelist.push(min_ed_key);
+                cplist.push(min_ed_value[0].id);
+                cplist.push(min_ed_value[2].id);
+            }
+                
         }
     }
     
