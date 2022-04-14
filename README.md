@@ -1,7 +1,7 @@
 
 # MVF Designer
 
-This is the source code for **MVF Designer: Design and Visualization of Morse Vector Fields**.
+This is the source code for **MSF Designer: Design and Visualization of Morse-Smale Vector Fields**.
 
 ## Installation
 
