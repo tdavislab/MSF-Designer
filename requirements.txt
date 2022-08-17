@@ -1,4 +1,4 @@
-Flask==1.1.1
+Flask==2.1.3
 Flask-Assets==0.12
 Flask-Uploads==0.2.1
 gunicorn==19.9.0
