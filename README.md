@@ -16,7 +16,7 @@ Depending on your permissions, you might have to do `sudo pip3 install`.
 2. Download the repository
 
 ```bash
-git clone git@github.com:zhou325/VIS-MSVF.git
+git clone https://github.com/tdavislab/MSF-Designer.git
 ```
 
 3. Install Perseus
@@ -30,7 +30,7 @@ Otherwise, please go to http://people.maths.ox.ac.uk/nanda/perseus/index.html, a
 ## Running
 
 ```bash
-cd VIS-MSVF
+cd VIS-MSF
 python3 run.py
 #Hit Ctrl+c to quit
 ```
