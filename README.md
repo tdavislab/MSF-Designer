@@ -31,7 +31,7 @@ Otherwise, please go to http://people.maths.ox.ac.uk/nanda/perseus/index.html, a
 ## Running
 
 ```bash
-cd VIS-MSF
+cd MSF-Designer
 python3 run.py
 #Hit Ctrl+c to quit
 ```
