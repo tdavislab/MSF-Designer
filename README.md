@@ -1,7 +1,8 @@
 
 # MSF Designer
 
-This is the source code for **MSF Designer: Design and Visualization of Morse-Smale Vector Fields**.
+This is the source code for Combinatorial Exploration of Morse–Smale Functions on the Sphere
+via Interactive Visualization.
 
 ## Installation
 
@@ -25,7 +26,7 @@ Perseus is used for computing persistence barcode.
 
 If your system is Mac OS Tiger and up, or Linux, this software will be installed automatically with the downloading of this repository.
 
-Otherwise, please go to http://people.maths.ox.ac.uk/nanda/perseus/index.html, and download a proper version, then move Perseus to `VIS-MSVF/app/static/assets/`.
+Otherwise, please go to http://people.maths.ox.ac.uk/nanda/perseus/index.html, and download a proper version, then move Perseus to `VIS-MSF/app/static/assets/`.
 
 ## Running
 
