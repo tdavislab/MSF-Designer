@@ -40,4 +40,4 @@ You can view the page at http://0.0.0.0:8080/ (If possible, please use Chrome).
 
 ## Demo
 
-A demo video: https://youtu.be/gA5UMdU4Cos.
+A demo video: [https://www.youtube.com/watch?v=V-8kA1BjU9k](https://www.youtube.com/watch?v=V-8kA1BjU9k).
